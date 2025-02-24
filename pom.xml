@@ -20,6 +20,7 @@
             <version>5.11.4</version>
             <scope>test</scope>
         </dependency>
+        <!-- lombok dependency to reduce boilerplate code -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
