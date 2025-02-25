@@ -1,0 +1,43 @@
+package edu.ntnu.iir.bidata.model;
+
+import edu.ntnu.iir.bidata.model.tile.Tile;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+/**
+ * Class that handles the movements of a specific player.
+ * @author kamyashinde
+ * @version 0.0.1
+ */
+public class Player {
+  private String name;
+  private Tile currentTile;
+
+  /**
+   * The constructor that initialises the players with their name and the board game they are connected to.
+   * @param inputName the name of the player
+   * @param game the instance of Board Game they are connected to todo
+   */
+  public Player(String inputName) {
+    setName(inputName);
+  }
+
+  /**
+   * Placing the player on a particular tile.
+   * @param tile the tile to place the player on.
+   */
+  public void placeOnTile(Tile tile){
+    this.currentTile = tile;
+  }
+
+  /**
+   * Move the player a given number of steps.
+   * @param steps The steps to move the player to.
+   */
+  public void moveSteps(int steps){
+    int newTileSpot = currentTile.getId() + steps;
+    placeOnTile(new Tile(newTileSpot));
+  }
+}
