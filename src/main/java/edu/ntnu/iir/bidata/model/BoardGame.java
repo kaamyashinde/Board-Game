@@ -18,6 +18,19 @@ public class BoardGame {
   private Player currentPlayer;
 
   /**
+   * The constructor that helps set up the initial parameters for the board game.
+   *
+   * @param numOfDices   to decide how many dices shall be rolled at one time.
+   * @param numOfPlayers the number of players playing the game.
+   * @param board        the board that is to be used.
+   */
+  public BoardGame(int numOfDices, int numOfPlayers, Board board) {
+    this.dice = new Dice(numOfDices);
+    this.players = new ArrayList<>(numOfPlayers);
+    this.board = board;
+  }
+
+  /**
    * Add a player to the list of players.
    *
    * @param player the player to be added.
@@ -29,13 +42,24 @@ public class BoardGame {
   /**
    * Play the game for the current player by rolling the dice and moving the player a certain amount of steps.
    */
-  public void play() {
-    currentPlayer.moveSteps(dice.rollAllDice());
-    //give the turn to the next player.
+  public void playCurrentPlayer() {
+    dice.rollAllDice();
+    currentPlayer.moveSteps(dice.sumOfRolledValues());
+  }
+
+  /**
+   * Play the game for each of the players by iterating over them and updating the currentPlayer field.
+   */
+  public void playGame() {
+    for (int i = 0; i < players.size(); i++) {
+      currentPlayer = players.get(i);
+      playCurrentPlayer();
+    }
   }
 
   /**
    * Calculate the winner.
+   *
    * @author Durva
    */
   public void getWinner() {
@@ -49,5 +73,4 @@ public class BoardGame {
       }
     }
   }
-
 }
