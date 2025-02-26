@@ -4,6 +4,8 @@ import edu.ntnu.iir.bidata.model.dice.Dice;
 import lombok.AllArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @AllArgsConstructor
 /**
@@ -13,8 +15,9 @@ import java.util.ArrayList;
  */
 public class BoardGame {
   private final Board board;
-  private final ArrayList<Player> players;
   private final Dice dice;
+  private ArrayList<Player> playerArrayList;
+  private HashMap<Player, Integer> players;
   private Player currentPlayer;
 
   /**
@@ -26,17 +29,17 @@ public class BoardGame {
    */
   public BoardGame(int numOfDices, int numOfPlayers, Board board) {
     this.dice = new Dice(numOfDices);
-    this.players = new ArrayList<>(numOfPlayers);
+    this.players = new HashMap<>(numOfPlayers);
     this.board = board;
   }
 
   /**
-   * Add a player to the list of players.
+   * Add a player to the list of players and initialise their score to zero.
    *
    * @param player the player to be added.
    */
   public void addPlayer(Player player) {
-    players.add(player);
+    this.players.put(player, 0);
   }
 
   /**
@@ -48,13 +51,16 @@ public class BoardGame {
   }
 
   /**
-   * Play the game for each of the players by iterating over them and updating the currentPlayer field.
+   * Play the game for each of the players by iterating over them and updating the currentPlayer field and their score.
    */
   public void playGame() {
-    for (int i = 0; i < players.size(); i++) {
-      currentPlayer = players.get(i);
+    for (Map.Entry<Player, Integer> player : players.entrySet()) {
+      currentPlayer = player.getKey();
       playCurrentPlayer();
+      //TODO update the score board.
+
     }
+
   }
 
   /**
@@ -67,7 +73,7 @@ public class BoardGame {
     // - durva: i think it should be in play option we can move it later
     //need to check current player tile position.
     int lastTileId = board.getTiles().size() - 1;
-    for (Player player : players) {
+    for (Player player : playerArrayList) {
       if (player.getCurrentTile().getId() == lastTileId) {
         System.out.println("The winner is: " + player.getName());
       }
