@@ -6,8 +6,10 @@ import lombok.AllArgsConstructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
 /**
  * A class for the different board games.
+ *
  * @author kaamyashinde
  * @version 0.0.1
  */
@@ -34,13 +36,29 @@ public class BoardGame {
     this.board = new Board(sizeOfBoard);
   }
 
+  public static void main(String[] args) {
+    BoardGame game = new BoardGame(1, 2, 15);
+    game.addPlayer(new Player("Kaamya"));
+    game.addPlayer(new Player("Durva"));
+    game.playGame();
+  }
+
   /**
    * Add a player to the list of players and initialise their score to zero.
    *
    * @param player the player to be added.
    */
   public void addPlayer(Player player) {
+    player.setCurrentTile(board.getTiles().get(0));
     this.players.put(player, 0);
+  }
+
+  /**
+   * Initialising the game by initialising the currentPlayer value to the first player in the list.
+   */
+  public void initialiseGame() {
+    currentPlayer = players.keySet().iterator().next();
+    System.out.println("First player is: " + currentPlayer.getName());
   }
 
   /**
@@ -48,11 +66,23 @@ public class BoardGame {
    * //TODO missing the use of nextTile logic
    */
   public void playCurrentPlayer() {
+    System.out.println("-----------");
+    System.out.println("Current player " + currentPlayer.getName());
+    System.out.println("Current position: " + currentPlayer.getCurrentTile().getId());
     dice.rollAllDice();
     int newPositionOnBoard = currentPlayer.getCurrentTile().getId() + dice.sumOfRolledValues();
+    if(newPositionOnBoard >= board.getTiles().size()){
+      newPositionOnBoard = board.getTiles().size();
+    }
     if (newPositionOnBoard >= board.getTiles().size()) {
-      System.out.println("Player " + currentPlayer.getName() + "has won!");
+      newPositionOnBoard = board.getTiles().size();
+      System.out.println("New position: " + newPositionOnBoard);
+
+      System.out.println("Player " + currentPlayer.getName() + " has won!");
+      playing = false;
     } else {
+      System.out.println("New position: " + newPositionOnBoard);
+
       currentPlayer.setCurrentTile(board.getPositionOnBoard(newPositionOnBoard));
     }
   }
@@ -67,6 +97,9 @@ public class BoardGame {
         currentPlayer = player.getKey();
         playCurrentPlayer();
         player.setValue(currentPlayer.getCurrentTile().getId());
+        if (!playing) {
+          break;
+        }
       }
     }
 
