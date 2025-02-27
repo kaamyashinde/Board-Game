@@ -6,31 +6,32 @@ import lombok.AllArgsConstructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-@AllArgsConstructor
 /**
  * A class for the different board games.
  * @author kaamyashinde
  * @version 0.0.1
  */
+@AllArgsConstructor
+
 public class BoardGame {
   private final Board board;
   private final Dice dice;
   private ArrayList<Player> playerArrayList;
   private HashMap<Player, Integer> players;
   private Player currentPlayer;
+  private boolean playing;
 
   /**
    * The constructor that helps set up the initial parameters for the board game.
    *
    * @param numOfDices   to decide how many dices shall be rolled at one time.
    * @param numOfPlayers the number of players playing the game.
-   * @param board        the board that is to be used.
+   * @param sizeOfBoard  how big the board is supposed to be.
    */
-  public BoardGame(int numOfDices, int numOfPlayers, Board board) {
+  public BoardGame(int numOfDices, int numOfPlayers, int sizeOfBoard) {
     this.dice = new Dice(numOfDices);
     this.players = new HashMap<>(numOfPlayers);
-    this.board = board;
+    this.board = new Board(sizeOfBoard);
   }
 
   /**
@@ -44,22 +45,31 @@ public class BoardGame {
 
   /**
    * Play the game for the current player by rolling the dice and moving the player a certain amount of steps.
+   * //TODO missing the use of nextTile logic
    */
   public void playCurrentPlayer() {
     dice.rollAllDice();
-    currentPlayer.moveSteps(dice.sumOfRolledValues());
+    int newPositionOnBoard = currentPlayer.getCurrentTile().getId() + dice.sumOfRolledValues();
+    if (newPositionOnBoard >= board.getTiles().size()) {
+      System.out.println("Player " + currentPlayer.getName() + "has won!");
+    } else {
+      currentPlayer.setCurrentTile(board.getPositionOnBoard(newPositionOnBoard));
+    }
   }
 
   /**
    * Play the game for each of the players by iterating over them and updating the currentPlayer field and their score.
    */
   public void playGame() {
-    for (Map.Entry<Player, Integer> player : players.entrySet()) {
-      currentPlayer = player.getKey();
-      playCurrentPlayer();
-      //TODO update the score board.
-
+    playing = true;
+    while (playing) {
+      for (Map.Entry<Player, Integer> player : players.entrySet()) {
+        currentPlayer = player.getKey();
+        playCurrentPlayer();
+        player.setValue(currentPlayer.getCurrentTile().getId());
+      }
     }
+
 
   }
 

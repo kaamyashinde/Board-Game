@@ -3,14 +3,14 @@ package edu.ntnu.iir.bidata.model;
 import edu.ntnu.iir.bidata.model.tile.Tile;
 import lombok.Getter;
 import lombok.Setter;
-
-@Getter
-@Setter
 /**
  * Class that handles the movements of a specific player.
  * @author kamyashinde
  * @version 0.0.1
  */
+@Getter
+@Setter
+
 public class Player {
   private String name;
   private Tile currentTile;
@@ -32,12 +32,13 @@ public class Player {
     this.currentTile = tile;
   }
 
-  /**
+  /*
    * Move the player a given number of steps.
    * @param steps The steps to move the player to.
    */
-  public void moveSteps(int steps){
+ /* public int moveSteps(int steps){
     int newTileSpot = currentTile.getId() + steps;
-    placeOnTile(new Tile(newTileSpot));
-  }
+    placeOnTile(currentTile.getNextTile());
+    return currentTile.getId();
+  }*/
 }
