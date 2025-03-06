@@ -14,7 +14,7 @@ import java.util.HashMap;
  */
 @Getter
 public class Board {
-  private HashMap<Integer, Tile> tiles;
+  private final HashMap<Integer, Tile> tiles;
 
   /**
    * The constructor where the board is initialised, where all the tiles have no actions.
@@ -27,5 +27,13 @@ public class Board {
     for (int i = 0; i < numberOfTiles; i++) {
       tiles.put(i, new Tile(i, null));
     }
+  }
+  /**
+   * Access a specific position on the board.
+   *
+   * @param id the id to be used to access a specific spot on the board.
+   */
+  public Tile getPositionOnBoard(int id){
+    return tiles.get(id);
   }
 }
