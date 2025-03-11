@@ -12,6 +12,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
+/**
+ * @author Durva
+ */
+
 public class BoardGameTest {
 
   private Board board;

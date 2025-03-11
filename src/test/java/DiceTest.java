@@ -2,6 +2,10 @@ import edu.ntnu.iir.bidata.model.dice.Dice;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+/**
+* @author Durva
+*/
+
 public class DiceTest {
 
   @Test
