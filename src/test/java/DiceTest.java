@@ -70,5 +70,7 @@ public class DiceTest {
     for (int i = 0; i < numberOfDice; i++) {
       calculatedSum += dice.getDie(i);
     }
+
+    Assertions.assertEquals(dice.sumOfRolledValues(), calculatedSum);
   }
 }
