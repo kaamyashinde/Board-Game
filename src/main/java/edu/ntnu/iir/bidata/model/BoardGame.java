@@ -30,7 +30,9 @@ public class BoardGame {
    * Play the game for the current player by rolling the dice and moving the player a certain amount of steps.
    */
   public void play() {
-    currentPlayer.moveSteps(dice.rollAllDice());
+    dice.rollAllDice();
+    int steps = dice.sumOfRolledValues();
+    currentPlayer.moveSteps(steps);
     //give the turn to the next player.
   }
 
