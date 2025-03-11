@@ -30,7 +30,10 @@ public class Dice {
    */
   public Dice(int numberOfDice) throws IllegalArgumentException {
     ParameterValidation.validateNonZeroPositiveInteger(numberOfDice, "number of dice to create the list");
-    dice = new ArrayList<>(Collections.nCopies(numberOfDice, new Die()));
+    dice = new ArrayList<>();
+    for (int i = 0; i < numberOfDice; i++) {
+      dice.add(new Die());
+    }
   }
 
   /**
