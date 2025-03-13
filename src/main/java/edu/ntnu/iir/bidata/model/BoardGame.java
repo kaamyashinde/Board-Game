@@ -65,6 +65,7 @@ public class BoardGame {
    * Play the game for the current player by rolling the dice and moving the player a certain amount of steps.
    * //TODO missing the use of nextTile logic
    */
+
   public void playCurrentPlayer() {
     System.out.println("-----------");
     System.out.println("Current player " + currentPlayer.getName());
@@ -102,9 +103,9 @@ public class BoardGame {
         }
       }
     }
-
-
   }
+
+
 
   /**
    * Calculate the winner.

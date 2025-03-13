@@ -30,7 +30,9 @@ public class Tile {
   @Setter
   private Tile nextTile;
 
+
   /**
+
    * Constructor that creates an instance of the tile with the desired id and tileAction.
    * @param id the id of the tile.
    * @param action the action associated with the tile.
@@ -43,10 +45,26 @@ public class Tile {
 
   /**
    * Executes the action associated with this tile
+
+   * Two-argument constructor that allows setting the id and action.
+
+
+  /**
+   * Single-argument constructor (defaults the action to null).
+   *
+   * @param id The tile's identifier.
+   */
+  public Tile(int id) {
+    // Call the two-argument constructor with a default action of null
+    this(id, null);
+  }
+
+
+  /**
+   * Executes the action associated with this tile.
    *
    * @param player The player who landed on this tile.
    */
-
   public void performAction(Player player) {
     if (action != null) {
       action.performAction(player);
