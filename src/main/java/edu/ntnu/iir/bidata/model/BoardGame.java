@@ -64,7 +64,7 @@ public class BoardGame {
 
   /**
    * Play the game for the current player by rolling the dice and moving the player a certain
-   * amount of steps. //TODO missing the use of nextTile logic
+   * amount of steps. // possibly added nexttile logic - durva
    */
   public void playCurrentPlayer() {
     System.out.println("-----------");
