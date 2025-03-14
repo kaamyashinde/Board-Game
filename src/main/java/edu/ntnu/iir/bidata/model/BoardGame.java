@@ -16,6 +16,7 @@ import java.util.Map;
 @AllArgsConstructor
 
 public class BoardGame {
+
   private final Board board;
   private final Dice dice;
   private ArrayList<Player> playerArrayList;
@@ -54,7 +55,7 @@ public class BoardGame {
   }
 
   /**
-   * Initialising the game by initialising the currentPlayer value to the first player in the list.
+   * Initialising the game by initialising the currentPlayer value to the first player.
    */
   public void initialiseGame() {
     currentPlayer = players.keySet().iterator().next();
@@ -62,15 +63,56 @@ public class BoardGame {
   }
 
   /**
-   * Play the game for the current player by rolling the dice and moving the player a certain amount of steps.
-   * //TODO missing the use of nextTile logic
+   * Play the game for the current player by rolling the dice and moving the player a certain
+   * amount of steps. //TODO missing the use of nextTile logic
    */
   public void playCurrentPlayer() {
     System.out.println("-----------");
     System.out.println("Current player " + currentPlayer.getName());
     System.out.println("Current position: " + currentPlayer.getCurrentTile().getId());
+
     dice.rollAllDice();
-    int newPositionOnBoard = currentPlayer.getCurrentTile().getId() + dice.sumOfRolledValues();
+    int steps = dice.sumOfRolledValues();
+    System.out.println("Rolled: " + steps);
+
+    // Move the player step by step using nextTile.
+    for (int i = 0; i < steps; i++) {
+      // Get the next tile from the current tile.
+      if (currentPlayer.getCurrentTile().getNextTile() != null) {
+        currentPlayer.setCurrentTile(currentPlayer.getCurrentTile().getNextTile());
+      } else {
+        // If nextTile is null, then this is the final tile.
+        System.out.println(
+            "Player " + currentPlayer.getName() + " has reached the final tile and wins the game!");
+        playing = false;
+        return; // End the turn (and game) immediately.
+      }
+    }
+    System.out.println("New position: " + currentPlayer.getCurrentTile().getId());
+  }
+
+  /**
+   * Play the game for each of the players by iterating over them and updating the currentPlayer
+   * field and their score.
+   */
+  public void playGame() {
+    playing = true;
+    while (playing) {
+      for (Map.Entry<Player, Integer> player : players.entrySet()) {
+        currentPlayer = player.getKey();
+        playCurrentPlayer();
+        player.setValue(currentPlayer.getCurrentTile().getId());
+        if (!playing) {
+          break;
+        }
+      }
+    }
+  }
+}
+
+
+
+    /*int newPositionOnBoard = currentPlayer.getCurrentTile().getId() + dice.sumOfRolledValues();
     if(newPositionOnBoard >= board.getTiles().size()){
       newPositionOnBoard = board.getTiles().size();
     }
@@ -87,31 +129,14 @@ public class BoardGame {
     }
   }
 
-  /**
-   * Play the game for each of the players by iterating over them and updating the currentPlayer field and their score.
-   */
-  public void playGame() {
-    playing = true;
-    while (playing) {
-      for (Map.Entry<Player, Integer> player : players.entrySet()) {
-        currentPlayer = player.getKey();
-        playCurrentPlayer();
-        player.setValue(currentPlayer.getCurrentTile().getId());
-        if (!playing) {
-          break;
-        }
-      }
-    }
 
-
-  }
 
   /**
    * Calculate the winner.
    *
    * @author Durva
    */
-  public void getWinner() {
+  /*public void getWinner() {
     //perhaps needs to be in the play option so that it is checked each time a player plays the game?
     // - durva: i think it should be in play option we can move it later
     //need to check current player tile position.
@@ -122,4 +147,6 @@ public class BoardGame {
       }
     }
   }
-}
+ }
+ }
+   */
