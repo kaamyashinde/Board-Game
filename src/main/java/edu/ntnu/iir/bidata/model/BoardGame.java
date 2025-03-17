@@ -66,6 +66,7 @@ public class BoardGame {
    * Play the game for the current player by rolling the dice and moving the player a certain
    * amount of steps. // possibly added nexttile logic - durva
    */
+
   public void playCurrentPlayer() {
     System.out.println("-----------");
     System.out.println("Current player " + currentPlayer.getName());
