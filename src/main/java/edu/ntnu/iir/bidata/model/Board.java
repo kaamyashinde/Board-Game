@@ -27,7 +27,14 @@ public class Board {
     for (int i = 0; i < numberOfTiles; i++) {
       tiles.put(i, new Tile(i, null));
     }
+
+    // Link the tiles: set each tile's nextTile except for the final tile.
+    for (int i = 0; i < numberOfTiles - 1; i++) {
+      tiles.get(i).setNextTile(tiles.get(i + 1));
+    }
   }
+
+
   /**
    * Access a specific position on the board.
    *
