@@ -1,6 +1,7 @@
 package edu.ntnu.iir.bidata.model.tile;
 
 import edu.ntnu.iir.bidata.model.Player;
+import edu.ntnu.iir.bidata.utils.ParameterValidation;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,9 +29,7 @@ public class Tile {
      * @throws IllegalArgumentException if id is negative
      */
     public Tile(int id, TileAction action) {
-        if (id < 0) {
-            throw new IllegalArgumentException("Tile ID cannot be negative");
-        }
+        ParameterValidation.validateTileId(id);
         this.id = id;
         this.action = action;
     }
@@ -64,7 +63,7 @@ public class Tile {
      * @throws IllegalArgumentException if player is null
      */
     public void performAction(Player player) {
-        Objects.requireNonNull(player, "Player cannot be null");
+        ParameterValidation.validatePlayer(player);
         if (action != null) {
             action.performAction(player);
         }
@@ -77,7 +76,7 @@ public class Tile {
      * @throws IllegalArgumentException if player is null
      */
     public void landPlayer(Player player) {
-        Objects.requireNonNull(player, "Player cannot be null");
+        ParameterValidation.validatePlayer(player);
         player.placeOnTile(this);
         performAction(player);
     }
@@ -89,7 +88,7 @@ public class Tile {
      * @throws IllegalArgumentException if player is null
      */
     public void leavePlayer(Player player) {
-        Objects.requireNonNull(player, "Player cannot be null");
+        ParameterValidation.validatePlayer(player);
         // Additional cleanup logic can be added here if needed
     }
 
@@ -119,7 +118,7 @@ public class Tile {
      * @throws IllegalArgumentException if targetTile is null
      */
     public int getDistanceTo(Tile targetTile) {
-        Objects.requireNonNull(targetTile, "Target tile cannot be null");
+        ParameterValidation.validateTile(targetTile);
         if (this == targetTile) {
             return 0;
         }

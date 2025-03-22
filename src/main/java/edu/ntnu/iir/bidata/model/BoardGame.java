@@ -4,6 +4,7 @@ import edu.ntnu.iir.bidata.model.dice.Dice;
 import edu.ntnu.iir.bidata.model.exception.GameException;
 import edu.ntnu.iir.bidata.model.tile.Tile;
 import edu.ntnu.iir.bidata.ui.GameUI;
+import edu.ntnu.iir.bidata.utils.ParameterValidation;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,10 +21,6 @@ import java.util.Objects;
 @Getter
 @Setter
 public class BoardGame {
-    private static final int MIN_PLAYERS = 2;
-    private static final int MIN_BOARD_SIZE = 10;
-    private static final int MIN_DICE = 1;
-
     private final Board board;
     private final Dice dice;
     private final Map<Player, Integer> players;
@@ -41,7 +38,7 @@ public class BoardGame {
      * @throws GameException if parameters are invalid
      */
     public BoardGame(int numOfDices, int numOfPlayers, int sizeOfBoard, GameUI ui) {
-        validateGameParameters(numOfDices, numOfPlayers, sizeOfBoard);
+        ParameterValidation.validateGameParameters(numOfDices, numOfPlayers, sizeOfBoard);
         Objects.requireNonNull(ui, "UI cannot be null");
         
         this.dice = new Dice(numOfDices);
@@ -52,36 +49,14 @@ public class BoardGame {
     }
 
     /**
-     * Validates the game parameters.
-     *
-     * @param numOfDices   number of dice
-     * @param numOfPlayers number of players
-     * @param sizeOfBoard  size of the board
-     * @throws GameException if any parameter is invalid
-     */
-    private void validateGameParameters(int numOfDices, int numOfPlayers, int sizeOfBoard) {
-        if (numOfDices < MIN_DICE) {
-            throw new GameException("Number of dice must be at least " + MIN_DICE);
-        }
-        if (numOfPlayers < MIN_PLAYERS) {
-            throw new GameException("Number of players must be at least " + MIN_PLAYERS);
-        }
-        if (sizeOfBoard < MIN_BOARD_SIZE) {
-            throw new GameException("Board size must be at least " + MIN_BOARD_SIZE);
-        }
-    }
-
-    /**
      * Adds a player to the game.
      *
      * @param player the player to add
      * @throws GameException if the game has already started or player is null
      */
     public void addPlayer(Player player) {
-        Objects.requireNonNull(player, "Player cannot be null");
-        if (playing) {
-            throw new GameException("Cannot add players after game has started");
-        }
+        ParameterValidation.validatePlayer(player);
+        ParameterValidation.validateGameNotStarted(playing);
         
         player.setCurrentTile(board.getTiles().get(0));
         this.players.put(player, 0);
@@ -93,12 +68,8 @@ public class BoardGame {
      * @throws GameException if no players are added or game is already playing
      */
     public void initialiseGame() {
-        if (players.isEmpty()) {
-            throw new GameException("No players have been added to the game");
-        }
-        if (playing) {
-            throw new GameException("Game is already in progress");
-        }
+        ParameterValidation.validatePlayersExist(players);
+        ParameterValidation.validateGameNotStarted(playing);
         
         currentPlayer = players.keySet().iterator().next();
         playing = true;
@@ -112,9 +83,7 @@ public class BoardGame {
      * @throws GameException if the game is not in progress or no current player
      */
     public void playCurrentPlayer() {
-        if (!playing || currentPlayer == null) {
-            throw new GameException("Game is not in progress or no current player");
-        }
+        ParameterValidation.validateGameState(playing, currentPlayer);
 
         ui.displayTurnStart(currentPlayer, currentPlayer.getCurrentTile().getId());
 
@@ -173,6 +142,4 @@ public class BoardGame {
             }
         }
     }
-
-    
 }
