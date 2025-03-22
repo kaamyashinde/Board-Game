@@ -1,7 +1,10 @@
 package edu.ntnu.iir.bidata.model;
 
 import edu.ntnu.iir.bidata.model.dice.Dice;
+import edu.ntnu.iir.bidata.model.exception.GameException;
 import edu.ntnu.iir.bidata.model.tile.Tile;
+import edu.ntnu.iir.bidata.ui.ConsoleGameUI;
+import edu.ntnu.iir.bidata.ui.GameUI;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,6 +28,7 @@ public class BoardGame {
     private final Board board;
     private final Dice dice;
     private final Map<Player, Integer> players;
+    private final GameUI ui;
     private Player currentPlayer;
     private boolean playing;
 
@@ -34,14 +38,17 @@ public class BoardGame {
      * @param numOfDices   number of dice to use in the game
      * @param numOfPlayers number of players in the game
      * @param sizeOfBoard  size of the game board
-     * @throws IllegalArgumentException if parameters are invalid
+     * @param ui          the UI implementation to use
+     * @throws GameException if parameters are invalid
      */
-    public BoardGame(int numOfDices, int numOfPlayers, int sizeOfBoard) {
+    public BoardGame(int numOfDices, int numOfPlayers, int sizeOfBoard, GameUI ui) {
         validateGameParameters(numOfDices, numOfPlayers, sizeOfBoard);
+        Objects.requireNonNull(ui, "UI cannot be null");
         
         this.dice = new Dice(numOfDices);
         this.players = new HashMap<>(numOfPlayers);
         this.board = new Board(sizeOfBoard);
+        this.ui = ui;
         this.playing = false;
     }
 
@@ -51,17 +58,17 @@ public class BoardGame {
      * @param numOfDices   number of dice
      * @param numOfPlayers number of players
      * @param sizeOfBoard  size of the board
-     * @throws IllegalArgumentException if any parameter is invalid
+     * @throws GameException if any parameter is invalid
      */
     private void validateGameParameters(int numOfDices, int numOfPlayers, int sizeOfBoard) {
         if (numOfDices < MIN_DICE) {
-            throw new IllegalArgumentException("Number of dice must be at least " + MIN_DICE);
+            throw new GameException("Number of dice must be at least " + MIN_DICE);
         }
         if (numOfPlayers < MIN_PLAYERS) {
-            throw new IllegalArgumentException("Number of players must be at least " + MIN_PLAYERS);
+            throw new GameException("Number of players must be at least " + MIN_PLAYERS);
         }
         if (sizeOfBoard < MIN_BOARD_SIZE) {
-            throw new IllegalArgumentException("Board size must be at least " + MIN_BOARD_SIZE);
+            throw new GameException("Board size must be at least " + MIN_BOARD_SIZE);
         }
     }
 
@@ -69,13 +76,12 @@ public class BoardGame {
      * Adds a player to the game.
      *
      * @param player the player to add
-     * @throws IllegalStateException if the game has already started
-     * @throws IllegalArgumentException if player is null
+     * @throws GameException if the game has already started or player is null
      */
     public void addPlayer(Player player) {
         Objects.requireNonNull(player, "Player cannot be null");
         if (playing) {
-            throw new IllegalStateException("Cannot add players after game has started");
+            throw new GameException("Cannot add players after game has started");
         }
         
         player.setCurrentTile(board.getTiles().get(0));
@@ -85,36 +91,37 @@ public class BoardGame {
     /**
      * Initializes the game and sets the first player.
      *
-     * @throws IllegalStateException if no players are added or game is already playing
+     * @throws GameException if no players are added or game is already playing
      */
     public void initialiseGame() {
         if (players.isEmpty()) {
-            throw new IllegalStateException("No players have been added to the game");
+            throw new GameException("No players have been added to the game");
         }
         if (playing) {
-            throw new IllegalStateException("Game is already in progress");
+            throw new GameException("Game is already in progress");
         }
         
         currentPlayer = players.keySet().iterator().next();
         playing = true;
-        System.out.println("First player is: " + currentPlayer.getName());
+        ui.displaySeparator();
+        ui.displayTurnStart(currentPlayer, currentPlayer.getCurrentTile().getId());
     }
 
     /**
      * Executes the current player's turn.
+     *
+     * @throws GameException if the game is not in progress or no current player
      */
     public void playCurrentPlayer() {
         if (!playing || currentPlayer == null) {
-            throw new IllegalStateException("Game is not in progress or no current player");
+            throw new GameException("Game is not in progress or no current player");
         }
 
-        System.out.println("-----------");
-        System.out.println("Current player " + currentPlayer.getName());
-        System.out.println("Current position: " + currentPlayer.getCurrentTile().getId());
+        ui.displayTurnStart(currentPlayer, currentPlayer.getCurrentTile().getId());
 
         dice.rollAllDice();
         int steps = dice.sumOfRolledValues();
-        System.out.println("Rolled: " + steps);
+        ui.displayDiceRoll(steps);
 
         movePlayer(steps);
     }
@@ -136,23 +143,25 @@ public class BoardGame {
         
         currentPlayer.setCurrentTile(currentTile);
         players.put(currentPlayer, currentTile.getId());
-        System.out.println("New position: " + currentTile.getId());
+        ui.displayNewPosition(currentTile.getId());
     }
 
     /**
      * Handles the win condition when a player reaches the final tile.
      */
     private void handleGameWin() {
-        System.out.println("Player " + currentPlayer.getName() + " has reached the final tile and wins the game!");
+        ui.displayWinner(currentPlayer);
         playing = false;
     }
 
     /**
      * Starts and runs the game until a winner is determined.
+     *
+     * @throws GameException if the game has not been initialized
      */
     public void playGame() {
         if (!playing) {
-            throw new IllegalStateException("Game has not been initialized");
+            throw new GameException("Game has not been initialized");
         }
 
         while (playing) {
@@ -165,4 +174,6 @@ public class BoardGame {
             }
         }
     }
+
+    
 }
