@@ -1,153 +1,178 @@
 package edu.ntnu.iir.bidata.model;
 
 import edu.ntnu.iir.bidata.model.dice.Dice;
-import lombok.AllArgsConstructor;
+import edu.ntnu.iir.bidata.model.exception.GameException;
+import edu.ntnu.iir.bidata.model.tile.Tile;
+import edu.ntnu.iir.bidata.ui.GameUI;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
- * A class for the different board games.
+ * A class for managing the board game.
  *
  * @author kaamyashinde
- * @version 0.0.1
+ * @version 1.0.0
  */
-@AllArgsConstructor
-
+@Getter
+@Setter
 public class BoardGame {
+    private static final int MIN_PLAYERS = 2;
+    private static final int MIN_BOARD_SIZE = 10;
+    private static final int MIN_DICE = 1;
 
-  private final Board board;
-  private final Dice dice;
-  private ArrayList<Player> playerArrayList;
-  private HashMap<Player, Integer> players;
-  private Player currentPlayer;
-  private boolean playing;
+    private final Board board;
+    private final Dice dice;
+    private final Map<Player, Integer> players;
+    private final GameUI ui;
+    private Player currentPlayer;
+    private boolean playing;
 
-  /**
-   * The constructor that helps set up the initial parameters for the board game.
-   *
-   * @param numOfDices   to decide how many dices shall be rolled at one time.
-   * @param numOfPlayers the number of players playing the game.
-   * @param sizeOfBoard  how big the board is supposed to be.
-   */
-  public BoardGame(int numOfDices, int numOfPlayers, int sizeOfBoard) {
-    this.dice = new Dice(numOfDices);
-    this.players = new HashMap<>(numOfPlayers);
-    this.board = new Board(sizeOfBoard);
-  }
-
-  public static void main(String[] args) {
-    BoardGame game = new BoardGame(1, 2, 15);
-    game.addPlayer(new Player("Kaamya"));
-    game.addPlayer(new Player("Durva"));
-    game.playGame();
-  }
-
-  /**
-   * Add a player to the list of players and initialise their score to zero.
-   *
-   * @param player the player to be added.
-   */
-  public void addPlayer(Player player) {
-    player.setCurrentTile(board.getTiles().get(0));
-    this.players.put(player, 0);
-  }
-
-  /**
-   * Initialising the game by initialising the currentPlayer value to the first player.
-   */
-  public void initialiseGame() {
-    currentPlayer = players.keySet().iterator().next();
-    System.out.println("First player is: " + currentPlayer.getName());
-  }
-
-  /**
-   * Play the game for the current player by rolling the dice and moving the player a certain
-   * amount of steps. // possibly added nexttile logic - durva
-   */
-
-  public void playCurrentPlayer() {
-    System.out.println("-----------");
-    System.out.println("Current player " + currentPlayer.getName());
-    System.out.println("Current position: " + currentPlayer.getCurrentTile().getId());
-
-    dice.rollAllDice();
-    int steps = dice.sumOfRolledValues();
-    System.out.println("Rolled: " + steps);
-
-    // Move the player step by step using nextTile.
-    for (int i = 0; i < steps; i++) {
-      // Get the next tile from the current tile.
-      if (currentPlayer.getCurrentTile().getNextTile() != null) {
-        currentPlayer.setCurrentTile(currentPlayer.getCurrentTile().getNextTile());
-      } else {
-        // If nextTile is null, then this is the final tile.
-        System.out.println(
-            "Player " + currentPlayer.getName() + " has reached the final tile and wins the game!");
-        playing = false;
-        return; // End the turn (and game) immediately.
-      }
+    /**
+     * Constructor that initializes the board game with the specified parameters.
+     *
+     * @param numOfDices   number of dice to use in the game
+     * @param numOfPlayers number of players in the game
+     * @param sizeOfBoard  size of the game board
+     * @param ui          the UI implementation to use
+     * @throws GameException if parameters are invalid
+     */
+    public BoardGame(int numOfDices, int numOfPlayers, int sizeOfBoard, GameUI ui) {
+        validateGameParameters(numOfDices, numOfPlayers, sizeOfBoard);
+        Objects.requireNonNull(ui, "UI cannot be null");
+        
+        this.dice = new Dice(numOfDices);
+        this.players = new HashMap<>(numOfPlayers);
+        this.board = new Board(sizeOfBoard);
+        this.ui = ui;
+        this.playing = false;
     }
-    System.out.println("New position: " + currentPlayer.getCurrentTile().getId());
-  }
 
-  /**
-   * Play the game for each of the players by iterating over them and updating the currentPlayer
-   * field and their score.
-   */
-  public void playGame() {
-    playing = true;
-    while (playing) {
-      for (Map.Entry<Player, Integer> player : players.entrySet()) {
-        currentPlayer = player.getKey();
-        playCurrentPlayer();
-        player.setValue(currentPlayer.getCurrentTile().getId());
-        if (!playing) {
-          break;
+    /**
+     * Validates the game parameters.
+     *
+     * @param numOfDices   number of dice
+     * @param numOfPlayers number of players
+     * @param sizeOfBoard  size of the board
+     * @throws GameException if any parameter is invalid
+     */
+    private void validateGameParameters(int numOfDices, int numOfPlayers, int sizeOfBoard) {
+        if (numOfDices < MIN_DICE) {
+            throw new GameException("Number of dice must be at least " + MIN_DICE);
         }
-      }
+        if (numOfPlayers < MIN_PLAYERS) {
+            throw new GameException("Number of players must be at least " + MIN_PLAYERS);
+        }
+        if (sizeOfBoard < MIN_BOARD_SIZE) {
+            throw new GameException("Board size must be at least " + MIN_BOARD_SIZE);
+        }
     }
-  }
+
+    /**
+     * Adds a player to the game.
+     *
+     * @param player the player to add
+     * @throws GameException if the game has already started or player is null
+     */
+    public void addPlayer(Player player) {
+        Objects.requireNonNull(player, "Player cannot be null");
+        if (playing) {
+            throw new GameException("Cannot add players after game has started");
+        }
+        
+        player.setCurrentTile(board.getTiles().get(0));
+        this.players.put(player, 0);
+    }
+
+    /**
+     * Initializes the game and sets the first player.
+     *
+     * @throws GameException if no players are added or game is already playing
+     */
+    public void initialiseGame() {
+        if (players.isEmpty()) {
+            throw new GameException("No players have been added to the game");
+        }
+        if (playing) {
+            throw new GameException("Game is already in progress");
+        }
+        
+        currentPlayer = players.keySet().iterator().next();
+        playing = true;
+        ui.displaySeparator();
+        ui.displayTurnStart(currentPlayer, currentPlayer.getCurrentTile().getId());
+    }
+
+    /**
+     * Executes the current player's turn.
+     *
+     * @throws GameException if the game is not in progress or no current player
+     */
+    public void playCurrentPlayer() {
+        if (!playing || currentPlayer == null) {
+            throw new GameException("Game is not in progress or no current player");
+        }
+
+        ui.displayTurnStart(currentPlayer, currentPlayer.getCurrentTile().getId());
+
+        dice.rollAllDice();
+        int steps = dice.sumOfRolledValues();
+        ui.displayDiceRoll(steps);
+
+        movePlayer(steps);
+    }
+
+    /**
+     * Moves the current player the specified number of steps.
+     *
+     * @param steps number of steps to move
+     */
+    private void movePlayer(int steps) {
+        Tile currentTile = currentPlayer.getCurrentTile();
+        for (int i = 0; i < steps; i++) {
+            if (currentTile.getNextTile() == null) {
+                handleGameWin();
+                return;
+            }
+            currentTile = currentTile.getNextTile();
+        }
+        
+        currentPlayer.setCurrentTile(currentTile);
+        players.put(currentPlayer, currentTile.getId());
+        ui.displayNewPosition(currentTile.getId());
+    }
+
+    /**
+     * Handles the win condition when a player reaches the final tile.
+     */
+    private void handleGameWin() {
+        ui.displayWinner(currentPlayer);
+        playing = false;
+    }
+
+    /**
+     * Starts and runs the game until a winner is determined.
+     *
+     * @throws GameException if the game has not been initialized
+     */
+    public void playGame() {
+        if (!playing) {
+            throw new GameException("Game has not been initialized");
+        }
+
+        while (playing) {
+            for (Map.Entry<Player, Integer> playerEntry : players.entrySet()) {
+                currentPlayer = playerEntry.getKey();
+                playCurrentPlayer();
+                if (!playing) {
+                    break;
+                }
+            }
+        }
+    }
+
+    
 }
-
-
-
-    /*int newPositionOnBoard = currentPlayer.getCurrentTile().getId() + dice.sumOfRolledValues();
-    if(newPositionOnBoard >= board.getTiles().size()){
-      newPositionOnBoard = board.getTiles().size();
-    }
-    if (newPositionOnBoard >= board.getTiles().size()) {
-      newPositionOnBoard = board.getTiles().size();
-      System.out.println("New position: " + newPositionOnBoard);
-
-      System.out.println("Player " + currentPlayer.getName() + " has won!");
-      playing = false;
-    } else {
-      System.out.println("New position: " + newPositionOnBoard);
-
-      currentPlayer.setCurrentTile(board.getPositionOnBoard(newPositionOnBoard));
-    }
-  }
-
-
-
-  /**
-   * Calculate the winner.
-   *
-   * @author Durva
-   */
-  /*public void getWinner() {
-    //perhaps needs to be in the play option so that it is checked each time a player plays the game?
-    // - durva: i think it should be in play option we can move it later
-    //need to check current player tile position.
-    int lastTileId = board.getTiles().size() - 1;
-    for (Player player : playerArrayList) {
-      if (player.getCurrentTile().getId() == lastTileId) {
-        System.out.println("The winner is: " + player.getName());
-      }
-    }
-  }
- }
- }
-   */

@@ -1,3 +1,4 @@
+package edu.ntnu.iir.bidata.model;
 
 
 import static org.junit.jupiter.api.Assertions.*;
