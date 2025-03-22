@@ -1,7 +1,6 @@
 package edu.ntnu.iir.bidata.ui;
 
 import edu.ntnu.iir.bidata.model.Player;
-import edu.ntnu.iir.bidata.model.tile.Tile;
 
 /**
  * Interface for game UI implementations.

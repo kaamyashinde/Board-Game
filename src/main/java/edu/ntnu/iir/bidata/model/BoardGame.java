@@ -3,7 +3,6 @@ package edu.ntnu.iir.bidata.model;
 import edu.ntnu.iir.bidata.model.dice.Dice;
 import edu.ntnu.iir.bidata.model.exception.GameException;
 import edu.ntnu.iir.bidata.model.tile.Tile;
-import edu.ntnu.iir.bidata.ui.ConsoleGameUI;
 import edu.ntnu.iir.bidata.ui.GameUI;
 import lombok.Getter;
 import lombok.Setter;
