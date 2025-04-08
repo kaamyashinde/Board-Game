@@ -8,7 +8,9 @@ import edu.ntnu.iir.bidata.utils.ParameterValidation;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -25,6 +27,7 @@ public class BoardGame {
     private final Dice dice;
     private final Map<Player, Integer> players;
     private final GameUI ui;
+    private final List<BoardGameObserver> observers;
     private Player currentPlayer;
     private boolean playing;
 
@@ -45,8 +48,10 @@ public class BoardGame {
         this.players = new HashMap<>(numOfPlayers);
         this.board = new Board(sizeOfBoard);
         this.ui = ui;
+        this.observers = new ArrayList<>();
         this.playing = false;
     }
+
 
     /**
      * Adds a player to the game.
@@ -75,6 +80,7 @@ public class BoardGame {
         playing = true;
         ui.displaySeparator();
         ui.displayTurnStart(currentPlayer, currentPlayer.getCurrentTile().getId());
+        notifyTurnChanged(currentPlayer);
     }
 
     /**
@@ -86,6 +92,7 @@ public class BoardGame {
         ParameterValidation.validateGameState(playing, currentPlayer);
 
         ui.displayTurnStart(currentPlayer, currentPlayer.getCurrentTile().getId());
+        notifyTurnChanged(currentPlayer);
 
         dice.rollAllDice();
         int steps = dice.sumOfRolledValues();
@@ -110,8 +117,10 @@ public class BoardGame {
         }
         
         currentPlayer.setCurrentTile(currentTile);
-        players.put(currentPlayer, currentTile.getId());
-        ui.displayNewPosition(currentTile.getId());
+        int newPosition = currentTile.getId();
+        players.put(currentPlayer, newPosition);
+        ui.displayNewPosition(newPosition);
+        notifyPlayerMoved(currentPlayer, newPosition);
     }
 
     /**
@@ -119,6 +128,7 @@ public class BoardGame {
      */
     private void handleGameWin() {
         ui.displayWinner(currentPlayer);
+        notifyGameWon(currentPlayer);
         playing = false;
     }
 
@@ -140,6 +150,60 @@ public class BoardGame {
                     break;
                 }
             }
+        }
+    }
+
+        /**
+     * Adds an observer to be notified of game state changes.
+     *
+     * @param observer the observer to add
+     * @throws IllegalArgumentException if observer is null
+     */
+    public void addObserver(BoardGameObserver observer) {
+        Objects.requireNonNull(observer, "Observer cannot be null");
+        observers.add(observer);
+    }
+
+    /**
+     * Removes an observer from the list of observers.
+     *
+     * @param observer the observer to remove
+     */
+    public void removeObserver(BoardGameObserver observer) {
+        observers.remove(observer);
+    }
+
+    /**
+     * Notifies all observers that a player has moved.
+     *
+     * @param player the player who moved
+     * @param newPosition the new position
+     */
+    private void notifyPlayerMoved(Player player, int newPosition) {
+        for (BoardGameObserver observer : observers) {
+            observer.onPlayerMoved(player, newPosition);
+        }
+    }
+
+    /**
+     * Notifies all observers that a player has won.
+     *
+     * @param winner the winning player
+     */
+    private void notifyGameWon(Player winner) {
+        for (BoardGameObserver observer : observers) {
+            observer.onGameWon(winner);
+        }
+    }
+
+    /**
+     * Notifies all observers that the turn has changed.
+     *
+     * @param currentPlayer the player whose turn it is now
+     */
+    private void notifyTurnChanged(Player currentPlayer) {
+        for (BoardGameObserver observer : observers) {
+            observer.onTurnChanged(currentPlayer);
         }
     }
 }
