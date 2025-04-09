@@ -1,4 +1,4 @@
-package edu.ntnu.iir.bidata.model;
+package edu.ntnu.iir.bidata.model.board;
 
 import edu.ntnu.iir.bidata.ui.GameUI;
 

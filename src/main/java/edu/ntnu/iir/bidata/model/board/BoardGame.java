@@ -1,5 +1,6 @@
-package edu.ntnu.iir.bidata.model;
+package edu.ntnu.iir.bidata.model.board;
 
+import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.dice.Dice;
 import edu.ntnu.iir.bidata.model.exception.GameException;
 import edu.ntnu.iir.bidata.model.tile.Tile;
@@ -17,7 +18,7 @@ import java.util.Objects;
 /**
  * A class for managing the board game.
  *
- * @author kaamyashinde
+ * @author Durva & kaamyashinde
  * @version 1.0.0
  */
 @Getter
@@ -201,7 +202,7 @@ public class BoardGame {
      *
      * @param currentPlayer the player whose turn it is now
      */
-    private void notifyTurnChanged(Player currentPlayer) {
+    public void notifyTurnChanged(Player currentPlayer) {
         for (BoardGameObserver observer : observers) {
             observer.onTurnChanged(currentPlayer);
         }

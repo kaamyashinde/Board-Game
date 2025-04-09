@@ -1,4 +1,6 @@
-package edu.ntnu.iir.bidata.model;
+package edu.ntnu.iir.bidata.model.board;
+
+import edu.ntnu.iir.bidata.model.Player;
 
 /**
  * Interface for objects that want to observe changes in the BoardGame state.
