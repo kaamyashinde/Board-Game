@@ -1,7 +1,7 @@
 package edu.ntnu.iir.bidata;
 
 import edu.ntnu.iir.bidata.ui.ConsoleGameUI;
-import edu.ntnu.iir.bidata.model.BoardGame;
+import edu.ntnu.iir.bidata.model.board.BoardGame;
 import edu.ntnu.iir.bidata.model.Player;
 
 /**
