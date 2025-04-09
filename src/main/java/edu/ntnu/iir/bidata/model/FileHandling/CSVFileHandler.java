@@ -1,6 +1,6 @@
 package edu.ntnu.iir.bidata.model.FileHandling;
 
-import edu.ntnu.iir.bidata.model.Board;
+import edu.ntnu.iir.bidata.model.board.Board;
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.exception.GameException;
 
@@ -11,6 +11,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+/**
+ * file handler class for saving players to and loading players from CSV files.
+ *
+ * @author Durva
+ * @version 1.0.0
+ */
 
 public class CSVFileHandler {
   private static final String CSV_DELIMITER = ",";
