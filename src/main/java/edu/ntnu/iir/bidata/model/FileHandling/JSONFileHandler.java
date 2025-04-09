@@ -2,7 +2,7 @@ package edu.ntnu.iir.bidata.model.FileHandling;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import edu.ntnu.iir.bidata.model.BoardGame;
+import edu.ntnu.iir.bidata.model.board.BoardGame;
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.exception.GameException;
 import edu.ntnu.iir.bidata.ui.GameUI;
@@ -13,6 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+/**
+ * file handler class for saving a hard-coded board game to
+ * and loading a board game from JSON files.
+ *
+ * @author Durva
+ * @version 1.0.0
+ */
 
 public class JSONFileHandler {
   private static final ObjectMapper objectMapper = new ObjectMapper();
