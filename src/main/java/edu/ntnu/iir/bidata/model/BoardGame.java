@@ -4,8 +4,7 @@ import edu.ntnu.iir.bidata.model.dice.Dice;
 import edu.ntnu.iir.bidata.model.exception.GameException;
 import edu.ntnu.iir.bidata.model.tile.Tile;
 import edu.ntnu.iir.bidata.model.tile.TileAction;
-import edu.ntnu.iir.bidata.ui.GameUI;
-import edu.ntnu.iir.bidata.utils.ParameterValidation;
+import edu.ntnu.iir.bidata.model.utils.ParameterValidation;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,7 +26,6 @@ public class BoardGame {
     private Board board;
     private final Dice dice;
     private final Map<Player, Integer> players;
-    private final GameUI ui;
     private final List<BoardGameObserver> observers;
     private Player currentPlayer;
     private boolean playing;
@@ -37,18 +35,14 @@ public class BoardGame {
      * Constructor that initializes the board game with the specified parameters.
      *
      * @param numOfDices   number of dice to use in the game
-     * @param numOfPlayers number of players in the game
      * @param sizeOfBoard  size of the game board
-     * @param ui          the UI implementation to use
      * @throws GameException if parameters are invalid
      */
-    public BoardGame(int numOfDices, int numOfPlayers, int sizeOfBoard, GameUI ui) {
-        ParameterValidation.validateGameParameters(numOfDices, numOfPlayers, sizeOfBoard);
-        Objects.requireNonNull(ui, "UI cannot be null");
+    public BoardGame(int numOfDices, int sizeOfBoard) {
+        ParameterValidation.validateGameParameters(numOfDices, 2, sizeOfBoard); // Default to 2 players minimum
         
         this.dice = new Dice(numOfDices);
-        this.players = new HashMap<>(numOfPlayers);
-        this.ui = ui;
+        this.players = new HashMap<>();
         this.observers = new ArrayList<>();
         this.playing = false;
         this.sizeOfBoard = sizeOfBoard;
@@ -86,86 +80,95 @@ public class BoardGame {
         
         currentPlayer = players.keySet().iterator().next();
         playing = true;
-        ui.displaySeparator();
-        ui.displayTurnStart(currentPlayer, currentPlayer.getCurrentTile().getId());
         notifyTurnChanged(currentPlayer);
     }
 
     /**
-     * Executes the current player's turn.
+     * Rolls the dice and returns the result.
      *
-     * @throws GameException if the game is not in progress or no current player
+     * @return the sum of the dice roll
      */
-    public void playCurrentPlayer() {
-        ParameterValidation.validateGameState(playing, currentPlayer);
-
-        ui.displayTurnStart(currentPlayer, currentPlayer.getCurrentTile().getId());
-        notifyTurnChanged(currentPlayer);
-
+    public int rollDice() {
         dice.rollAllDice();
-        int steps = dice.sumOfRolledValues();
-        ui.displayDiceRoll(steps);
-
-        movePlayer(steps);
+        return dice.sumOfRolledValues();
     }
 
     /**
      * Moves the current player the specified number of steps.
      *
+     * @param player the player to move
      * @param steps number of steps to move
+     * @return true if the player won, false otherwise
      */
-    private void movePlayer(int steps) {
-        Tile currentTile = currentPlayer.getCurrentTile();
+    public boolean movePlayer(Player player, int steps) {
+        Tile currentTile = player.getCurrentTile();
         for (int i = 0; i < steps; i++) {
             if (currentTile.getNextTile() == null) {
-                handleGameWin();
-                return;
+                handleGameWin(player);
+                return true;
             }
             currentTile = currentTile.getNextTile();
         }
         
-        currentPlayer.setCurrentTile(currentTile);
+        player.setCurrentTile(currentTile);
         int newPosition = currentTile.getId();
-        players.put(currentPlayer, newPosition);
-        ui.displayNewPosition(newPosition);
-        notifyPlayerMoved(currentPlayer, newPosition);
+        players.put(player, newPosition);
+        notifyPlayerMoved(player, newPosition);
 
-        // Check for and display any tile action
+        // Check for and perform any tile action
         TileAction action = currentTile.getAction();
         if (action != null) {
-            ui.displayTileAction(currentPlayer, action);
-            action.performAction(currentPlayer);
+            action.performAction(player);
         }
+        
+        return false;
     }
 
     /**
      * Handles the win condition when a player reaches the final tile.
      */
-    private void handleGameWin() {
-        ui.displayWinner(currentPlayer);
-        notifyGameWon(currentPlayer);
+    private void handleGameWin(Player winner) {
+        notifyGameWon(winner);
         playing = false;
     }
 
     /**
-     * Starts and runs the game until a winner is determined.
+     * Checks if the game is over.
      *
-     * @throws GameException if the game has not been initialized
+     * @return true if the game is over, false otherwise
      */
-    public void playGame() {
-        if (!playing) {
-            throw new GameException("Game has not been initialized");
-        }
+    public boolean isGameOver() {
+        return !playing;
+    }
 
-        while (playing) {
-            for (Map.Entry<Player, Integer> playerEntry : players.entrySet()) {
-                currentPlayer = playerEntry.getKey();
-                playCurrentPlayer();
-                if (!playing) {
-                    break;
-                }
-            }
-        }
+    /**
+     * Gets the current player.
+     *
+     * @return the current player
+     */
+    public Player getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    /**
+     * Moves to the next player's turn.
+     */
+    public void nextPlayer() {
+        List<Player> playerList = new ArrayList<>(players.keySet());
+        int currentIndex = playerList.indexOf(currentPlayer);
+        int nextIndex = (currentIndex + 1) % playerList.size();
+        currentPlayer = playerList.get(nextIndex);
+        notifyTurnChanged(currentPlayer);
+    }
+
+    /**
+     * Checks if a player has won the game.
+     *
+     * @param player the player to check
+     * @return true if the player has won, false otherwise
+     */
+    public boolean hasPlayerWon(Player player) {
+        return player.getCurrentTile().getNextTile() == null;
     }
 
     /**

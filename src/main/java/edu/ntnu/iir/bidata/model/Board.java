@@ -9,7 +9,7 @@ import edu.ntnu.iir.bidata.model.tile.TeleportAction;
 import edu.ntnu.iir.bidata.model.tile.SwitchPlacesAction;
 import edu.ntnu.iir.bidata.model.tile.snakeandladder.LadderAction;
 import edu.ntnu.iir.bidata.model.tile.snakeandladder.SnakeAction;
-import edu.ntnu.iir.bidata.utils.ParameterValidation;
+import edu.ntnu.iir.bidata.model.utils.ParameterValidation;
 import lombok.Getter;
 
 import java.util.HashMap;

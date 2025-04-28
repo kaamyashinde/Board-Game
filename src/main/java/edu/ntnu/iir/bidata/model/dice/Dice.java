@@ -1,8 +1,8 @@
 package edu.ntnu.iir.bidata.model.dice;
 
-import edu.ntnu.iir.bidata.utils.ParameterValidation;
-
 import java.util.ArrayList;
+
+import edu.ntnu.iir.bidata.model.utils.ParameterValidation;
 
 /**
  * Class handling multiple instances of the class {@link Die}.

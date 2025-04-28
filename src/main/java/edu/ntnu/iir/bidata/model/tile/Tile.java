@@ -1,7 +1,7 @@
 package edu.ntnu.iir.bidata.model.tile;
 
 import edu.ntnu.iir.bidata.model.Player;
-import edu.ntnu.iir.bidata.utils.ParameterValidation;
+import edu.ntnu.iir.bidata.model.utils.ParameterValidation;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,4 +1,4 @@
-package edu.ntnu.iir.bidata.ui;
+package edu.ntnu.iir.bidata.view;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;

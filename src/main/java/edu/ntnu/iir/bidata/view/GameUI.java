@@ -1,4 +1,4 @@
-package edu.ntnu.iir.bidata.ui;
+package edu.ntnu.iir.bidata.view;
 
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.tile.TileAction;
@@ -8,30 +8,43 @@ import edu.ntnu.iir.bidata.model.tile.TileAction;
  */
 public interface GameUI {
     /**
-     * Displays the start of a player's turn.
-     *
-     * @param player The current player
-     * @param currentPosition The player's current position
+     * Displays a welcome message at the start of the game.
      */
-    void displayTurnStart(Player player, int currentPosition);
+    void displayWelcomeMessage();
+
+    /**
+     * Gets the number of players from the user.
+     * @return The number of players
+     */
+    int getNumberOfPlayers();
+
+    /**
+     * Gets a player's name from the user.
+     * @param playerNumber The player number (1-based)
+     * @return The player's name
+     */
+    String getPlayerName(int playerNumber);
+
+    /**
+     * Displays the start of a player's turn.
+     * @param player The current player
+     */
+    void displayPlayerTurn(Player player);
 
     /**
      * Displays the result of a dice roll.
-     *
+     * @param player The player who rolled
      * @param rollResult The result of the dice roll
      */
-    void displayDiceRoll(int rollResult);
+    void displayDiceRoll(Player player, int rollResult);
 
     /**
-     * Displays the player's new position after moving.
-     *
-     * @param newPosition The player's new position
+     * Displays the current state of the game board.
      */
-    void displayNewPosition(int newPosition);
+    void displayBoard();
 
     /**
      * Displays the game winner.
-     *
      * @param winner The winning player
      */
     void displayWinner(Player winner);
@@ -43,7 +56,6 @@ public interface GameUI {
 
     /**
      * Displays information about a tile action that was triggered.
-     *
      * @param player The player who triggered the action
      * @param action The action that was triggered
      */
