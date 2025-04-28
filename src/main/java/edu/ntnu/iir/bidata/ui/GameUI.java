@@ -1,6 +1,7 @@
 package edu.ntnu.iir.bidata.ui;
 
 import edu.ntnu.iir.bidata.model.Player;
+import edu.ntnu.iir.bidata.model.tile.TileAction;
 
 /**
  * Interface for game UI implementations.
@@ -39,4 +40,12 @@ public interface GameUI {
      * Displays a separator line for visual organization.
      */
     void displaySeparator();
+
+    /**
+     * Displays information about a tile action that was triggered.
+     *
+     * @param player The player who triggered the action
+     * @param action The action that was triggered
+     */
+    void displayTileAction(Player player, TileAction action);
 } 
