@@ -10,7 +10,7 @@ import edu.ntnu.iir.bidata.model.Player;
 public class Main {
     public static void main(String[] args) {
         // Game configuration
-        final int BOARD_SIZE = 20;  // A medium-sized board
+        final int BOARD_SIZE = 100;  // A medium-sized board
         final int NUM_DICE = 1;     // One die for simplicity
         final int NUM_PLAYERS = 2;  // Two players
 
