@@ -3,6 +3,7 @@ package edu.ntnu.iir.bidata.model;
 import edu.ntnu.iir.bidata.model.dice.Dice;
 import edu.ntnu.iir.bidata.model.exception.GameException;
 import edu.ntnu.iir.bidata.model.tile.Tile;
+import edu.ntnu.iir.bidata.model.tile.TileAction;
 import edu.ntnu.iir.bidata.ui.GameUI;
 import edu.ntnu.iir.bidata.utils.ParameterValidation;
 import lombok.Getter;
@@ -23,13 +24,14 @@ import java.util.Objects;
 @Getter
 @Setter
 public class BoardGame {
-    private final Board board;
+    private Board board;
     private final Dice dice;
     private final Map<Player, Integer> players;
     private final GameUI ui;
     private final List<BoardGameObserver> observers;
     private Player currentPlayer;
     private boolean playing;
+    private final int sizeOfBoard;
 
     /**
      * Constructor that initializes the board game with the specified parameters.
@@ -46,15 +48,14 @@ public class BoardGame {
         
         this.dice = new Dice(numOfDices);
         this.players = new HashMap<>(numOfPlayers);
-        this.board = new Board(sizeOfBoard);
         this.ui = ui;
         this.observers = new ArrayList<>();
         this.playing = false;
+        this.sizeOfBoard = sizeOfBoard;
     }
 
-
     /**
-     * Adds a player to the game.
+     * Adds a player to the game and updates the board with the new player list.
      *
      * @param player the player to add
      * @throws GameException if the game has already started or player is null
@@ -63,8 +64,15 @@ public class BoardGame {
         ParameterValidation.validatePlayer(player);
         ParameterValidation.validateGameNotStarted(playing);
         
-        player.setCurrentTile(board.getTiles().get(0));
         this.players.put(player, 0);
+        
+        // Create or update the board with the current list of players
+        List<Player> playerList = new ArrayList<>(players.keySet());
+        if (board == null) {
+            board = new Board(sizeOfBoard, playerList);
+        }
+        
+        player.setCurrentTile(board.getTiles().get(0));
     }
 
     /**
@@ -121,6 +129,13 @@ public class BoardGame {
         players.put(currentPlayer, newPosition);
         ui.displayNewPosition(newPosition);
         notifyPlayerMoved(currentPlayer, newPosition);
+
+        // Check for and display any tile action
+        TileAction action = currentTile.getAction();
+        if (action != null) {
+            ui.displayTileAction(currentPlayer, action);
+            action.performAction(currentPlayer);
+        }
     }
 
     /**
@@ -153,7 +168,7 @@ public class BoardGame {
         }
     }
 
-        /**
+    /**
      * Adds an observer to be notified of game state changes.
      *
      * @param observer the observer to add
