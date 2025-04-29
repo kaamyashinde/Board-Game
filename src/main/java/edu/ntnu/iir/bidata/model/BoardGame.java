@@ -26,9 +26,9 @@ public class BoardGame {
     private Board board;
     private final Dice dice;
     private final Map<Player, Integer> players;
-    private final List<BoardGameObserver> observers;
-    private Player currentPlayer;
-    private boolean playing;
+    private final GameStateManager stateManager;
+    private final GameRulesManager rulesManager;
+    private final GameEventManager eventManager;
     private final int sizeOfBoard;
 
     /**
@@ -39,12 +39,13 @@ public class BoardGame {
      * @throws GameException if parameters are invalid
      */
     public BoardGame(int numOfDices, int sizeOfBoard) {
-        ParameterValidation.validateGameParameters(numOfDices, 2, sizeOfBoard); // Default to 2 players minimum
+        this.rulesManager = new GameRulesManager();
+        this.rulesManager.validateGameParameters(numOfDices, 2, sizeOfBoard);
         
         this.dice = new Dice(numOfDices);
         this.players = new HashMap<>();
-        this.observers = new ArrayList<>();
-        this.playing = false;
+        this.stateManager = new GameStateManager(players);
+        this.eventManager = new GameEventManager();
         this.sizeOfBoard = sizeOfBoard;
     }
 
@@ -56,7 +57,7 @@ public class BoardGame {
      */
     public void addPlayer(Player player) {
         ParameterValidation.validatePlayer(player);
-        ParameterValidation.validateGameNotStarted(playing);
+        ParameterValidation.validateGameNotStarted(stateManager.isPlaying());
         
         this.players.put(player, 0);
         
@@ -76,11 +77,10 @@ public class BoardGame {
      */
     public void initialiseGame() {
         ParameterValidation.validatePlayersExist(players);
-        ParameterValidation.validateGameNotStarted(playing);
+        ParameterValidation.validateGameNotStarted(stateManager.isPlaying());
         
-        currentPlayer = players.keySet().iterator().next();
-        playing = true;
-        notifyTurnChanged(currentPlayer);
+        stateManager.initializeGame();
+        eventManager.notifyTurnChanged(stateManager.getCurrentPlayer());
     }
 
     /**
@@ -113,7 +113,7 @@ public class BoardGame {
         player.setCurrentTile(currentTile);
         int newPosition = currentTile.getId();
         players.put(player, newPosition);
-        notifyPlayerMoved(player, newPosition);
+        eventManager.notifyPlayerMoved(player, newPosition);
 
         // Check for and perform any tile action
         TileAction action = currentTile.getAction();
@@ -128,8 +128,8 @@ public class BoardGame {
      * Handles the win condition when a player reaches the final tile.
      */
     private void handleGameWin(Player winner) {
-        notifyGameWon(winner);
-        playing = false;
+        stateManager.setWinner(winner);
+        eventManager.notifyGameWon(winner);
     }
 
     /**
@@ -138,7 +138,7 @@ public class BoardGame {
      * @return true if the game is over, false otherwise
      */
     public boolean isGameOver() {
-        return !playing;
+        return stateManager.isGameOver();
     }
 
     /**
@@ -147,18 +147,15 @@ public class BoardGame {
      * @return the current player
      */
     public Player getCurrentPlayer() {
-        return currentPlayer;
+        return stateManager.getCurrentPlayer();
     }
 
     /**
      * Moves to the next player's turn.
      */
     public void nextPlayer() {
-        List<Player> playerList = new ArrayList<>(players.keySet());
-        int currentIndex = playerList.indexOf(currentPlayer);
-        int nextIndex = (currentIndex + 1) % playerList.size();
-        currentPlayer = playerList.get(nextIndex);
-        notifyTurnChanged(currentPlayer);
+        stateManager.nextPlayer();
+        eventManager.notifyTurnChanged(stateManager.getCurrentPlayer());
     }
 
     /**
@@ -178,8 +175,7 @@ public class BoardGame {
      * @throws IllegalArgumentException if observer is null
      */
     public void addObserver(BoardGameObserver observer) {
-        Objects.requireNonNull(observer, "Observer cannot be null");
-        observers.add(observer);
+        eventManager.addObserver(observer);
     }
 
     /**
@@ -188,40 +184,6 @@ public class BoardGame {
      * @param observer the observer to remove
      */
     public void removeObserver(BoardGameObserver observer) {
-        observers.remove(observer);
-    }
-
-    /**
-     * Notifies all observers that a player has moved.
-     *
-     * @param player the player who moved
-     * @param newPosition the new position
-     */
-    private void notifyPlayerMoved(Player player, int newPosition) {
-        for (BoardGameObserver observer : observers) {
-            observer.onPlayerMoved(player, newPosition);
-        }
-    }
-
-    /**
-     * Notifies all observers that a player has won.
-     *
-     * @param winner the winning player
-     */
-    private void notifyGameWon(Player winner) {
-        for (BoardGameObserver observer : observers) {
-            observer.onGameWon(winner);
-        }
-    }
-
-    /**
-     * Notifies all observers that the turn has changed.
-     *
-     * @param currentPlayer the player whose turn it is now
-     */
-    private void notifyTurnChanged(Player currentPlayer) {
-        for (BoardGameObserver observer : observers) {
-            observer.onTurnChanged(currentPlayer);
-        }
+        eventManager.removeObserver(observer);
     }
 }

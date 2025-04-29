@@ -18,7 +18,7 @@ public class Main {
             BoardGame game = new BoardGame(NUM_DICE, BOARD_SIZE);
             
             // Create the view
-            ConsoleGameUI gameUI = new ConsoleGameUI();
+            ConsoleGameUI gameUI = new ConsoleGameUI(game);
             
             // Create the controller
             GameController controller = new GameController(game, gameUI);
