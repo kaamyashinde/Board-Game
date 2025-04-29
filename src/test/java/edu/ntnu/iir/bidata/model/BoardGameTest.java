@@ -1,7 +1,7 @@
 package edu.ntnu.iir.bidata.model;
 
 import edu.ntnu.iir.bidata.model.exception.GameException;
-import edu.ntnu.iir.bidata.ui.GameUI;
+import edu.ntnu.iir.bidata.view.GameUI;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -21,7 +21,7 @@ class BoardGameTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        boardGame = new BoardGame(2, 2, 10, mockUI);
+        boardGame = new BoardGame(2, 10);
         player1 = new Player("Player 1");
         player2 = new Player("Player 2");
     }
@@ -58,9 +58,10 @@ class BoardGameTest {
     void testPlayCurrentPlayer() {
         boardGame.addPlayer(player1);
         boardGame.initialiseGame();
-        boardGame.playCurrentPlayer();
-        verify(mockUI, atLeastOnce()).displayTurnStart(any(), anyInt());
-        verify(mockUI, atLeastOnce()).displayDiceRoll(anyInt());
+        int steps = boardGame.rollDice();
+        boardGame.movePlayer(player1, steps);
+        verify(mockUI, atLeastOnce()).displayPlayerTurn(player1);
+        verify(mockUI, atLeastOnce()).displayDiceRoll(player1, steps);
     }
     
     @Test
@@ -83,7 +84,8 @@ class BoardGameTest {
         player1.setCurrentTile(boardGame.getBoard().getTiles().get(8));
         boardGame.getPlayers().put(player1, 8);
         
-        boardGame.playCurrentPlayer();
+        int steps = boardGame.rollDice();
+        boardGame.movePlayer(player1, steps);
         assertFalse(boardGame.isPlaying());
         verify(mockUI).displayWinner(player1);
     }
