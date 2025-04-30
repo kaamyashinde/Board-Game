@@ -3,6 +3,7 @@ package edu.ntnu.iir.bidata.controller;
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.view.GameUI;
+import edu.ntnu.iir.bidata.view.JavaFXGameUI;
 
 /**
  * Controls the flow of the game and coordinates between the model and view.
@@ -10,46 +11,43 @@ import edu.ntnu.iir.bidata.view.GameUI;
 public class GameController {
     private final BoardGame boardGame;
     private final GameUI gameUI;
+    private boolean gameStarted = false;
 
     public GameController(BoardGame boardGame, GameUI gameUI) {
         this.boardGame = boardGame;
         this.gameUI = gameUI;
-    }
-
-    public void startGame() {
-        // Display welcome message
-        gameUI.displayWelcomeMessage();
         
-        // Initialize players
-        initializePlayers();
-        
-        // Start the game
-        boardGame.initialiseGame();
-        
-        // Play the game
-        playGame();
-    }
-
-    private void initializePlayers() {
-        // Get number of players
-        int numPlayers = gameUI.getNumberOfPlayers();
-        
-        // Create and add players
-        for (int i = 0; i < numPlayers; i++) {
-            String playerName = gameUI.getPlayerName(i + 1);
-            Player player = new Player(playerName);
-            boardGame.addPlayer(player);
+        // Set up the next turn action if using JavaFX UI
+        if (gameUI instanceof JavaFXGameUI) {
+            ((JavaFXGameUI) gameUI).setNextTurnAction(this::handleNextTurn);
         }
     }
 
-    private void playGame() {
-        while (!boardGame.isGameOver()) {
-            // Get current player
-            Player currentPlayer = boardGame.getCurrentPlayer();
+    public void startGame() {
+        if (!gameStarted) {
+            // Display welcome message
+            gameUI.displayWelcomeMessage();
             
-            // Display current player's turn
+            // Display initial board state
+            gameUI.displayBoard();
+            
+            // Start the first turn
+            startNextTurn();
+            
+            gameStarted = true;
+        }
+    }
+
+    private void startNextTurn() {
+        if (!boardGame.isGameOver()) {
+            Player currentPlayer = boardGame.getCurrentPlayer();
             gameUI.displayPlayerTurn(currentPlayer);
-            gameUI.displaySeparator();
+        }
+    }
+
+    private void handleNextTurn() {
+        if (!boardGame.isGameOver()) {
+            Player currentPlayer = boardGame.getCurrentPlayer();
             
             // Roll dice
             int diceRoll = boardGame.rollDice();
@@ -60,16 +58,15 @@ public class GameController {
             
             // Display board state
             gameUI.displayBoard();
-            gameUI.displaySeparator();
             
             // Check if game is over
             if (hasWon) {
                 gameUI.displayWinner(currentPlayer);
-                break;
+            } else {
+                // Move to next player
+                boardGame.nextPlayer();
+                startNextTurn();
             }
-            
-            // Move to next player
-            boardGame.nextPlayer();
         }
     }
 } 

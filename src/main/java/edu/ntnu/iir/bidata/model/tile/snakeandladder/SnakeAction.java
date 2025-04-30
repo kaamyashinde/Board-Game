@@ -1,6 +1,7 @@
 package edu.ntnu.iir.bidata.model.tile.snakeandladder;
 
 import edu.ntnu.iir.bidata.model.Player;
+import edu.ntnu.iir.bidata.model.tile.Tile;
 import edu.ntnu.iir.bidata.model.tile.TileAction;
 
 /**
@@ -23,7 +24,19 @@ public class SnakeAction implements TileAction {
 
     @Override
     public void performAction(Player player) {
-        System.out.println(player.getName() + " encountered a snake! Sliding down to tile " + tailTileId + "!");
+        // Find the target tile
+        Tile currentTile = player.getCurrentTile();
+        Tile targetTile = currentTile;
+        
+        // Move backward until we reach the target tile
+        while (targetTile != null && targetTile.getId() > tailTileId) {
+            targetTile = targetTile.getPreviousTile();
+        }
+        
+        if (targetTile != null && targetTile.getId() == tailTileId) {
+            player.placeOnTile(targetTile);
+            System.out.println(player.getName() + " encountered a snake! Slid down to tile " + tailTileId + "!");
+        }
     }
 
     @Override
