@@ -1,39 +1,44 @@
 package edu.ntnu.iir.bidata.model.board;
 
 import edu.ntnu.iir.bidata.model.tile.Tile;
+import edu.ntnu.iir.bidata.model.tile.TileAction;
 import edu.ntnu.iir.bidata.utils.ParameterValidation;
 import lombok.Getter;
 
 import java.util.HashMap;
 
+
 /**
  * This class contains the actual board where a game can be played.
  *
  * @author kaamyashinde
- * @version 0.0.1
+ * @version 0.0.2
  */
 @Getter
 public class Board {
   private final HashMap<Integer, Tile> tiles;
 
   /**
-   * The constructor where the board is initialised, where all the tiles have no actions.
-   *
-   * @param numberOfTiles The number of tiles the board would contain.
+   * Constructor for the Board class.
+   * @param sizeOfBoard the size of the board
    */
-  public Board(int numberOfTiles) {
-    ParameterValidation.validateNonZeroPositiveInteger(numberOfTiles, "number of tiles to create");
-    tiles = new HashMap<>();
-    for (int i = 0; i < numberOfTiles; i++) {
-      tiles.put(i, new Tile(i, null));
-    }
-
-    // Link the tiles: set each tile's nextTile except for the final tile.
-    for (int i = 0; i < numberOfTiles - 1; i++) {
-      tiles.get(i).setNextTile(tiles.get(i + 1));
-    }
+  public Board(int sizeOfBoard){
+    ParameterValidation.validateNonZeroPositiveInteger(sizeOfBoard, "size of board");
+    this.tiles = new HashMap<>(sizeOfBoard);
   }
 
+  /**
+   * The method that allows the addition of a tile to the board.
+   */
+
+public boolean addTile(int id, TileAction action){
+  ParameterValidation.validateTileId(id);
+  if(tiles.containsKey(id)){
+    return false;
+  }
+  tiles.put(id, new Tile(id, action));
+  return true;
+}
 
   /**
    * Access a specific position on the board.
@@ -41,6 +46,31 @@ public class Board {
    * @param id the id to be used to access a specific spot on the board.
    */
   public Tile getPositionOnBoard(int id){
+    return tiles.get(id);
+  }
+
+  /**
+   * Returns the size of the board.
+   * @return the size of the board
+   */
+  public int getSizeOfBoard(){
+    return tiles.size();
+  }
+
+  /**
+   * Returns the tiles of the board.
+   * @return the tiles of the board
+   */
+  public HashMap<Integer, Tile> getTiles(){
+    return tiles;
+  }
+
+  /**
+   * Returns the tile at a specific position on the board.
+   * @param id the id of the tile
+   * @return the tile at the specific position
+   */
+  public Tile getTile(int id){
     return tiles.get(id);
   }
 }
