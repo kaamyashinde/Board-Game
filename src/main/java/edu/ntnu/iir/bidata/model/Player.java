@@ -6,7 +6,7 @@ import lombok.Setter;
 /**
  * Class that handles the movements of a specific player.
  * @author kaamyashinde
- * @version 0.0.1
+ * @version 0.0.2
  */
 @Getter
 @Setter
