@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 /**
  * Class that handles the movements of a specific player.
- * @author kamyashinde
+ * @author kaamyashinde
  * @version 0.0.1
  */
 @Getter
@@ -23,22 +23,4 @@ public class Player {
   public Player(String inputName) {
     setName(inputName);
   }
-
-  /**
-   * Placing the player on a particular tile.
-   * @param tile the tile to place the player on.
-   */
-  public void placeOnTile(Tile tile){
-    this.currentTile = tile;
-  }
-
-  /*
-   * Move the player a given number of steps.
-   * @param steps The steps to move the player to.
-   */
- /* public int moveSteps(int steps){
-    int newTileSpot = currentTile.getId() + steps;
-    placeOnTile(currentTile.getNextTile());
-    return currentTile.getId();
-  }*/
 }
