@@ -5,13 +5,14 @@ import edu.ntnu.iir.bidata.utils.ParameterValidation;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Objects;
 
 /**
  * Represents a tile on the game board.
  *
  * @author Durva and Kaamya
- * @version 1.0.0
+ * @version 1.0.1
  */
 @Getter
 @Setter
@@ -19,7 +20,7 @@ public class Tile {
     private final int id;
     private final TileAction action;
     private Tile nextTile;
-    private Tile previousTile;
+    private Player currentPlayer;
 
     /**
      * Constructor that creates an instance of the tile with the desired id and tileAction.
@@ -32,6 +33,7 @@ public class Tile {
         ParameterValidation.validateTileId(id);
         this.id = id;
         this.action = action;
+        this.currentPlayer = null;
     }
 
     /**
@@ -45,29 +47,15 @@ public class Tile {
     }
 
     /**
-     * Sets the next tile in the sequence and updates the previous tile reference.
+     * Sets the next tile in the sequence.
      *
      * @param nextTile The next tile to set
      */
     public void setNextTile(Tile nextTile) {
         this.nextTile = nextTile;
-        if (nextTile != null) {
-            nextTile.previousTile = this;
-        }
     }
 
-    /**
-     * Executes the action associated with this tile.
-     *
-     * @param player The player who landed on this tile
-     * @throws IllegalArgumentException if player is null
-     */
-    public void performAction(Player player) {
-        ParameterValidation.validatePlayer(player);
-        if (action != null) {
-            action.performAction(player);
-        }
-    }
+   
 
     /**
      * Places the player on this tile and performs any associated actions.
@@ -77,19 +65,28 @@ public class Tile {
      */
     public void landPlayer(Player player) {
         ParameterValidation.validatePlayer(player);
-        player.placeOnTile(this);
-        performAction(player);
+        this.currentPlayer = player;
+        performCurrentPlayerAction();
     }
 
-    /**
-     * Removes the player from this tile.
+     /**
+     * Executes the action associated with this tile.
      *
-     * @param player The player to remove from this tile
+     * @param player The player who landed on this tile
      * @throws IllegalArgumentException if player is null
      */
-    public void leavePlayer(Player player) {
-        ParameterValidation.validatePlayer(player);
-        // Additional cleanup logic can be added here if needed
+    private void performCurrentPlayerAction() {
+        if (action != null) {
+            action.performAction(currentPlayer);
+        }
+    }
+    /**
+     * Removes the player from this tile.
+     */
+    public void leavePlayer() {
+        if (currentPlayer != null) {
+            currentPlayer = null;
+        }
     }
 
     /**
@@ -102,16 +99,7 @@ public class Tile {
     }
 
     /**
-     * Checks if this tile is the first tile in the sequence.
-     *
-     * @return true if this is the first tile, false otherwise
-     */
-    public boolean isFirstTile() {
-        return previousTile == null;
-    }
-
-    /**
-     * Gets the distance to another tile.
+     * Gets the distance to another tile. Uses a HashSet to detect cycles.
      *
      * @param targetTile The tile to calculate distance to
      * @return The number of tiles between this tile and the target tile, or -1 if not reachable
@@ -119,21 +107,33 @@ public class Tile {
      */
     public int getDistanceTo(Tile targetTile) {
         ParameterValidation.validateTile(targetTile);
-        if (this == targetTile) {
+        if (this.equals(targetTile)) {
             return 0;
         }
 
         int distance = 0;
         Tile current = this;
+        HashSet<Tile> visited = new HashSet<>();
         while (current.nextTile != null) {
             distance++;
             current = current.nextTile;
-            if (current == targetTile) {
+            if (current.equals(targetTile)) {
                 return distance;
             }
+            if (visited.contains(current)) {
+                return -1;
+            }
+            visited.add(current);
         }
         return -1;
     }
+
+    /**
+     * Checks if this tile is equal to another object.
+     *
+     * @param o The object to compare to
+     * @return true if the objects are equal, false otherwise
+     */
 
     @Override
     public boolean equals(Object o) {
@@ -143,6 +143,11 @@ public class Tile {
         return id == tile.id;
     }
 
+    /**
+     * Returns the hash code for this tile.
+     *
+     * @return the hash code for this tile
+     */
     @Override
     public int hashCode() {
         return Objects.hash(id);

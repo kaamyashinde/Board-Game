@@ -74,7 +74,9 @@ public class ParameterValidation {
      * @throws IllegalArgumentException if player is null
      */
     public static void validatePlayer(Player player) {
-        Objects.requireNonNull(player, "Player cannot be null");
+        if (player == null) {
+            throw new IllegalArgumentException("Player cannot be null");
+        }
     }
 
     /**
@@ -84,7 +86,9 @@ public class ParameterValidation {
      * @throws IllegalArgumentException if tile is null
      */
     public static void validateTile(Tile tile) {
-        Objects.requireNonNull(tile, "Tile cannot be null");
+        if (tile == null) {
+            throw new IllegalArgumentException("Tile cannot be null");
+        }
     }
 
     /**
