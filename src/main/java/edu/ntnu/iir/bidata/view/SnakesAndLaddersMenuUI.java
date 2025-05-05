@@ -16,19 +16,21 @@ import lombok.Getter;
 public class SnakesAndLaddersMenuUI {
     private final Stage primaryStage;
     private final Runnable onStartGame;
-  /**
-   * -- GETTER --
-   *  Get the list of selected players
-   *
-   * @return List of player names
-   */
-  @Getter
-  private List<String> selectedPlayers = new ArrayList<>();
+    private final BoardManagementUI boardManagementUI;
+    /**
+     * -- GETTER --
+     *  Get the list of selected players
+     *
+     * @return List of player names
+     */
+    @Getter
+    private List<String> selectedPlayers = new ArrayList<>();
     private Label playerCountLabel;
 
     public SnakesAndLaddersMenuUI(Stage primaryStage, Runnable onStartGame) {
         this.primaryStage = primaryStage;
         this.onStartGame = onStartGame;
+        this.boardManagementUI = new BoardManagementUI(primaryStage);
         setupMenu();
     }
 
@@ -62,6 +64,11 @@ public class SnakesAndLaddersMenuUI {
         boardButtons.setAlignment(Pos.CENTER);
         Button newBoardBtn = createMenuButton("NEW BOARD");
         Button loadBoardBtn = createMenuButton("LOAD BOARD");
+
+        // Add board button actions
+        newBoardBtn.setOnAction(e -> boardManagementUI.showAddBoardDialog());
+        loadBoardBtn.setOnAction(e -> boardManagementUI.showLoadBoardDialog());
+
         boardButtons.getChildren().addAll(newBoardBtn, loadBoardBtn);
         centerBox.getChildren().add(boardButtons);
 
@@ -150,5 +157,4 @@ public class SnakesAndLaddersMenuUI {
             "-fx-padding: 10;");
         return button;
     }
-
 }
