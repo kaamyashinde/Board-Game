@@ -34,24 +34,22 @@ public class SnakesAndLaddersGameUI {
 
   // Define snakes and ladders based on your image
   private final int[][] snakes = {
-      {99, 78},  // From 99 to 78
-      {89, 53},  // From 89 to 53
-      {76, 58},  // From 76 to 58
-      {66, 45},  // From 66 to 45
-      {54, 31},  // From 54 to 31
-      {43, 17},  // From 43 to 17
-      {36, 6},   // From 36 to 6
-      {26, 9}    // From 26 to 9
+      {99, 41},  // From 99 to 41
+      {95, 75},  // From 95 to 75
+      {89, 86},  // From 89 to 86
+      {78, 15},  // From 78 to 15
+      {38, 2},  // From 38 to 2
+      {29, 11},  // From 29 to 11
   };
 
   private final int[][] ladders = {
-      {4, 25},   // From 4 to 25
-      {13, 46},  // From 13 to 46
-      {33, 49},  // From 33 to 49
-      {42, 63},  // From 42 to 63
-      {50, 69},  // From 50 to 69
-      {62, 81},  // From 62 to 81
-      {74, 92}   // From 74 to 92
+      {3, 36},   // From 3 to 36
+      {8, 12},  // From 8 to 12
+      {14, 26},  // From 14 to 26
+      {31, 73},  // From 31 to 73
+      {59, 80},  // From 59 to 80
+      {83, 97},  // From 83 to 97
+      {90, 92}   // From 90 to 92
   };
 
   // Player colors
@@ -179,6 +177,19 @@ public class SnakesAndLaddersGameUI {
     Label positionLabel = playerPositionLabels.get(playerNumber - 1);
 
     // Get current position
+    int newPosition = getNewPosition(diceRoll, positionLabel);
+
+    // Update position label
+    positionLabel.setText("at position: " + newPosition);
+
+    // Move the token to the new position
+    movePlayerToken(playerNumber, newPosition);
+
+    // Check for snakes and ladders
+    checkSnakesAndLadders(playerNumber, newPosition);
+  }
+
+  private static int getNewPosition(int diceRoll, Label positionLabel) {
     String posText = positionLabel.getText();
     int currentPosition = 0;
 
@@ -198,15 +209,7 @@ public class SnakesAndLaddersGameUI {
     if (newPosition > 100) {
       newPosition = 100; // Cap at 100
     }
-
-    // Update position label
-    positionLabel.setText("at position: " + newPosition);
-
-    // Move the token to the new position
-    movePlayerToken(playerNumber, newPosition);
-
-    // Check for snakes and ladders
-    checkSnakesAndLadders(playerNumber, newPosition);
+    return newPosition;
   }
 
   /**
