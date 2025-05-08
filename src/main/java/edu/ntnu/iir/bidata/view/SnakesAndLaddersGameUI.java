@@ -118,7 +118,7 @@ public class SnakesAndLaddersGameUI implements GameUI {
 
     // --- Board (center) ---
     StackPane boardPane = new StackPane();
-    boardPane.setAlignment(Pos.CENTER);
+    boardPane.setAlignment(Pos.CENTER_LEFT);
 
     // Load custom board image
     Image boardImage = new Image(
@@ -126,14 +126,14 @@ public class SnakesAndLaddersGameUI implements GameUI {
     ImageView boardView = new ImageView(boardImage);
     boardView.setFitWidth(TILE_SIZE * BOARD_SIZE);
     boardView.setFitHeight(TILE_SIZE * BOARD_SIZE);
-    boardView.setPreserveRatio(true);
+    boardView.setPreserveRatio(false);
 
     // Add the board image to the pane
     boardPane.getChildren().add(boardView);
 
     // Create a pane for player tokens that will be positioned over the board
     playerLayer = new Pane();
-    playerLayer.setPrefSize(TILE_SIZE * BOARD_SIZE, TILE_SIZE * BOARD_SIZE);
+    playerLayer.setPrefSize(boardView.getFitWidth(), boardView.getFitHeight());
     boardPane.getChildren().add(playerLayer);
 
     root.setCenter(boardPane);
@@ -408,7 +408,8 @@ public class SnakesAndLaddersGameUI implements GameUI {
     }
 
     // Flip row because the board starts from the bottom
-    row = BOARD_SIZE - 1 - row;
+    // FIXED: Adjust the calculation to match the visual layout of the board image
+    row = BOARD_SIZE - row;
 
     // Calculate pixel coordinates (adding offset to center token in tile)
     int x = col * TILE_SIZE + TILE_SIZE / 2;
