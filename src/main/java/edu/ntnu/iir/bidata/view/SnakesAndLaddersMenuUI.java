@@ -11,11 +11,12 @@ import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import lombok.Getter;
 
 public class SnakesAndLaddersMenuUI {
     private final Stage primaryStage;
-    private final Runnable onStartGame;
+    private final Consumer<List<String>> onStartGame;
     private final BoardManagementUI boardManagementUI;
     /**
      * -- GETTER --
@@ -27,7 +28,13 @@ public class SnakesAndLaddersMenuUI {
     private List<String> selectedPlayers = new ArrayList<>();
     private Label playerCountLabel;
 
-    public SnakesAndLaddersMenuUI(Stage primaryStage, Runnable onStartGame) {
+    /**
+     * Creates a new Snakes and Ladders Menu UI
+     *
+     * @param primaryStage The primary stage
+     * @param onStartGame Consumer that accepts the list of selected players when starting the game
+     */
+    public SnakesAndLaddersMenuUI(Stage primaryStage, Consumer<List<String>> onStartGame) {
         this.primaryStage = primaryStage;
         this.onStartGame = onStartGame;
         this.boardManagementUI = new BoardManagementUI(primaryStage);
@@ -41,16 +48,13 @@ public class SnakesAndLaddersMenuUI {
         root.setPadding(new Insets(20));
         root.setStyle("-fx-background-color: #f5fff5;");
 
-        // --- Left: Green logo stack ---
         VBox logoStack = createLogoStack();
         root.setLeft(logoStack);
 
-        // --- Center: Main content ---
         VBox centerBox = new VBox(30);
         centerBox.setAlignment(Pos.TOP_CENTER);
         centerBox.setPadding(new Insets(40, 0, 0, 0));
 
-        // SNAKES & LADDERS label in rounded rectangle
         StackPane titlePane = new StackPane();
         titlePane.setPrefSize(400, 60);
         titlePane.setStyle("-fx-background-color: #bdebc8; -fx-background-radius: 20;");
@@ -59,13 +63,11 @@ public class SnakesAndLaddersMenuUI {
         titlePane.getChildren().add(titleLabel);
         centerBox.getChildren().add(titlePane);
 
-        // NEW BOARD and LOAD BOARD buttons side by side
         HBox boardButtons = new HBox(30);
         boardButtons.setAlignment(Pos.CENTER);
         Button newBoardBtn = createMenuButton("NEW BOARD");
         Button loadBoardBtn = createMenuButton("LOAD BOARD");
 
-        // Add board button actions
         newBoardBtn.setOnAction(e -> boardManagementUI.showAddBoardDialog());
         loadBoardBtn.setOnAction(e -> boardManagementUI.showLoadBoardDialog());
 
@@ -86,7 +88,7 @@ public class SnakesAndLaddersMenuUI {
         Button startGameBtn = createMenuButton("START");
         startGameBtn.setOnAction(e -> {
             if (selectedPlayers.size() >= 1) {
-                if (onStartGame != null) onStartGame.run();
+                if (onStartGame != null) onStartGame.accept(selectedPlayers);
             } else {
                 playerCountLabel.setText("Please select at least one player!");
                 playerCountLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: red;");
@@ -123,7 +125,6 @@ public class SnakesAndLaddersMenuUI {
         PlayerSelectionUI playerSelection = new PlayerSelectionUI(primaryStage);
         List<String> players = playerSelection.showAndWait();
 
-        // Update selected players
         if (players != null && !players.isEmpty()) {
             this.selectedPlayers = players;
             updatePlayerCountLabel();

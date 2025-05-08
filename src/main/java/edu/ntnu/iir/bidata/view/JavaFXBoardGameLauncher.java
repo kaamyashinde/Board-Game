@@ -3,6 +3,8 @@ package edu.ntnu.iir.bidata.view;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
+import java.util.List;
+
 /**
  * JavaFX application launcher for the Snakes and Ladders UI.
  * This class only handles UI navigation between different screens,
@@ -31,7 +33,8 @@ public class JavaFXBoardGameLauncher extends Application {
      * @param stage The primary stage to show the menu on
      */
     private void showSnakesAndLaddersMenu(Stage stage) {
-        new SnakesAndLaddersMenuUI(stage, () -> showGameBoard(stage));
+        SnakesAndLaddersMenuUI menuUI = new SnakesAndLaddersMenuUI(stage,
+            selectedPlayers -> showGameBoard(stage, selectedPlayers));
     }
 
     /**
@@ -40,10 +43,10 @@ public class JavaFXBoardGameLauncher extends Application {
      * the fully implemented game board interface.
      *
      * @param stage The primary stage to show the game on
+     * @param players The list of player names to use in the game
      */
-    private void showGameBoard(Stage stage) {
-        // Initialize and display the actual game board UI
-        new SnakesAndLaddersGameUI(stage);
+    private void showGameBoard(Stage stage, List<String> players) {
+        new SnakesAndLaddersGameUI(stage, players);
     }
 
     /**

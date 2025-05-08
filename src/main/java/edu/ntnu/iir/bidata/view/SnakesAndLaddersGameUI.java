@@ -35,9 +35,9 @@ public class SnakesAndLaddersGameUI implements GameUI {
   private Button rollDiceBtn;
   private Label statusLabel;
   private int currentPlayerIndex = 0;
-  private List<String> playerNames = new ArrayList<>();
+  private List<String> playerNames;
 
-  // Board configuration
+
   private final int TILE_SIZE = 50;
   private final int BOARD_SIZE = 10; // 10x10 board
 
@@ -61,11 +61,37 @@ public class SnakesAndLaddersGameUI implements GameUI {
       {90, 92}   // From 90 to 92
   };
 
-  // Player colors
   private final Color[] PLAYER_COLORS = {
       Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.PURPLE
   };
 
+  /**
+   * Constructor that receives the selected players from the menu
+   *
+   * @param primaryStage The primary stage
+   * @param playerNames List of player names selected in the menu
+   */
+  public SnakesAndLaddersGameUI(Stage primaryStage, List<String> playerNames) {
+    this.primaryStage = primaryStage;
+    this.playerNames = playerNames;
+
+    // If no players were passed, add a default player
+    if (this.playerNames == null || this.playerNames.isEmpty()) {
+      this.playerNames = new ArrayList<>();
+      this.playerNames.add("Player 1");
+    }
+
+    setupGamePage();
+    initializePlayerPositions();
+    updateCurrentPlayerIndicator();
+  }
+
+  /**
+   * Legacy constructor that creates its own player selection UI
+   * This is kept for backward compatibility
+   *
+   * @param primaryStage The primary stage
+   */
   public SnakesAndLaddersGameUI(Stage primaryStage) {
     this.primaryStage = primaryStage;
 
@@ -142,11 +168,9 @@ public class SnakesAndLaddersGameUI implements GameUI {
       Label posLabel = new Label("at position: 0");
       playerPositionLabels.put(playerName, posLabel);
 
-      // Create player token
       Circle token = createPlayerToken(i + 1, playerName);
       playerTokenMap.put(playerName, token);
 
-      // Add a circle indicator in the player panel
       HBox nameBox = new HBox(10);
       nameBox.setAlignment(Pos.CENTER_LEFT);
       Circle colorIndicator = new Circle(8);
@@ -172,11 +196,8 @@ public class SnakesAndLaddersGameUI implements GameUI {
     rollDiceBtn = new Button("ROLL DICE");
     rollDiceBtn.setStyle("-fx-background-color: #bdebc8; -fx-font-size: 18px; -fx-background-radius: 15;");
 
-    // Use DiceView
     diceView = new DiceView();
     diceBox.getChildren().addAll(rollDiceBtn, diceView);
-
-    // Add dice roll functionality
     rollDiceBtn.setOnAction(e -> rollDiceAndMove());
 
     topBox.getChildren().add(diceBox);
@@ -202,20 +223,15 @@ public class SnakesAndLaddersGameUI implements GameUI {
    * Roll the dice and move the current player
    */
   private void rollDiceAndMove() {
-    // Disable roll button during animation
     rollDiceBtn.setDisable(true);
 
-    // Get current player
     String currentPlayer = playerNames.get(currentPlayerIndex);
 
-    // Roll the dice
     int roll = 1 + (int)(Math.random() * 6); // Random 1-6
     diceView.setValue(roll);
 
-    // Update status
     statusLabel.setText(currentPlayer + " rolled a " + roll + "!");
 
-    // Move player after short delay
     PauseTransition pause = new PauseTransition(Duration.millis(800));
     pause.setOnFinished(event -> {
       updatePlayerPosition(currentPlayer, roll);
@@ -289,10 +305,8 @@ public class SnakesAndLaddersGameUI implements GameUI {
     Label positionLabel = playerPositionLabels.get(playerName);
     positionLabel.setText("at position: " + newPosition);
 
-    // Move the token to the new position
     movePlayerToken(playerName, newPosition);
 
-    // Check for snakes and ladders
     checkSnakesAndLadders(playerName, newPosition);
   }
 
@@ -362,14 +376,11 @@ public class SnakesAndLaddersGameUI implements GameUI {
       PauseTransition pause = new PauseTransition(Duration.millis(1000));
       int finalNewPosition = newPosition;
       pause.setOnFinished(e -> {
-        // Update position map
         playerPositions.put(playerName, finalNewPosition);
 
-        // Update position label
         Label positionLabel = playerPositionLabels.get(playerName);
         positionLabel.setText("at position: " + finalNewPosition);
 
-        // Move the token to the new position
         movePlayerToken(playerName, finalNewPosition);
       });
       pause.play();
@@ -471,7 +482,6 @@ public class SnakesAndLaddersGameUI implements GameUI {
 
   @Override
   public void displaySeparator() {
-    // Not needed for this UI implementation
   }
 
   @Override
