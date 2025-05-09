@@ -1,7 +1,5 @@
 package edu.ntnu.iir.bidata.view;
 
-import edu.ntnu.iir.bidata.model.BoardGame;
-import edu.ntnu.iir.bidata.model.Player;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -9,29 +7,33 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * MainMenuUI class for the main menu of the game.
+ * Pure frontend implementation without backend logic.
+ */
 public class MainMenuUI {
   private final Stage primaryStage;
-  private final List<Player> players = new ArrayList<>();
-  private final List<String> savedBoards = new ArrayList<>();
-  private final int MAX_PLAYERS = 5;
-  private final int MIN_PLAYERS = 1;
-  private final Runnable onSnakesAndLadders;
+  private final Runnable onSnakesAndLaddersSelected;
+  private final Runnable onLudoSelected;
 
-  public MainMenuUI(Stage primaryStage, Runnable onSnakesAndLadders) {
+  /**
+   * Creates a new Main Menu UI
+   *
+   * @param primaryStage The primary stage
+   * @param onSnakesAndLaddersSelected Callback for when Snakes and Ladders is selected
+   * @param onLudoSelected Callback for when Ludo is selected
+   */
+  public MainMenuUI(Stage primaryStage, Runnable onSnakesAndLaddersSelected, Runnable onLudoSelected) {
     this.primaryStage = primaryStage;
-    this.onSnakesAndLadders = onSnakesAndLadders;
-    this.savedBoards.add("Default Board");
+    this.onSnakesAndLaddersSelected = onSnakesAndLaddersSelected;
+    this.onLudoSelected = onLudoSelected;
     setupMainMenu();
   }
 
   private void setupMainMenu() {
-    primaryStage.setTitle("Main Menu");
+    primaryStage.setTitle("Game Selection");
 
     BorderPane root = new BorderPane();
     root.setPadding(new Insets(20));
@@ -61,62 +63,29 @@ public class MainMenuUI {
     welcomeLabel.setStyle("-fx-font-size: 30px; -fx-font-family: serif; -fx-font-weight: bold;");
     welcomePane.getChildren().add(welcomeLabel);
 
-    // two placeholders
+    // Game selection boxes
     HBox menuRow = new HBox(40);
     menuRow.setAlignment(Pos.CENTER);
 
-    // left: board grid placeholder - MAKE THIS THE CLICKABLE ELEMENT
-    StackPane boardPane = new StackPane();
-    boardPane.setPrefSize(220, 200);
-    boardPane.setStyle(
-        "-fx-background-color: #c2c2fa; " +
-            "-fx-background-radius: 18; " +
-            "-fx-border-color: #2e8b57; -fx-border-width: 3; -fx-border-radius: 18;"
-    );
-    GridPane boardGrid = new GridPane();
-    int size = 6;
-    for (int i = 0; i < size; i++) {
-      for (int j = 0; j < size; j++) {
-        Region sq = new Region();
-        sq.setPrefSize(20, 20);
-        sq.setStyle("-fx-background-color: " + (((i + j) % 2 == 0) ? "#e0ffe0" : "#7ed957") + ";");
-        boardGrid.add(sq, j, i);
-      }
-    }
-
-    // Add a label to the board grid making it clear this is for Snakes & Ladders
-    Label snakesAndLaddersLabel = new Label("Snakes & Ladders");
-    snakesAndLaddersLabel.setStyle(
-        "-fx-font-size: 18px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-text-fill: white; " +
-            "-fx-background-color: rgba(0, 100, 0, 0.7); " +
-            "-fx-padding: 5 10; " +
-            "-fx-background-radius: 10;"
+    // Snakes & Ladders game box
+    StackPane snakesAndLaddersPane = createGamePane(
+        "#c2c2fa",
+        "#2e8b57",
+        "Snakes & Ladders",
+        createSnakesAndLaddersGrid(),
+        onSnakesAndLaddersSelected
     );
 
-    // Stack the grid and the label
-    StackPane boardContent = new StackPane(boardGrid, snakesAndLaddersLabel);
-    boardPane.getChildren().add(boardContent);
-
-    // Make the board pane clickable
-    boardPane.setOnMouseClicked(e -> {
-      if (onSnakesAndLadders != null) {
-        onSnakesAndLadders.run();
-      }
-    });
-    boardPane.setCursor(Cursor.HAND);
-
-    // right: empty placeholder
-    StackPane emptyPane = new StackPane();
-    emptyPane.setPrefSize(220, 200);
-    emptyPane.setStyle(
-        "-fx-background-color: #c2c2fa; " +
-            "-fx-background-radius: 18; " +
-            "-fx-border-color: #e69a28; -fx-border-width: 3; -fx-border-radius: 18;"
+    // Ludo game box
+    StackPane ludoPane = createGamePane(
+        "#c2c2fa",
+        "#e69a28",
+        "Ludo",
+        createLudoGrid(),
+        onLudoSelected
     );
 
-    menuRow.getChildren().addAll(boardPane, emptyPane);
+    menuRow.getChildren().addAll(snakesAndLaddersPane, ludoPane);
     centerBox.getChildren().addAll(welcomePane, menuRow);
     root.setCenter(centerBox);
 
@@ -135,6 +104,100 @@ public class MainMenuUI {
     Scene scene = new Scene(root, 900, 700);
     primaryStage.setScene(scene);
     primaryStage.show();
+  }
+
+  /**
+   * Creates a game selection pane with a grid and label
+   */
+  private StackPane createGamePane(String bgColor, String borderColor, String gameName, Region gameGrid, Runnable onClick) {
+    StackPane gamePane = new StackPane();
+    gamePane.setPrefSize(220, 200);
+    gamePane.setStyle(
+        "-fx-background-color: " + bgColor + "; " +
+            "-fx-background-radius: 18; " +
+            "-fx-border-color: " + borderColor + "; " +
+            "-fx-border-width: 3; " +
+            "-fx-border-radius: 18;"
+    );
+
+    Label gameLabel = new Label(gameName);
+    gameLabel.setStyle(
+        "-fx-font-size: 18px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-text-fill: white; " +
+            "-fx-background-color: rgba(0, 100, 0, 0.7); " +
+            "-fx-padding: 5 10; " +
+            "-fx-background-radius: 10;"
+    );
+
+    StackPane gameContent = new StackPane(gameGrid, gameLabel);
+    gamePane.getChildren().add(gameContent);
+
+    // Make the box clickable
+    if (onClick != null) {
+      gamePane.setOnMouseClicked(e -> onClick.run());
+      gamePane.setCursor(Cursor.HAND);
+    }
+
+    return gamePane;
+  }
+
+  /**
+   * Creates a Snakes & Ladders grid for visualization
+   */
+  private GridPane createSnakesAndLaddersGrid() {
+    GridPane boardGrid = new GridPane();
+    int size = 6;
+    for (int i = 0; i < size; i++) {
+      for (int j = 0; j < size; j++) {
+        Region sq = new Region();
+        sq.setPrefSize(20, 20);
+        sq.setStyle("-fx-background-color: " + (((i + j) % 2 == 0) ? "#e0ffe0" : "#7ed957") + ";");
+        boardGrid.add(sq, j, i);
+      }
+    }
+    return boardGrid;
+  }
+
+  /**
+   * Creates a Ludo grid for visualization
+   */
+  private GridPane createLudoGrid() {
+    GridPane ludoGrid = new GridPane();
+
+    // Create a simplified Ludo board representation
+    Color[] playerColors = {
+        Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW
+    };
+
+    int size = 5;
+    for (int i = 0; i < size; i++) {
+      for (int j = 0; j < size; j++) {
+        Region sq = new Region();
+        sq.setPrefSize(20, 20);
+
+        // Corner regions are player bases
+        if ((i == 0 && j == 0) || (i == 0 && j == size-1) ||
+            (i == size-1 && j == 0) || (i == size-1 && j == size-1)) {
+          int colorIndex = 0;
+          if (i == 0 && j == 0) colorIndex = 0;
+          else if (i == 0 && j == size-1) colorIndex = 1;
+          else if (i == size-1 && j == 0) colorIndex = 2;
+          else colorIndex = 3;
+
+          sq.setStyle("-fx-background-color: " + toHexString(playerColors[colorIndex]) + ";");
+        } else if (i == size/2 && j == size/2) {
+          // Center square
+          sq.setStyle("-fx-background-color: white;");
+        } else {
+          // Path squares
+          sq.setStyle("-fx-background-color: " + (((i + j) % 2 == 0) ? "#fff0f0" : "#f0f0ff") + ";");
+        }
+        ludoGrid.add(sq, j, i);
+      }
+    }
+
+    return ludoGrid;
   }
 
   /**
@@ -193,235 +256,14 @@ public class MainMenuUI {
     return pane;
   }
 
+  /**
+   * Converts a JavaFX Color to a hex string
+   */
   private String toHexString(Color c) {
     return String.format("#%02X%02X%02X",
         (int)(c.getRed() * 255),
         (int)(c.getGreen() * 255),
         (int)(c.getBlue() * 255)
     );
-  }
-
-  // --- Remaining dialogs and helpers ---
-
-  private Button createMenuButton(String text) {
-    Button button = new Button(text);
-    button.setPrefWidth(200);
-    button.setPrefHeight(50);
-    button.setStyle(
-        "-fx-background-color: #BDEBC8; " +
-            "-fx-text-fill: black; " +
-            "-fx-font-size: 16px; " +
-            "-fx-background-radius: 25; " +
-            "-fx-padding: 10;"
-    );
-    return button;
-  }
-
-  private void showNewBoardDialog() {
-    Stage dialog = createDialog("Add New Board");
-
-    VBox content = new VBox(20);
-    content.setPadding(new Insets(20));
-    content.setAlignment(Pos.CENTER);
-
-    Label nameLabel = new Label("NAME:");
-    nameLabel.setStyle("-fx-font-weight: bold;");
-
-    TextField nameField = new TextField();
-    nameField.setPrefWidth(200);
-
-    Button addButton = new Button("Add New Board");
-    addButton.setStyle("-fx-background-color: #BDEBC8; -fx-background-radius: 15;");
-    addButton.setPrefWidth(150);
-    addButton.setOnAction(e -> {
-      if (!nameField.getText().trim().isEmpty()) {
-        savedBoards.add(nameField.getText().trim());
-        dialog.close();
-      } else {
-        showAlert("Invalid Name", "Board name cannot be empty.");
-      }
-    });
-
-    HBox nameBox = new HBox(10);
-    nameBox.setAlignment(Pos.CENTER_LEFT);
-    Region indicator = new Region();
-    indicator.setPrefSize(20, 80);
-    indicator.setStyle("-fx-background-color: #006400; -fx-background-radius: 5;");
-    VBox fieldContainer = new VBox(5, nameLabel, nameField);
-    nameBox.getChildren().addAll(indicator, fieldContainer);
-
-    content.getChildren().addAll(addButton, nameBox);
-
-    dialog.setScene(new Scene(content, 300, 200));
-    dialog.show();
-  }
-
-  private void showLoadBoardDialog() {
-    Stage dialog = createDialog("Load Board");
-
-    VBox content = new VBox(20);
-    content.setPadding(new Insets(20));
-    content.setAlignment(Pos.CENTER);
-
-    Button loadBtn = new Button("load board");
-    loadBtn.setStyle("-fx-background-color: #BDEBC8; -fx-background-radius: 15;");
-    loadBtn.setPrefWidth(150);
-
-    // list of saved boards
-    VBox boardList = new VBox(5);
-    boardList.setAlignment(Pos.CENTER_LEFT);
-    for (String boardName : savedBoards) {
-      HBox boardEntry = new HBox(10);
-      boardEntry.setAlignment(Pos.CENTER_LEFT);
-      Region ind = new Region();
-      ind.setPrefSize(20, 20);
-      ind.setStyle("-fx-background-color: #006400; -fx-background-radius: 5;");
-      Label name = new Label(boardName);
-      name.setStyle("-fx-font-weight: bold;");
-      boardEntry.getChildren().addAll(ind, name);
-      boardList.getChildren().add(boardEntry);
-    }
-
-    Button addBtn = new Button("ADD");
-    addBtn.setStyle("-fx-background-color: #BDEBC8; -fx-background-radius: 15;");
-    addBtn.setPrefWidth(80);
-    addBtn.setOnAction(e -> showNewBoardDialog());
-
-    Button removeBtn = new Button("REMOVE");
-    removeBtn.setStyle("-fx-background-color: #BDEBC8; -fx-background-radius: 15;");
-    removeBtn.setPrefWidth(80);
-    removeBtn.setOnAction(e -> {
-      if (!savedBoards.isEmpty()) {
-        savedBoards.remove(savedBoards.size() - 1);
-      }
-      dialog.close();
-    });
-
-    HBox buttonBar = new HBox(20, addBtn, removeBtn);
-    buttonBar.setAlignment(Pos.CENTER);
-
-    content.getChildren().addAll(loadBtn, boardList, buttonBar);
-    dialog.setScene(new Scene(content, 400, 300));
-    dialog.show();
-  }
-
-  private void showChoosePlayersDialog() {
-    Stage dialog = createDialog("Choose Players");
-
-    VBox content = new VBox(20);
-    content.setPadding(new Insets(20));
-    content.setAlignment(Pos.CENTER);
-
-    ListView<String> playerListView = new ListView<>();
-    for (Player p : players) playerListView.getItems().add(p.getName());
-
-    Button addPlayerBtn = new Button("Add Player");
-    addPlayerBtn.setStyle("-fx-background-color: #BDEBC8; -fx-background-radius: 15;");
-    addPlayerBtn.setOnAction(e -> {
-      if (players.size() < MAX_PLAYERS) {
-        Stage addDialog = showAddPlayerDialog();
-        addDialog.setOnHidden(ev -> {
-          playerListView.getItems().setAll();
-          for (Player pl : players) playerListView.getItems().add(pl.getName());
-        });
-      } else {
-        showAlert("Maximum Players", "You have reached the maximum of " + MAX_PLAYERS);
-      }
-    });
-
-    Button removePlayerBtn = new Button("Remove Player");
-    removePlayerBtn.setStyle("-fx-background-color: #BDEBC8; -fx-background-radius: 15;");
-    removePlayerBtn.setOnAction(e -> {
-      int idx = playerListView.getSelectionModel().getSelectedIndex();
-      if (idx >= 0) {
-        if (players.size() > MIN_PLAYERS) {
-          players.remove(idx);
-          playerListView.getItems().remove(idx);
-        } else {
-          showAlert("Minimum Players", "At least " + MIN_PLAYERS + " required");
-        }
-      } else {
-        showAlert("No Selection", "Select a player first");
-      }
-    });
-
-    Button doneBtn = new Button("Done");
-    doneBtn.setStyle("-fx-background-color: #BDEBC8; -fx-background-radius: 15;");
-    doneBtn.setOnAction(e -> dialog.close());
-
-    HBox buttonBar = new HBox(20, addPlayerBtn, removePlayerBtn, doneBtn);
-    buttonBar.setAlignment(Pos.CENTER);
-
-    content.getChildren().addAll(new Label("Players:"), playerListView, buttonBar);
-    dialog.setScene(new Scene(content, 400, 300));
-    dialog.show();
-  }
-
-  private Stage showAddPlayerDialog() {
-    Stage dialog = createDialog("Add New Player");
-
-    VBox content = new VBox(20);
-    content.setPadding(new Insets(20));
-    content.setAlignment(Pos.CENTER);
-
-    Label nameLabel = new Label("NAME:");
-    nameLabel.setStyle("-fx-font-weight: bold;");
-    TextField nameField = new TextField();
-    nameField.setPrefWidth(200);
-
-    Button addBtn = new Button("Add New Player");
-    addBtn.setStyle("-fx-background-color: #BDEBC8; -fx-background-radius: 15;");
-    addBtn.setPrefWidth(150);
-    addBtn.setOnAction(e -> {
-      if (!nameField.getText().trim().isEmpty()) {
-        players.add(new Player(nameField.getText().trim()));
-        dialog.close();
-      } else {
-        showAlert("Invalid Name", "Player name cannot be empty.");
-      }
-    });
-
-    HBox nameBox = new HBox(10, new Region() {{
-      setPrefSize(20, 80);
-      setStyle("-fx-background-color: #006400; -fx-background-radius: 5;");
-    }}, new VBox(5, nameLabel, nameField)
-    );
-    nameBox.setAlignment(Pos.CENTER_LEFT);
-
-    content.getChildren().addAll(addBtn, nameBox);
-    dialog.setScene(new Scene(content, 300, 200));
-    dialog.show();
-    return dialog;
-  }
-
-  private Stage createDialog(String title) {
-    Stage dialog = new Stage();
-    dialog.initModality(Modality.APPLICATION_MODAL);
-    dialog.initOwner(primaryStage);
-    dialog.setTitle(title);
-    dialog.setResizable(false);
-    return dialog;
-  }
-
-  private void showAlert(String title, String message) {
-    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-    alert.setTitle(title);
-    alert.setHeaderText(null);
-    alert.setContentText(message);
-    alert.showAndWait();
-  }
-
-  private void startGame() {
-    if (players.isEmpty()) {
-      players.add(new Player("Player 1"));
-      players.add(new Player("Player 2"));
-    }
-    BoardGame boardGame = new BoardGame(1, 100);
-    players.forEach(boardGame::addPlayer);
-    boardGame.initialiseGame();
-
-    // launch your game UI
-    new JavaFXGameUI(boardGame).displayWelcomeMessage();
-    primaryStage.close();
   }
 }
