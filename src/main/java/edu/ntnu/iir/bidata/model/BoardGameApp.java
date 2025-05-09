@@ -1,9 +1,8 @@
-package edu.ntnu.iir.bidata.model.board;
+package edu.ntnu.iir.bidata.model;
 
-import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.exception.GameException;
-import edu.ntnu.iir.bidata.ui.ConsoleGameUI;
-import edu.ntnu.iir.bidata.ui.GameUI;
+import edu.ntnu.iir.bidata.view.ConsoleGameUI;
+import edu.ntnu.iir.bidata.view.GameUI;
 
 import lombok.Getter;
 import lombok.NonNull;

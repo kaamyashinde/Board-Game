@@ -1,6 +1,6 @@
-package edu.ntnu.iir.bidata.model.board;
+package edu.ntnu.iir.bidata.model;
 
-import edu.ntnu.iir.bidata.ui.GameUI;
+import edu.ntnu.iir.bidata.view.GameUI;
 
 /**
  * Factory class that provides pre-defined board game configurations.

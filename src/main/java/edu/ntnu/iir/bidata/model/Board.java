@@ -1,4 +1,4 @@
-package edu.ntnu.iir.bidata.model.board;
+package edu.ntnu.iir.bidata.model;
 
 import edu.ntnu.iir.bidata.model.tile.Tile;
 import edu.ntnu.iir.bidata.model.tile.TileFactory;
