@@ -1,6 +1,6 @@
 package edu.ntnu.iir.bidata.model.FileHandling;
 
-import edu.ntnu.iir.bidata.model.board.Board;
+import edu.ntnu.iir.bidata.model.Board;
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.exception.GameException;
 

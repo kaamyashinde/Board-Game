@@ -2,7 +2,7 @@ package edu.ntnu.iir.bidata.model.FileHandling;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import edu.ntnu.iir.bidata.model.board.BoardGame;
+import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.exception.GameException;
 import edu.ntnu.iir.bidata.ui.GameUI;
