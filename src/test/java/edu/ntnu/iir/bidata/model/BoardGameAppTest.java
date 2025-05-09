@@ -2,9 +2,6 @@ package edu.ntnu.iir.bidata.model;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import edu.ntnu.iir.bidata.model.Player;
-import edu.ntnu.iir.bidata.model.board.BoardGame;
-import edu.ntnu.iir.bidata.model.board.BoardGameApp;
 import edu.ntnu.iir.bidata.model.exception.GameException;
 import edu.ntnu.iir.bidata.ui.ConsoleGameUI;
 import edu.ntnu.iir.bidata.ui.GameUI;
