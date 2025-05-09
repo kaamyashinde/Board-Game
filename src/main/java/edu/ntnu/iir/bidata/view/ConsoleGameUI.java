@@ -51,7 +51,7 @@ public class ConsoleGameUI implements GameUI {
         // Update board and player positions in output handler
         outputHandler.setBoard(boardGame.getBoard());
         outputHandler.setPlayerPositions(boardGame.getPlayers());
-        
+
         // Display the board
         outputHandler.displayBoard();
     }
