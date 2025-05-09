@@ -1,4 +1,4 @@
-package edu.ntnu.iir.bidata.utils;
+package edu.ntnu.iir.bidata.model.utils;
 
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.exception.GameException;
