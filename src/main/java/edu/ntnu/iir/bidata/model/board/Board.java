@@ -1,5 +1,6 @@
 package edu.ntnu.iir.bidata.model.board;
 
+import edu.ntnu.iir.bidata.model.exception.GameException;
 import edu.ntnu.iir.bidata.model.tile.Tile;
 import edu.ntnu.iir.bidata.model.tile.TileAction;
 import edu.ntnu.iir.bidata.utils.ParameterValidation;
@@ -45,9 +46,10 @@ public boolean addTile(int id, TileAction action){
    * @param id
    * @param nextTile
    */
-  public void connectTiles(int id, Tile nextTile){
-    for (int i = 0; i < tiles.size() - 1; i++) {
-      tiles.get(i).setNextTile(tiles.get(i + 1));
+  public void connectTiles(int id, Tile nextTile) {
+    Tile fromTile = tiles.get(id);
+    if (fromTile != null && nextTile != null) {
+        fromTile.setNextTile(nextTile);
     }
   }
   /**
@@ -73,8 +75,12 @@ public boolean addTile(int id, TileAction action){
   public boolean isValidTileConnection(int fromId, int toId){
     Tile fromTile = tiles.get(fromId);
     Tile toTile = tiles.get(toId);
-    return fromTile.getNextTile(1) == toTile;
-  }
+    try {
+        return fromTile.getNextTile(1) == toTile;
+    } catch (GameException e) {
+        return false;
+    }
+}
   /**
    * Access a specific position on the board.
    *
