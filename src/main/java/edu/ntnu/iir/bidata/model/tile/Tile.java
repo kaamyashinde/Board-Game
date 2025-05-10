@@ -53,6 +53,15 @@ public class Tile {
     public void setNextTile(Tile nextTile) {
         this.nextTile = nextTile;
     }
+    
+    /**
+     * Checks if this tile is the first tile in the sequence.
+     * 
+     * @return true if this is the first tile, false otherwise
+     */
+    public boolean isFirstTile() {
+        return id == 0;
+    }
 
     /**
      * Checks if this tile is the last tile in the sequence.
