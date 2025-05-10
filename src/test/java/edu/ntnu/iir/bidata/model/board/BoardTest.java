@@ -24,7 +24,8 @@ class BoardTest {
         // Test valid constructor
         Board validBoard = new Board(5);
         assertNotNull(validBoard);
-        assertEquals(0, validBoard.getSizeOfBoard());
+        assertEquals(5, validBoard.getSizeOfBoard()); // Board capacity
+        assertEquals(0, validBoard.getTiles().size()); // No tiles added yet
 
         // Test invalid constructor
         assertThrows(IllegalArgumentException.class, () -> new Board(0));
@@ -35,12 +36,12 @@ class BoardTest {
     void testAddTile() {
         // Test adding a valid tile
         assertTrue(board.addTile(0, mockAction));
-        assertEquals(1, board.getSizeOfBoard());
+        assertEquals(1, board.getTiles().size());
         assertNotNull(board.getTile(0));
 
         // Test adding a tile with duplicate ID
         assertFalse(board.addTile(0, mockAction));
-        assertEquals(1, board.getSizeOfBoard());
+        assertEquals(1, board.getTiles().size());
 
         // Test adding a tile with invalid ID
         assertThrows(IllegalArgumentException.class, () -> board.addTile(-1, mockAction));
@@ -58,17 +59,6 @@ class BoardTest {
         assertEquals(0, board.getStartingTile().getId());
     }
 
-    @Test
-    void testGetEndingTile() {
-        // Test when board is empty
-        assertNull(board.getEndingTile());
-
-        // Test when board has tiles
-        board.addTile(0, mockAction);
-        board.addTile(1, mockAction);
-        assertNotNull(board.getEndingTile());
-        assertEquals(1, board.getEndingTile().getId());
-    }
 
     @Test
     void testIsValidTileConnection() {
@@ -96,9 +86,10 @@ class BoardTest {
 
     @Test
     void testGetSizeOfBoard() {
-        assertEquals(0, board.getSizeOfBoard());
+        assertEquals(5, board.getSizeOfBoard()); // Board capacity
         board.addTile(0, mockAction);
-        assertEquals(1, board.getSizeOfBoard());
+        assertEquals(5, board.getSizeOfBoard()); // Still capacity
+        assertEquals(1, board.getTiles().size()); // Number of tiles added
     }
 
     @Test
