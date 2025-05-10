@@ -3,6 +3,6 @@ package edu.ntnu.iir.bidata.model.tile;
 import edu.ntnu.iir.bidata.model.Player;
 
 public interface TileAction {
-  void performAction (Player player);
+  void executeAction(Player player, Tile currentTile);
   String getDescription();
 }
