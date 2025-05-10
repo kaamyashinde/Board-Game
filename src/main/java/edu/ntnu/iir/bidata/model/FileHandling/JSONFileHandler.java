@@ -127,7 +127,7 @@ public class JSONFileHandler {
       for (PlayerData playerData : gameState.getPlayers()) {
         Player player = new Player(playerData.getName());
         game.addPlayer(player);
-        player.placeOnTile(game.getBoard().getPositionOnBoard(playerData.getPosition()));
+        //player.placeOnTile(game.getBoard().getPositionOnBoard(playerData.getPosition()));
       }
 
       // Initialize the game state

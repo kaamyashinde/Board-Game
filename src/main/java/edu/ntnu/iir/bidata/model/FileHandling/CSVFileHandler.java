@@ -87,7 +87,7 @@ public class CSVFileHandler {
           int position = Integer.parseInt(data[1].trim());
 
           Player player = new Player(playerName);
-          player.placeOnTile(board.getPositionOnBoard(position));
+          //player.placeOnTile(board.getPositionOnBoard(position));
           players.add(player);
         }
       }
