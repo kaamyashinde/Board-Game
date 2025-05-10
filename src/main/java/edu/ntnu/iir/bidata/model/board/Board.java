@@ -41,6 +41,41 @@ public boolean addTile(int id, TileAction action){
 }
 
   /**
+   * A method that connects the tiles in the board.
+   * @param id
+   * @param nextTile
+   */
+  public void connectTiles(int id, Tile nextTile){
+    for (int i = 0; i < tiles.size() - 1; i++) {
+      tiles.get(i).setNextTile(tiles.get(i + 1));
+    }
+  }
+  /**
+   * The method that returns the starting tile of the board.
+   * @return the starting tile of the board
+   */
+  public Tile getStartingTile(){
+    return tiles.get(0);
+  }
+  /**
+   * The method that returns the ending tile of the board.
+   * @return the ending tile of the board
+   */
+  public Tile getEndingTile(){
+    return tiles.get(tiles.size() - 1);
+  }
+  /**
+   * The method that checks if a tile connection is valid.
+   * @param fromId
+   * @param toId
+   * @return true if the connection is valid, false otherwise 
+   */
+  public boolean isValidTileConnection(int fromId, int toId){
+    Tile fromTile = tiles.get(fromId);
+    Tile toTile = tiles.get(toId);
+    return fromTile.getNextTile(1) == toTile;
+  }
+  /**
    * Access a specific position on the board.
    *
    * @param id the id to be used to access a specific spot on the board.
