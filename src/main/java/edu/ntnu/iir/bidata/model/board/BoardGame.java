@@ -53,7 +53,27 @@ public class BoardGame {
         this.playing = false;
     }
 
-
+    /**
+     * Add a check to see if the player can move to the next tile.
+     * @param player
+     */
+    private boolean canPlayerMove(Player player){
+        try {
+            player.getCurrentTile().getNextTile(1);
+            return true;
+        } catch (GameException e) {
+            return false;
+        }
+    }
+    /**
+     * Getting the next player to play.
+     * @param player
+     */
+    private Player getNextPlayer() {
+        List<Player> playerList = new ArrayList<>(players.keySet());
+        int currentIndex = playerList.indexOf(currentPlayer);
+        return playerList.get((currentIndex + 1) % playerList.size());
+    }
     /**
      * Adds a player to the game.
      *
@@ -68,6 +88,15 @@ public class BoardGame {
         this.players.put(player, 0);
     }
 
+    /**
+     * The method that handles the tile action.
+     * @param player
+     */
+    private void handleTileAction(Player player, Tile tile){
+        if (tile.getAction() != null){
+            tile.getAction().executeAction(player, tile);
+        }
+    }
     /**
      * Initializes the game and sets the first player.
      *
