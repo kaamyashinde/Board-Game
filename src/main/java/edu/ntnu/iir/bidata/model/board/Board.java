@@ -18,6 +18,7 @@ import java.util.HashMap;
 @Getter
 public class Board {
   private final HashMap<Integer, Tile> tiles;
+  private final int boardSize;
 
   /**
    * Constructor for the Board class.
@@ -26,6 +27,7 @@ public class Board {
   public Board(int sizeOfBoard){
     ParameterValidation.validateNonZeroPositiveInteger(sizeOfBoard, "size of board");
     this.tiles = new HashMap<>(sizeOfBoard);
+    this.boardSize = sizeOfBoard;
   }
 
   /**
@@ -64,7 +66,7 @@ public boolean addTile(int id, TileAction action){
    * @return the ending tile of the board
    */
   public Tile getEndingTile(){
-    return tiles.get(tiles.size() - 1);
+    return tiles.get(boardSize - 1);
   }
   /**
    * The method that checks if a tile connection is valid.
@@ -95,7 +97,7 @@ public boolean addTile(int id, TileAction action){
    * @return the size of the board
    */
   public int getSizeOfBoard(){
-    return tiles.size();
+    return boardSize;
   }
 
   /**
