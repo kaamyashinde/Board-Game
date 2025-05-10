@@ -72,15 +72,23 @@ public class Tile {
         return nextTile == null;
     }
     
+    /**
+     * Gets the next tile in the sequence.
+     *
+     * @return The next tile in the sequence
+     */
+    public Tile getNextTile() {
+        return nextTile;
+    }
 
     /**
-     * Gets the distance to another tile. Uses a HashSet to detect cycles.
+     * Gets the tile that is a specified number of steps away.
      *
-     * @param targetTile The tile to calculate distance to
-     * @return The number of tiles between this tile and the target tile, or -1 if not reachable
-     * @throws IllegalArgumentException if targetTile is null
+     * @param steps The number of steps to move
+     * @return The tile that is steps away from this tile
+     * @throws GameException if the end of the board is reached
      */
-    public Tile getNextTile(int steps){
+    public Tile getNextTile(int steps) {
         Tile targetTile = this;
         for (int i = 0; i < steps; i++) {
             targetTile = targetTile.getNextTile();
