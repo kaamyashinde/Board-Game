@@ -144,9 +144,7 @@ public class NewBoardGame {
             return false;
         }
 
-        // Print round number at the start of each round (when first player moves)
         if (currentPlayerIndex == 0) {
-            System.out.println("\n=== Round " + roundNumber + " ===");
             roundNumber++;
         }
 
@@ -155,43 +153,31 @@ public class NewBoardGame {
             throw new GameException("Current player's position is not set");
         }
 
-        // Check if player should skip their turn
         if (currentPlayer.isSkipNextTurn()) {
-            System.out.println("\n" + currentPlayer.getName() + " must skip their turn!");
-            currentPlayer.setSkipNextTurn(false);  // Reset the skip flag
-            currentPlayerIndex = (currentPlayerIndex + 1) % players.size();  // Move to next player
+            currentPlayer.setSkipNextTurn(false);
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
             return true;
         }
 
-        System.out.println("\n" + currentPlayer.getName() + "'s turn");
-        System.out.println("Current position: " + currentPlayer.getCurrentPosition());
-        
         dice.rollAllDice();
         int steps = dice.sumOfRolledValues();
-        System.out.println("Rolled: " + steps + " steps");
         
         try {
             currentPlayer.move(steps);
             Tile landedTile = currentPlayer.getCurrentTile();
-            System.out.println("Landed on tile: " + landedTile.getId());
             
             if (landedTile != null && landedTile.getAction() != null) {
-                System.out.println("Tile Action: " + landedTile.getAction().getDescription());
                 landedTile.getAction().executeAction(currentPlayer, landedTile);
-                System.out.println("New position after action: " + currentPlayer.getCurrentPosition());
             }
             
-            // Check if the player has won
             if (currentPlayer.isOnLastTile()) {
                 gameOver = true;
                 return false;
             }
             
-            // Move to next player
             currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
             return true;
         } catch (GameException e) {
-            // If player can't move (e.g., reached end of board), game is over
             gameOver = true;
             return false;
         }
