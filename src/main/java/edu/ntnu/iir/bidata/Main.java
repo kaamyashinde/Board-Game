@@ -11,13 +11,6 @@ public class Main {
         // Create a new game with a board size of 25 and 1 die
         NewBoardGame game = new NewBoardGame(25, 1);
         
-        // Add players
-        game.addPlayer("Player 1");
-        game.addPlayer("Player 2");
-        
-        // Start the game
-        game.startGame();
-        
         // Run the command line interface
         CommandLineInterface cli = new CommandLineInterface(game);
         cli.start();
