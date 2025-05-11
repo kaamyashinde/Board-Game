@@ -4,6 +4,9 @@ import edu.ntnu.iir.bidata.model.NewBoardGame;
 import edu.ntnu.iir.bidata.model.Player;
 import java.util.Scanner;
 import java.util.List;
+import edu.ntnu.iir.bidata.model.tile.Tile;
+import edu.ntnu.iir.bidata.model.tile.TileAction;
+import java.util.ArrayList;
 
 public class CommandLineInterface {
     private NewBoardGame game;
@@ -25,36 +28,41 @@ public class CommandLineInterface {
         setupPlayers();
         game.startGame();
         int round = 1;
+        ArrayList<TurnResult> turnResults = new ArrayList<>();
         while (!game.isGameOver()) {
-            if (game.getCurrentPlayerIndex() == 0) {
+            if (game.getCurrentPlayerIndex() == 0 && !turnResults.isEmpty()) {
+                printTurnResultsTable(round - 1, turnResults);
+                turnResults.clear();
                 System.out.println("\n=== Round " + round + " ===");
                 round++;
             }
             Player currentPlayer = game.getPlayers().get(game.getCurrentPlayerIndex());
-            if (currentPlayer.isSkipNextTurn()) {
-                System.out.println(currentPlayer.getName() + " must skip their turn!");
-                game.makeMove();
-                continue;
-            }
             System.out.println("\n" + currentPlayer.getName() + "'s turn");
             System.out.println("Current position: " + currentPlayer.getCurrentPosition());
             System.out.print("Press Enter to roll the dice...");
             scanner.nextLine();
-            int[] diceValues = game.getCurrentDiceValues();
-            game.makeMove();
+            NewBoardGame.MoveResult moveResult = game.makeMoveWithResult();
+            StringBuilder diceStr = new StringBuilder();
             int steps = 0;
-            for (int v : diceValues) steps += v;
-            if (diceValues.length > 0) {
-                System.out.print("Rolled: ");
-                for (int i = 0; i < diceValues.length; i++) {
-                    System.out.print(diceValues[i]);
-                    if (i < diceValues.length - 1) System.out.print(" + ");
+            if (moveResult.diceValues != null && moveResult.diceValues.length > 0) {
+                for (int i = 0; i < moveResult.diceValues.length; i++) {
+                    steps += moveResult.diceValues[i];
+                    diceStr.append(moveResult.diceValues[i]);
+                    if (i < moveResult.diceValues.length - 1) diceStr.append(" + ");
                 }
-                System.out.println(" = " + steps);
+                System.out.println("Rolled: " + diceStr + " = " + steps);
             }
-            Player updatedPlayer = game.getPlayers().get(game.getCurrentPlayerIndex() == 0 ? game.getPlayers().size() - 1 : game.getCurrentPlayerIndex() - 1);
-            System.out.println("New position: " + updatedPlayer.getCurrentPosition());
+            if (moveResult.actionDesc != null && !moveResult.actionDesc.isEmpty()) {
+                System.out.println("Tile Action: " + moveResult.actionDesc);
+            }
+            System.out.println("New position after move: " + moveResult.posAfterMove);
+            System.out.println("New position after tile action: " + moveResult.posAfterAction);
+            turnResults.add(new TurnResult(round, moveResult.playerName, diceStr.toString(), moveResult.prevPos, moveResult.posAfterMove, moveResult.posAfterAction, moveResult.actionDesc));
             printGameState();
+        }
+        // Print the last round's table
+        if (!turnResults.isEmpty()) {
+            printTurnResultsTable(round - 1, turnResults);
         }
         Player winner = game.getWinner();
         if (winner != null) {
@@ -94,6 +102,35 @@ public class CommandLineInterface {
         List<Player> players = game.getPlayers();
         for (Player player : players) {
             System.out.println(player.getName() + " is at position " + player.getCurrentPosition());
+        }
+    }
+
+    // Helper class to store turn results
+    private static class TurnResult {
+        int round;
+        String playerName;
+        String diceRolled;
+        int prevPos;
+        int newPos;
+        int afterActionPos;
+        String actionDesc;
+        TurnResult(int round, String playerName, String diceRolled, int prevPos, int newPos, int afterActionPos, String actionDesc) {
+            this.round = round;
+            this.playerName = playerName;
+            this.diceRolled = diceRolled;
+            this.prevPos = prevPos;
+            this.newPos = newPos;
+            this.afterActionPos = afterActionPos;
+            this.actionDesc = actionDesc;
+        }
+    }
+
+    // Print a table of turn results for a round
+    private void printTurnResultsTable(int round, List<TurnResult> turnResults) {
+        System.out.println("\nResults for Round " + round + ":");
+        System.out.printf("%-10s %-12s %-15s %-15s %-22s %-22s %-20s\n", "Round", "Player", "Dice Rolled", "Prev Pos", "After Move", "After Tile Action", "Tile Action");
+        for (TurnResult tr : turnResults) {
+            System.out.printf("%-10d %-12s %-15s %-15d %-22d %-22d %-20s\n", tr.round, tr.playerName, tr.diceRolled, tr.prevPos, tr.newPos, tr.afterActionPos, tr.actionDesc);
         }
     }
 } 

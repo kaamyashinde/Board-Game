@@ -130,57 +130,81 @@ public class NewBoardGame {
     }
 
     /**
-     * Makes a move for the current player.
-     * This includes rolling the dice and moving the player accordingly.
+     * Makes a move for the current player and returns detailed move info.
+     * This includes rolling the dice, moving, and applying tile actions.
      *
-     * @return true if the game continues, false if the game is over
+     * @return MoveResult containing all move details
      * @throws GameException if the game is not properly initialized
      */
-    public boolean makeMove() {
+    public MoveResult makeMoveWithResult() {
         if (!gameInitialized) {
             throw new GameException("Game has not been started. Call startGame() first.");
         }
-        
         if (gameOver) {
-            return false;
+            return null;
         }
-
         if (currentPlayerIndex == 0) {
             roundNumber++;
         }
-
         Player currentPlayer = players.get(currentPlayerIndex);
         if (currentPlayer.getCurrentTile() == null) {
             throw new GameException("Current player's position is not set");
         }
-
+        int prevPos = currentPlayer.getCurrentPosition();
+        String playerName = currentPlayer.getName();
+        int[] diceValues = null;
+        int posAfterMove = prevPos;
+        int posAfterAction = prevPos;
+        String actionDesc = "";
+        boolean skipTurn = false;
         if (currentPlayer.isSkipNextTurn()) {
             currentPlayer.setSkipNextTurn(false);
+            skipTurn = true;
             currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
-            return true;
+            return new MoveResult(playerName, prevPos, prevPos, prevPos, new int[0], "Skip Turn");
         }
-
         dice.rollAllDice();
+        diceValues = dice.getLastRolledValues();
         int steps = dice.sumOfRolledValues();
-        
         try {
             currentPlayer.move(steps);
+            posAfterMove = currentPlayer.getCurrentPosition();
             Tile landedTile = currentPlayer.getCurrentTile();
-            
             if (landedTile != null && landedTile.getAction() != null) {
+                actionDesc = landedTile.getAction().getDescription();
                 landedTile.getAction().executeAction(currentPlayer, landedTile);
+                posAfterAction = currentPlayer.getCurrentPosition();
+            } else {
+                posAfterAction = posAfterMove;
             }
-            
             if (currentPlayer.isOnLastTile()) {
                 gameOver = true;
-                return false;
             }
-            
             currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
-            return true;
+            return new MoveResult(playerName, prevPos, posAfterMove, posAfterAction, diceValues, actionDesc);
         } catch (GameException e) {
             gameOver = true;
-            return false;
+            return new MoveResult(playerName, prevPos, posAfterMove, posAfterAction, diceValues, actionDesc + " (GameException: " + e.getMessage() + ")");
+        }
+    }
+
+    /**
+     * Result object for a move, containing all relevant info for display.
+     */
+    public static class MoveResult {
+        public final String playerName;
+        public final int prevPos;
+        public final int posAfterMove;
+        public final int posAfterAction;
+        public final int[] diceValues;
+        public final String actionDesc;
+        public MoveResult(String playerName, int prevPos, int posAfterMove, int posAfterAction, int[] diceValues, String actionDesc) {
+            this.playerName = playerName;
+            this.prevPos = prevPos;
+            this.posAfterMove = posAfterMove;
+            this.posAfterAction = posAfterAction;
+            this.diceValues = diceValues;
+            this.actionDesc = actionDesc;
         }
     }
 
