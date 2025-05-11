@@ -1,4 +1,4 @@
-package edu.ntnu.iir.bidata.filehandling;
+package edu.ntnu.iir.bidata.filehandling.board;
 
 import java.nio.file.Path;
 
