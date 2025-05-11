@@ -75,14 +75,16 @@ public class NewBoardGame {
             }
         }
         
-        // Connect all tiles
+        // Connect all tiles using the Board class's method
         for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
-            Tile currentTile = board.getTile(i);
-            Tile nextTile = board.getTile(i + 1);
-            if (currentTile == null || nextTile == null) {
-                throw new GameException("Failed to get tiles for connection at position " + i);
+            board.connectTiles(i, board.getTile(i + 1));
+        }
+
+        // Validate all tile connections
+        for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
+            if (!board.isValidTileConnection(i, i + 1)) {
+                throw new GameException("Invalid tile connection between tiles " + i + " and " + (i + 1));
             }
-            board.connectTiles(i, nextTile);
         }
     }
 
