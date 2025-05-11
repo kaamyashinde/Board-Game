@@ -3,7 +3,7 @@ package edu.ntnu.iir.bidata.model.board;
 import edu.ntnu.iir.bidata.model.exception.GameException;
 import edu.ntnu.iir.bidata.model.tile.Tile;
 import edu.ntnu.iir.bidata.model.tile.TileAction;
-import edu.ntnu.iir.bidata.utils.ParameterValidation;
+import edu.ntnu.iir.bidata.model.utils.ParameterValidation;
 import lombok.Getter;
 
 import java.util.HashMap;

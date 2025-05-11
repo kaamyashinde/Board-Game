@@ -1,4 +1,4 @@
-package edu.ntnu.iir.bidata.model.board;
+package edu.ntnu.iir.bidata.model;
 
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.dice.Dice;
@@ -9,7 +9,8 @@ import edu.ntnu.iir.bidata.model.tile.GoToTileAction;
 import edu.ntnu.iir.bidata.model.tile.LoseTurnAction;
 import edu.ntnu.iir.bidata.model.tile.SwitchPositionAction;
 import edu.ntnu.iir.bidata.model.tile.TileAction;
-import edu.ntnu.iir.bidata.utils.ParameterValidation;
+import edu.ntnu.iir.bidata.model.utils.ParameterValidation;
+import edu.ntnu.iir.bidata.model.board.Board;
 import lombok.Getter;
 
 import java.util.ArrayList;

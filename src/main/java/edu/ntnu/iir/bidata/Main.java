@@ -1,6 +1,6 @@
 package edu.ntnu.iir.bidata;
 
-import edu.ntnu.iir.bidata.model.board.NewBoardGame;
+import edu.ntnu.iir.bidata.model.NewBoardGame;
 import edu.ntnu.iir.bidata.ui.CommandLineInterface;
 
 /**
