@@ -1,5 +1,8 @@
 package edu.ntnu.iir.bidata.filehandling.player;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Path;
 
 import edu.ntnu.iir.bidata.model.Player;
@@ -7,6 +10,14 @@ import edu.ntnu.iir.bidata.model.Player;
 public class PlayerFileReaderCSV implements PlayerFileReader {
     @Override
     public Player readPlayer(Path filePath) {
-        return null;
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath.toFile()))) {
+            String line = reader.readLine();
+            if (line != null && !line.isEmpty()) {
+                return new Player(line.trim());
+            }
+            return null;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read player from CSV file", e);
+        }
     }
 }
