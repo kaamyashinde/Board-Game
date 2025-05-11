@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class SnakesAndLaddersGameUI implements GameUI {
+public class SnakesAndLaddersGameUI {
   private final Stage primaryStage;
   private DiceView diceView;
   private final Map<String, Circle> playerTokenMap = new HashMap<>();
@@ -207,7 +207,7 @@ public class SnakesAndLaddersGameUI implements GameUI {
 
       // Check for win condition
       if (hasWon) {
-        displayWinner(new Player(currentPlayer));
+        showWinner(new Player(currentPlayer));
         return;
       }
 
@@ -348,38 +348,21 @@ public class SnakesAndLaddersGameUI implements GameUI {
     return new int[] {x, y};
   }
 
-  // Implement GameUI interface methods
-  @Override
-  public void displayWelcomeMessage() {
+  // Remove all @Override methods and replace with regular methods
+  public void showWelcomeMessage() {
     statusLabel.setText("Welcome to Snakes & Ladders!");
   }
 
-  @Override
-  public int getNumberOfPlayers() {
-    return playerNames.size();
-  }
-
-  @Override
-  public String getPlayerName(int playerNumber) {
-    if (playerNumber <= 0 || playerNumber > playerNames.size()) {
-      return "Unknown Player";
-    }
-    return playerNames.get(playerNumber - 1);
-  }
-
-  @Override
-  public void displayPlayerTurn(Player player) {
+  public void showPlayerTurn(Player player) {
     statusLabel.setText(player.getName() + "'s Turn");
   }
 
-  @Override
-  public void displayDiceRoll(Player player, int rollResult) {
+  public void showDiceRoll(Player player, int rollResult) {
     statusLabel.setText(player.getName() + " rolled a " + rollResult);
     diceView.setValue(rollResult);
   }
 
-  @Override
-  public void displayBoard() {
+  public void updateBoard() {
     // The board is already displayed in the UI
     // This would update all player positions based on the model
     if (controller != null) {
@@ -389,8 +372,7 @@ public class SnakesAndLaddersGameUI implements GameUI {
     }
   }
 
-  @Override
-  public void displayWinner(Player winner) {
+  public void showWinner(Player winner) {
     statusLabel.setText("🏆 " + winner.getName() + " WINS! 🏆");
     rollDiceBtn.setDisable(true);
 
@@ -418,13 +400,7 @@ public class SnakesAndLaddersGameUI implements GameUI {
     winnerStage.show();
   }
 
-  @Override
-  public void displaySeparator() {
-    // No implementation needed for JavaFX UI
-  }
-
-  @Override
-  public void displayTileAction(Player player, TileAction action) {
+  public void showTileAction(Player player, TileAction action) {
     statusLabel.setText(player.getName() + " " + action.getDescription());
   }
 }

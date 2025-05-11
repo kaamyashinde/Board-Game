@@ -24,7 +24,7 @@ import java.util.*;
  * JavaFX UI for the Ludo game board.
  * This class implements the game board interface and game flow for Ludo.
  */
-public class LudoGameUI implements GameUI {
+public class LudoGameUI {
   private final Stage primaryStage;
   private final List<String> players;
   private final String[] playerColors = {"Red", "Green", "Yellow", "Blue"};
@@ -574,27 +574,12 @@ public class LudoGameUI implements GameUI {
         (int) (color.getBlue() * 255));
   }
 
-  // Implement GameUI interface methods
-  @Override
-  public void displayWelcomeMessage() {
+  // Remove all @Override methods and replace with regular methods
+  public void showWelcomeMessage() {
     statusLabel.setText("Welcome to Ludo!");
   }
 
-  @Override
-  public int getNumberOfPlayers() {
-    return players.size();
-  }
-
-  @Override
-  public String getPlayerName(int playerNumber) {
-    if (playerNumber <= 0 || playerNumber > players.size()) {
-      return "Unknown Player";
-    }
-    return players.get(playerNumber - 1);
-  }
-
-  @Override
-  public void displayPlayerTurn(Player player) {
+  public void showPlayerTurn(Player player) {
     // Find the player index by name
     int playerIndex = -1;
     for (int i = 0; i < players.size(); i++) {
@@ -612,32 +597,23 @@ public class LudoGameUI implements GameUI {
     }
   }
 
-  @Override
-  public void displayDiceRoll(Player player, int rollResult) {
+  public void showDiceRoll(Player player, int rollResult) {
     diceValue = rollResult;
     updateDiceDisplay();
     statusLabel.setText(player.getName() + " rolled a " + rollResult);
   }
 
-  @Override
-  public void displayBoard() {
+  public void updateBoard() {
     // The Ludo board is already displayed
   }
 
-  @Override
-  public void displayWinner(Player winner) {
+  public void showWinner(Player winner) {
     statusLabel.setText("🏆 " + winner.getName() + " WINS! 🏆");
     statusLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: green;");
     rollDiceButton.setDisable(true);
   }
 
-  @Override
-  public void displaySeparator() {
-    // Not needed in JavaFX UI
-  }
-
-  @Override
-  public void displayTileAction(Player player, TileAction action) {
+  public void showTileAction(Player player, TileAction action) {
     statusLabel.setText(player.getName() + " " + action.getDescription());
   }
 }

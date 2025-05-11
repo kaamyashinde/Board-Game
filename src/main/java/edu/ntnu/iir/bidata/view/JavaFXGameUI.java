@@ -1,6 +1,6 @@
 package edu.ntnu.iir.bidata.view;
 
-import edu.ntnu.iir.bidata.model.BoardGame;
+import edu.ntnu.iir.bidata.model.NewBoardGame;
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.tile.Tile;
 import edu.ntnu.iir.bidata.model.tile.TileAction;
@@ -25,8 +25,8 @@ import javafx.stage.Stage;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JavaFXGameUI implements GameUI {
-    private final BoardGame boardGame;
+public class JavaFXGameUI {
+    private final NewBoardGame boardGame;
     private final Stage primaryStage;
     private final Map<Player, Circle> playerTokens;
     private final Map<Integer, StackPane> tilePanes;
@@ -39,7 +39,7 @@ public class JavaFXGameUI implements GameUI {
     private final DiceView diceView;
     private final VBox gameInfoPane;
 
-    public JavaFXGameUI(BoardGame boardGame) {
+    public JavaFXGameUI(NewBoardGame boardGame) {
         this.boardGame = boardGame;
         this.playerTokens = new HashMap<>();
         this.tilePanes = new HashMap<>();
@@ -97,7 +97,7 @@ public class JavaFXGameUI implements GameUI {
         boardPane.setVgap(2);
         boardPane.setAlignment(Pos.CENTER);
         
-        int boardSize = boardGame.getBoard().getSize();
+        int boardSize = boardGame.getBoard().getSizeOfBoard();
         int gridSize = (int) Math.ceil(Math.sqrt(boardSize));
         
         // Create a background for the board
@@ -188,26 +188,14 @@ public class JavaFXGameUI implements GameUI {
         return token;
     }
 
-    @Override
-    public void displayWelcomeMessage() {
+    public void showWelcomeMessage() {
         Platform.runLater(() -> {
             statusLabel.setText("Welcome to Snakes and Ladders!");
             primaryStage.show();
         });
     }
 
-    @Override
-    public int getNumberOfPlayers() {
-        return 2;
-    }
-
-    @Override
-    public String getPlayerName(int playerNumber) {
-        return "Player " + playerNumber;
-    }
-
-    @Override
-    public void displayPlayerTurn(Player player) {
+    public void showPlayerTurn(Player player) {
         Platform.runLater(() -> {
             currentPlayerLabel.setText("Current Player: " + player.getName());
             statusLabel.setText(player.getName() + "'s turn to roll the dice!");
@@ -220,8 +208,7 @@ public class JavaFXGameUI implements GameUI {
         });
     }
 
-    @Override
-    public void displayDiceRoll(Player player, int rollResult) {
+    public void showDiceRoll(Player player, int rollResult) {
         Platform.runLater(() -> {
             diceRollLabel.setText(player.getName() + " rolled: " + rollResult);
             diceView.setValue(rollResult);
@@ -229,8 +216,7 @@ public class JavaFXGameUI implements GameUI {
         });
     }
 
-    @Override
-    public void displayBoard() {
+    public void updateBoard() {
         Platform.runLater(() -> {
             for (Player player : playerTokens.keySet()) {
                 updatePlayerPosition(player);
@@ -252,8 +238,7 @@ public class JavaFXGameUI implements GameUI {
         }
     }
 
-    @Override
-    public void displayWinner(Player winner) {
+    public void showWinner(Player winner) {
         Platform.runLater(() -> {
             currentPlayerLabel.setText("Winner: " + winner.getName() + "!");
             statusLabel.setText("🎉 " + winner.getName() + " has won the game! 🎉");
@@ -262,13 +247,7 @@ public class JavaFXGameUI implements GameUI {
         });
     }
 
-    @Override
-    public void displaySeparator() {
-        // Not needed in JavaFX UI
-    }
-
-    @Override
-    public void displayTileAction(Player player, TileAction action) {
+    public void showTileAction(Player player, TileAction action) {
         Platform.runLater(() -> {
             diceRollLabel.setText(player.getName() + " triggered: " + action.getDescription());
             statusLabel.setText(player.getName() + " " + action.getDescription() + "!");

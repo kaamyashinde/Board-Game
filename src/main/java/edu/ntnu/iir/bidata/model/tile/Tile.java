@@ -1,17 +1,19 @@
 package edu.ntnu.iir.bidata.model.tile;
 
 import edu.ntnu.iir.bidata.model.Player;
+import edu.ntnu.iir.bidata.model.exception.GameException;
 import edu.ntnu.iir.bidata.model.utils.ParameterValidation;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Objects;
 
 /**
  * Represents a tile on the game board.
  *
  * @author Durva and Kaamya
- * @version 1.0.0
+ * @version 1.0.1
  */
 @Getter
 @Setter
@@ -19,7 +21,6 @@ public class Tile {
     private final int id;
     private final TileAction action;
     private Tile nextTile;
-    private Tile previousTile;
 
     /**
      * Constructor that creates an instance of the tile with the desired id and tileAction.
@@ -45,51 +46,21 @@ public class Tile {
     }
 
     /**
-     * Sets the next tile in the sequence and updates the previous tile reference.
+     * Sets the next tile in the sequence.
      *
      * @param nextTile The next tile to set
      */
     public void setNextTile(Tile nextTile) {
         this.nextTile = nextTile;
-        if (nextTile != null) {
-            nextTile.previousTile = this;
-        }
     }
-
+    
     /**
-     * Executes the action associated with this tile.
-     *
-     * @param player The player who landed on this tile
-     * @throws IllegalArgumentException if player is null
+     * Checks if this tile is the first tile in the sequence.
+     * 
+     * @return true if this is the first tile, false otherwise
      */
-    public void performAction(Player player) {
-        ParameterValidation.validatePlayer(player);
-        if (action != null) {
-            action.performAction(player);
-        }
-    }
-
-    /**
-     * Places the player on this tile and performs any associated actions.
-     *
-     * @param player The player to place on this tile
-     * @throws IllegalArgumentException if player is null
-     */
-    public void landPlayer(Player player) {
-        ParameterValidation.validatePlayer(player);
-        player.placeOnTile(this);
-        performAction(player);
-    }
-
-    /**
-     * Removes the player from this tile.
-     *
-     * @param player The player to remove from this tile
-     * @throws IllegalArgumentException if player is null
-     */
-    public void leavePlayer(Player player) {
-        ParameterValidation.validatePlayer(player);
-        // Additional cleanup logic can be added here if needed
+    public boolean isFirstTile() {
+        return id == 0;
     }
 
     /**
@@ -100,40 +71,40 @@ public class Tile {
     public boolean isLastTile() {
         return nextTile == null;
     }
-
+    
     /**
-     * Checks if this tile is the first tile in the sequence.
+     * Gets the next tile in the sequence.
      *
-     * @return true if this is the first tile, false otherwise
+     * @return The next tile in the sequence
      */
-    public boolean isFirstTile() {
-        return previousTile == null;
+    public Tile getNextTile() {
+        return nextTile;
     }
 
     /**
-     * Gets the distance to another tile.
+     * Gets the tile that is a specified number of steps away.
      *
-     * @param targetTile The tile to calculate distance to
-     * @return The number of tiles between this tile and the target tile, or -1 if not reachable
-     * @throws IllegalArgumentException if targetTile is null
+     * @param steps The number of steps to move
+     * @return The tile that is steps away from this tile
+     * @throws GameException if the end of the board is reached
      */
-    public int getDistanceTo(Tile targetTile) {
-        ParameterValidation.validateTile(targetTile);
-        if (this == targetTile) {
-            return 0;
-        }
-
-        int distance = 0;
-        Tile current = this;
-        while (current.nextTile != null) {
-            distance++;
-            current = current.nextTile;
-            if (current == targetTile) {
-                return distance;
+    public Tile getNextTile(int steps) {
+        Tile targetTile = this;
+        for (int i = 0; i < steps; i++) {
+            targetTile = targetTile.getNextTile();
+            if (targetTile == null) {
+                throw new GameException("Reached the end of the board");
             }
         }
-        return -1;
+        return targetTile;
     }
+
+    /**
+     * Checks if this tile is equal to another object.
+     *
+     * @param o The object to compare to
+     * @return true if the objects are equal, false otherwise
+     */
 
     @Override
     public boolean equals(Object o) {
@@ -143,6 +114,11 @@ public class Tile {
         return id == tile.id;
     }
 
+    /**
+     * Returns the hash code for this tile.
+     *
+     * @return the hash code for this tile
+     */
     @Override
     public int hashCode() {
         return Objects.hash(id);

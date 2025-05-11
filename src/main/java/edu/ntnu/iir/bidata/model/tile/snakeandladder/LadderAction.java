@@ -23,9 +23,8 @@ public class LadderAction implements TileAction {
     }
 
     @Override
-    public void performAction(Player player) {
+    public void executeAction(Player player, Tile currentTile) {
         // Find the target tile
-        Tile currentTile = player.getCurrentTile();
         Tile targetTile = currentTile;
         
         // Move forward until we reach the target tile
@@ -34,7 +33,7 @@ public class LadderAction implements TileAction {
         }
         
         if (targetTile != null && targetTile.getId() == topTileId) {
-            player.placeOnTile(targetTile);
+            player.setCurrentTile(targetTile);
             System.out.println(player.getName() + " found a ladder! Climbed up to tile " + topTileId + "!");
         }
     }

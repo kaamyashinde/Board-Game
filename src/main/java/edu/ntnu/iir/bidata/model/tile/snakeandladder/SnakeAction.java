@@ -23,18 +23,17 @@ public class SnakeAction implements TileAction {
     }
 
     @Override
-    public void performAction(Player player) {
+    public void executeAction(Player player, Tile currentTile) {
         // Find the target tile
-        Tile currentTile = player.getCurrentTile();
         Tile targetTile = currentTile;
         
         // Move backward until we reach the target tile
         while (targetTile != null && targetTile.getId() > tailTileId) {
-            targetTile = targetTile.getPreviousTile();
+            targetTile = targetTile.getNextTile();
         }
         
         if (targetTile != null && targetTile.getId() == tailTileId) {
-            player.placeOnTile(targetTile);
+            player.setCurrentTile(targetTile);
             System.out.println(player.getName() + " encountered a snake! Slid down to tile " + tailTileId + "!");
         }
     }

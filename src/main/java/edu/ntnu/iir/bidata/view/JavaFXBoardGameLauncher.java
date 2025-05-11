@@ -1,7 +1,7 @@
 package edu.ntnu.iir.bidata.view;
 
 import edu.ntnu.iir.bidata.controller.GameController;
-import edu.ntnu.iir.bidata.model.BoardGame;
+import edu.ntnu.iir.bidata.model.NewBoardGame;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -64,10 +64,10 @@ public class JavaFXBoardGameLauncher extends Application {
         SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(stage, players);
 
         // Create model (using a default 100-tile board)
-        BoardGame boardGame = new BoardGame(1, 100);
+        NewBoardGame boardGame = new NewBoardGame(1, 100);
 
         // Create controller and connect it with the view
-        GameController controller = new GameController(boardGame, gameUI);
+        GameController controller = new GameController(boardGame);
         gameUI.setController(controller);
 
         // Start the game
@@ -85,10 +85,10 @@ public class JavaFXBoardGameLauncher extends Application {
         LudoGameUI gameUI = new LudoGameUI(stage, players);
 
         // Create model
-        BoardGame boardGame = new BoardGame(1, 52); // Typical Ludo board size
+        NewBoardGame boardGame = new NewBoardGame(1, 52); // Typical Ludo board size
 
         // Create controller and connect it with the view
-        GameController controller = new GameController(boardGame, gameUI);
+        GameController controller = new GameController(boardGame);
         gameUI.setController(controller);
 
         // Start the game

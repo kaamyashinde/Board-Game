@@ -1,11 +1,8 @@
 package edu.ntnu.iir.bidata.controller;
 
-import edu.ntnu.iir.bidata.model.BoardGame;
+import edu.ntnu.iir.bidata.model.NewBoardGame;
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.tile.TileAction;
-import edu.ntnu.iir.bidata.view.GameUI;
-import edu.ntnu.iir.bidata.view.SnakesAndLaddersGameUI;
-import edu.ntnu.iir.bidata.view.LudoGameUI;
 
 import java.util.List;
 import java.util.Map;
@@ -17,22 +14,14 @@ import lombok.Setter;
  * Controls the flow of the game and coordinates between the model and view.
  */
 public class GameController {
-    private final BoardGame boardGame;
-    private final GameUI gameUI;
+    private final NewBoardGame boardGame;
     private boolean gameStarted = false;
 
     // For Snakes and Ladders specific logic
     private Map<String, Integer> playerPositions = new HashMap<>();
-  /**
-   * -- GETTER --
-   *  Gets the current player index for Ludo
-   * -- SETTER --
-   *  Sets the current player index for Ludo
-
-   */
-  @Setter
-  @Getter
-  private int currentPlayerIndex = 0;
+    @Setter
+    @Getter
+    private int currentPlayerIndex = 0;
     private List<String> playerNames;
 
     // Snakes and Ladders specific data
@@ -46,38 +35,15 @@ public class GameController {
 
     // For Ludo specific logic
     private int diceValue = 1;
-  /**
-   * -- GETTER --
-   *  Gets whether a Ludo dice has been rolled
-   *
-   *
-   * -- SETTER --
-   *  Sets whether a Ludo dice has been rolled
-   *
-   @return true if dice has been rolled, false otherwise
-    * @param rolled true if dice has been rolled, false otherwise
-   */
-  @Setter
-  @Getter
-  private boolean diceRolled = false;
-  /**
-   * -- SETTER --
-   *  Sets whether a Ludo piece is moving
-   *
-   *
-   * -- GETTER --
-   *  Gets whether a Ludo piece is moving
-   *
-   @param moving true if a piece is moving, false otherwise
-    * @return true if a piece is moving, false otherwise
-   */
-  @Getter
-  @Setter
-  private boolean movingPiece = false;
+    @Setter
+    @Getter
+    private boolean diceRolled = false;
+    @Getter
+    @Setter
+    private boolean movingPiece = false;
 
-    public GameController(BoardGame boardGame, GameUI gameUI) {
+    public GameController(NewBoardGame boardGame) {
         this.boardGame = boardGame;
-        this.gameUI = gameUI;
     }
 
     /**
@@ -93,15 +59,8 @@ public class GameController {
 
     public void startGame() {
         if (!gameStarted) {
-            // Display welcome message
-            gameUI.displayWelcomeMessage();
-
-            // Display initial board state
-            gameUI.displayBoard();
-
             // Start the first turn
             startNextTurn();
-
             gameStarted = true;
         }
     }
@@ -109,11 +68,11 @@ public class GameController {
     private void startNextTurn() {
         if (!boardGame.isGameOver()) {
             Player currentPlayer = boardGame.getCurrentPlayer();
-            gameUI.displayPlayerTurn(currentPlayer);
-        } else if (gameUI instanceof SnakesAndLaddersGameUI) {
+            // Handle turn logic here
+        } else if (boardGame instanceof NewBoardGame) {
             // For Snakes and Ladders specific turn management
             String currentPlayer = playerNames.get(currentPlayerIndex);
-            ((SnakesAndLaddersGameUI) gameUI).updateCurrentPlayerIndicator(currentPlayer);
+            // Handle turn logic here
         }
     }
 
@@ -125,21 +84,17 @@ public class GameController {
             Player currentPlayer = boardGame.getCurrentPlayer();
 
             // Roll dice
-            int diceRoll = boardGame.rollDice();
-            gameUI.displayDiceRoll(currentPlayer, diceRoll);
+            int diceRoll = rollDiceForSnakesAndLadders();
 
             // Move player
-            boolean hasWon = boardGame.movePlayer(currentPlayer, diceRoll);
-
-            // Display board state
-            gameUI.displayBoard();
+            boolean hasWon = updateSnakesAndLaddersPosition(currentPlayer.getName(), diceRoll);
 
             // Check if game is over
             if (hasWon) {
-                gameUI.displayWinner(currentPlayer);
+                // Handle win condition
             } else {
                 // Move to next player
-                boardGame.nextPlayer();
+                nextSnakesAndLaddersPlayer();
                 startNextTurn();
             }
         }
@@ -196,10 +151,6 @@ public class GameController {
         for (int[] snake : snakes) {
             if (snake[0] == position) {
                 newPosition = snake[1];
-                if (gameUI instanceof SnakesAndLaddersGameUI) {
-                    ((SnakesAndLaddersGameUI) gameUI).displaySnakeOrLadderMessage(
-                        playerName, position, newPosition, "snake");
-                }
                 break;
             }
         }
@@ -208,10 +159,6 @@ public class GameController {
         for (int[] ladder : ladders) {
             if (ladder[0] == position) {
                 newPosition = ladder[1];
-                if (gameUI instanceof SnakesAndLaddersGameUI) {
-                    ((SnakesAndLaddersGameUI) gameUI).displaySnakeOrLadderMessage(
-                        playerName, position, newPosition, "ladder");
-                }
                 break;
             }
         }
@@ -269,5 +216,4 @@ public class GameController {
         // If already on the board, can move
         return currentPosition >= 0;
     }
-
 }

@@ -43,14 +43,12 @@ public class Dice {
   }
 
   /**
-   * Return the last rolled value by a specific die from the list of dice.
+   * Get the last rolled value of all the dice.
    *
-   * @param dieNumber the index of the die to be rolled from the list.
-   * @return The number rolled on the selected die.
+   * @return the last rolled value of all the dice.
    */
-  public int getDie(int dieNumber) {
-    ParameterValidation.validateZeroPositiveInteger(dieNumber, "index of the dice");
-    return dice.get(dieNumber).getLastRolledValue();
+  public int[] getLastRolledValues() {
+    return dice.stream().mapToInt(Die::getLastRolledValue).toArray();
   }
 
   /**

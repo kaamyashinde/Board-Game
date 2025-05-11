@@ -29,13 +29,7 @@ public class TileFactory {
             return new LadderAction(tileConfig.getLadderEnd(position));
         } else if (tileConfig.isSnakeHead(position)) {
             return new SnakeAction(tileConfig.getSnakeTail(position));
-        } else if (tileConfig.isSkipTurn(position)) {
-            return new SkipTurnAction();
-        } else if (tileConfig.isMoveBack(position)) {
-            return new MoveBackAction(tileConfig.getMoveBackSteps(position));
-        } else if (tileConfig.isSwitchPlaces(position) && !players.isEmpty()) {
-            return new SwitchPlacesAction(players.get(0));
-        }
+        } 
         return null;
     }
 } 
