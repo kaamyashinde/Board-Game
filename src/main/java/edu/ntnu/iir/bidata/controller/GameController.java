@@ -3,10 +3,10 @@ package edu.ntnu.iir.bidata.controller;
 import edu.ntnu.iir.bidata.model.NewBoardGame;
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.tile.TileAction;
-
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.logging.Logger;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,206 +14,264 @@ import lombok.Setter;
  * Controls the flow of the game and coordinates between the model and view.
  */
 public class GameController {
-    private final NewBoardGame boardGame;
-    private boolean gameStarted = false;
 
-    // For Snakes and Ladders specific logic
-    private Map<String, Integer> playerPositions = new HashMap<>();
-    @Setter
-    @Getter
-    private int currentPlayerIndex = 0;
-    private List<String> playerNames;
+  private static final Logger LOGGER = Logger.getLogger(GameController.class.getName());
+  private final NewBoardGame boardGame;
+  // Snakes and Ladders specific data
+  private final int[][] snakes = {
+      {99, 41}, {95, 75}, {89, 86}, {78, 15}, {38, 2}, {29, 11}
+  };
+  private final int[][] ladders = {
+      {3, 36}, {8, 12}, {14, 26}, {31, 73}, {59, 80}, {83, 97}, {90, 92}
+  };
+  private boolean gameStarted = false;
+  // For Snakes and Ladders specific logic
+  private final Map<String, Integer> playerPositions = new HashMap<>();
+  @Setter
+  @Getter
+  private int currentPlayerIndex = 0;
+  private List<String> playerNames;
+  // For Ludo specific logic
+  private final int diceValue = 1;
+  @Setter
+  @Getter
+  private boolean diceRolled = false;
+  @Getter
+  @Setter
+  private boolean movingPiece = false;
 
-    // Snakes and Ladders specific data
-    private final int[][] snakes = {
-        {99, 41}, {95, 75}, {89, 86}, {78, 15}, {38, 2}, {29, 11}
-    };
+  public GameController(NewBoardGame boardGame) {
+    this.boardGame = boardGame;
+    LOGGER.info("GameController initialized");
+  }
 
-    private final int[][] ladders = {
-        {3, 36}, {8, 12}, {14, 26}, {31, 73}, {59, 80}, {83, 97}, {90, 92}
-    };
+  /**
+   * Sets the player names for games that manage their own player list
+   */
+  public void setPlayerNames(List<String> playerNames) {
+    this.playerNames = playerNames;
+    // Initialize positions for all players
+    for (String playerName : playerNames) {
+      playerPositions.put(playerName, 0);
+    }
+    LOGGER.info("Setting player names: " + playerNames);
+  }
 
-    // For Ludo specific logic
-    private int diceValue = 1;
-    @Setter
-    @Getter
-    private boolean diceRolled = false;
-    @Getter
-    @Setter
-    private boolean movingPiece = false;
+  public void startGame() {
+    LOGGER.info("Starting new game");
+    if (!gameStarted) {
+      // Start the first turn
+      gameStarted = true;
+      LOGGER.info("First turn started");
+    }
+  }
 
-    public GameController(NewBoardGame boardGame) {
-        this.boardGame = boardGame;
+  /**
+   * Handles the dice roll and player movement for standard board games
+   */
+  public void handleNextTurn() {
+    if (!boardGame.isGameOver()) {
+      Player currentPlayer = boardGame.getCurrentPlayer();
+
+      // Roll dice
+      int diceRoll = rollDiceForSnakesAndLadders();
+
+      // Move player
+      boolean hasWon = updateSnakesAndLaddersPosition(currentPlayer.getName(), diceRoll);
+
+      // Check if game is over
+      if (hasWon) {
+        // Handle win condition
+      } else {
+        // Move to next player
+        nextSnakesAndLaddersPlayer();
+        startNextTurn();
+      }
+    }
+  }
+
+  /**
+   * Rolls dice for Snakes and Ladders game
+   *
+   * @return the dice roll value
+   */
+  public int rollDiceForSnakesAndLadders() {
+    return 1 + (int) (Math.random() * 6);
+  }
+
+  /**
+   * Updates player position for Snakes and Ladders game
+   *
+   * @param playerName the player's name
+   * @param diceRoll   the dice roll value
+   * @return true if the player won, false otherwise
+   */
+  public boolean updateSnakesAndLaddersPosition(String playerName, int diceRoll) {
+    // Get current position
+    int currentPosition = playerPositions.get(playerName);
+    int newPosition = currentPosition + diceRoll;
+
+    // Ensure we don't go past 100
+    if (newPosition > 100) {
+      // Bounce back from 100
+      newPosition = 100 - (newPosition - 100);
     }
 
-    /**
-     * Sets the player names for games that manage their own player list
-     */
-    public void setPlayerNames(List<String> playerNames) {
-        this.playerNames = playerNames;
-        // Initialize positions for all players
-        for (String playerName : playerNames) {
-            playerPositions.put(playerName, 0);
-        }
+    // Update position
+    playerPositions.put(playerName, newPosition);
+
+    // Check for snakes and ladders
+    int finalPosition = checkSnakesAndLadders(playerName, newPosition);
+    if (finalPosition != newPosition) {
+      playerPositions.put(playerName, finalPosition);
     }
 
-    public void startGame() {
-        if (!gameStarted) {
-            // Start the first turn
-            startNextTurn();
-            gameStarted = true;
-        }
+    // Check for win condition
+    return playerPositions.get(playerName) == 100;
+  }
+
+  /**
+   * Moves to the next player in Snakes and Ladders
+   */
+  public void nextSnakesAndLaddersPlayer() {
+    currentPlayerIndex = (currentPlayerIndex + 1) % playerNames.size();
+  }
+
+  private void startNextTurn() {
+    if (!boardGame.isGameOver()) {
+      Player currentPlayer = boardGame.getCurrentPlayer();
+      // Handle turn logic here
+    } else if (boardGame instanceof NewBoardGame) {
+      // For Snakes and Ladders specific turn management
+      String currentPlayer = playerNames.get(currentPlayerIndex);
+      // Handle turn logic here
+    }
+  }
+
+  /**
+   * Checks if a position has a snake or ladder
+   *
+   * @param playerName the player's name
+   * @param position   the current position
+   * @return the new position after snake or ladder
+   */
+  private int checkSnakesAndLadders(String playerName, int position) {
+    int newPosition = position;
+
+    // Check for snakes
+    for (int[] snake : snakes) {
+      if (snake[0] == position) {
+        newPosition = snake[1];
+        break;
+      }
     }
 
-    private void startNextTurn() {
-        if (!boardGame.isGameOver()) {
-            Player currentPlayer = boardGame.getCurrentPlayer();
-            // Handle turn logic here
-        } else if (boardGame instanceof NewBoardGame) {
-            // For Snakes and Ladders specific turn management
-            String currentPlayer = playerNames.get(currentPlayerIndex);
-            // Handle turn logic here
-        }
+    // Check for ladders
+    for (int[] ladder : ladders) {
+      if (ladder[0] == position) {
+        newPosition = ladder[1];
+        break;
+      }
     }
 
-    /**
-     * Handles the dice roll and player movement for standard board games
-     */
-    public void handleNextTurn() {
-        if (!boardGame.isGameOver()) {
-            Player currentPlayer = boardGame.getCurrentPlayer();
+    return newPosition;
+  }
 
-            // Roll dice
-            int diceRoll = rollDiceForSnakesAndLadders();
+  /**
+   * Gets the current player's name for Snakes and Ladders
+   *
+   * @return the current player's name
+   */
+  public String getCurrentSnakesAndLaddersPlayerName() {
+    String name = playerNames.get(currentPlayerIndex);
+    LOGGER.info("Current Snakes and Ladders player: " + name);
+    return name;
+  }
 
-            // Move player
-            boolean hasWon = updateSnakesAndLaddersPosition(currentPlayer.getName(), diceRoll);
+  /**
+   * Gets the position for a player in Snakes and Ladders
+   *
+   * @param playerName the player's name
+   * @return the player's position
+   */
+  public int getPlayerPosition(String playerName) {
+    return playerPositions.get(playerName);
+  }
 
-            // Check if game is over
-            if (hasWon) {
-                // Handle win condition
-            } else {
-                // Move to next player
-                nextSnakesAndLaddersPlayer();
-                startNextTurn();
-            }
-        }
+  /* Ludo Game Specific Methods */
+
+  /**
+   * Rolls dice for Ludo game
+   *
+   * @return the dice roll value
+   */
+  public int rollDiceForLudo() {
+    diceRolled = true;
+    return 1 + (int) (Math.random() * 6);
+  }
+
+  /**
+   * Checks if a token can be moved in Ludo
+   *
+   * @param currentPosition the token's current position
+   * @param diceValue       the dice roll value
+   * @return true if the token can be moved, false otherwise
+   */
+  public boolean canMoveLudoToken(int currentPosition, int diceValue) {
+    // If in home and rolled a 6, can move out
+    if (currentPosition == -1 && diceValue == 6) {
+      return true;
     }
 
-    /**
-     * Rolls dice for Snakes and Ladders game
-     * @return the dice roll value
-     */
-    public int rollDiceForSnakesAndLadders() {
-        return 1 + (int)(Math.random() * 6);
+    // If already on the board, can move
+    return currentPosition >= 0;
+  }
+
+  public void rollDice() {
+    LOGGER.info("Rolling dice");
+    NewBoardGame.MoveResult result = boardGame.makeMoveWithResult();
+    if (result != null) {
+      LOGGER.info("Dice rolled: " + result.diceValues);
     }
+  }
 
-    /**
-     * Updates player position for Snakes and Ladders game
-     * @param playerName the player's name
-     * @param diceRoll the dice roll value
-     * @return true if the player won, false otherwise
-     */
-    public boolean updateSnakesAndLaddersPosition(String playerName, int diceRoll) {
-        // Get current position
-        int currentPosition = playerPositions.get(playerName);
-        int newPosition = currentPosition + diceRoll;
-
-        // Ensure we don't go past 100
-        if (newPosition > 100) {
-            // Bounce back from 100
-            newPosition = 100 - (newPosition - 100);
-        }
-
-        // Update position
-        playerPositions.put(playerName, newPosition);
-
-        // Check for snakes and ladders
-        int finalPosition = checkSnakesAndLadders(playerName, newPosition);
-        if (finalPosition != newPosition) {
-            playerPositions.put(playerName, finalPosition);
-        }
-
-        // Check for win condition
-        return playerPositions.get(playerName) == 100;
+  public void movePlayer() {
+    Player currentPlayer = boardGame.getCurrentPlayer();
+    int oldPosition = currentPlayer.getCurrentPosition();
+    NewBoardGame.MoveResult result = boardGame.makeMoveWithResult();
+    if (result != null) {
+      LOGGER.info(String.format("Player %s moved from position %d to %d",
+          currentPlayer.getName(), oldPosition, result.posAfterMove));
     }
+  }
 
-    /**
-     * Checks if a position has a snake or ladder
-     * @param playerName the player's name
-     * @param position the current position
-     * @return the new position after snake or ladder
-     */
-    private int checkSnakesAndLadders(String playerName, int position) {
-        int newPosition = position;
-
-        // Check for snakes
-        for (int[] snake : snakes) {
-            if (snake[0] == position) {
-                newPosition = snake[1];
-                break;
-            }
-        }
-
-        // Check for ladders
-        for (int[] ladder : ladders) {
-            if (ladder[0] == position) {
-                newPosition = ladder[1];
-                break;
-            }
-        }
-
-        return newPosition;
+  public boolean isGameOver() {
+    boolean gameOver = boardGame.isGameOver();
+    if (gameOver) {
+      LOGGER.info("Game over. Winner: " + boardGame.getWinner().getName());
     }
+    return gameOver;
+  }
 
-    /**
-     * Moves to the next player in Snakes and Ladders
-     */
-    public void nextSnakesAndLaddersPlayer() {
-        currentPlayerIndex = (currentPlayerIndex + 1) % playerNames.size();
+  public Player getCurrentPlayer() {
+    Player player = boardGame.getCurrentPlayer();
+    LOGGER.info("Current player: " + player.getName());
+    return player;
+  }
+
+  public NewBoardGame.MoveResult makeMove() {
+    LOGGER.info("Making move for current player");
+    NewBoardGame.MoveResult result = boardGame.makeMoveWithResult();
+    if (result != null) {
+      LOGGER.info(String.format("Player %s moved from %d to %d (after action: %d). Action: %s",
+          result.playerName, result.prevPos, result.posAfterMove, result.posAfterAction,
+          result.actionDesc));
     }
+    return result;
+  }
 
-    /**
-     * Gets the current player's name for Snakes and Ladders
-     * @return the current player's name
-     */
-    public String getCurrentSnakesAndLaddersPlayerName() {
-        return playerNames.get(currentPlayerIndex);
-    }
-
-    /**
-     * Gets the position for a player in Snakes and Ladders
-     * @param playerName the player's name
-     * @return the player's position
-     */
-    public int getPlayerPosition(String playerName) {
-        return playerPositions.get(playerName);
-    }
-
-    /* Ludo Game Specific Methods */
-
-    /**
-     * Rolls dice for Ludo game
-     * @return the dice roll value
-     */
-    public int rollDiceForLudo() {
-        diceRolled = true;
-        return 1 + (int)(Math.random() * 6);
-    }
-
-    /**
-     * Checks if a token can be moved in Ludo
-     * @param currentPosition the token's current position
-     * @param diceValue the dice roll value
-     * @return true if the token can be moved, false otherwise
-     */
-    public boolean canMoveLudoToken(int currentPosition, int diceValue) {
-        // If in home and rolled a 6, can move out
-        if (currentPosition == -1 && diceValue == 6) {
-            return true;
-        }
-
-        // If already on the board, can move
-        return currentPosition >= 0;
-    }
+  public void handleTileAction(TileAction action) {
+    LOGGER.info("Handling tile action: " + action);
+    // Handle the tile action
+  }
 }
