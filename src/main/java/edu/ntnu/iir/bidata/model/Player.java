@@ -14,6 +14,7 @@ import lombok.Setter;
 public class Player {
     private String name;
     private Tile currentTile;
+    private boolean skipNextTurn;
 
     /**
      * The constructor that initialises the players with their name and the board game they are connected to.
