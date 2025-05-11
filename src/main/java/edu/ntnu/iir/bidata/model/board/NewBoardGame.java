@@ -5,6 +5,9 @@ import edu.ntnu.iir.bidata.model.dice.Dice;
 import edu.ntnu.iir.bidata.model.exception.GameException;
 import edu.ntnu.iir.bidata.model.tile.Tile;
 import edu.ntnu.iir.bidata.model.tile.HopFiveStepsAction;
+import edu.ntnu.iir.bidata.model.tile.GoToTileAction;
+import edu.ntnu.iir.bidata.model.tile.LoseTurnAction;
+import edu.ntnu.iir.bidata.model.tile.SwitchPositionAction;
 import edu.ntnu.iir.bidata.model.tile.TileAction;
 import edu.ntnu.iir.bidata.utils.ParameterValidation;
 import lombok.Getter;
@@ -57,8 +60,15 @@ public class NewBoardGame {
         // Create all tiles first
         for (int i = 0; i < board.getSizeOfBoard(); i++) {
             TileAction action = null;
-            if (i == 7 || i == 8 || i == 9 || i == 10 || i == 11 || i == 12 || i == 13 || i == 14 || i == 15 || i == 16 || i == 17 || i == 18 || i == 19) {
+            // Add different tile actions at specific positions
+            if (i == 5) {
                 action = new HopFiveStepsAction();
+            } else if (i == 10) {
+                action = new GoToTileAction(15); // Go to tile 15
+            } else if (i == 15) {
+                action = new LoseTurnAction();
+            } else if (i == 20) {
+                action = new SwitchPositionAction(players);
             }
             if (!board.addTile(i, action)) {
                 throw new GameException("Failed to add tile at position " + i);
@@ -136,15 +146,22 @@ public class NewBoardGame {
             throw new GameException("Current player's position is not set");
         }
 
+        System.out.println("\n" + currentPlayer.getName() + "'s turn");
+        System.out.println("Current position: " + currentPlayer.getCurrentPosition());
+        
         dice.rollAllDice();
         int steps = dice.sumOfRolledValues();
+        System.out.println("Rolled: " + steps + " steps");
         
         try {
             currentPlayer.move(steps);
             Tile landedTile = currentPlayer.getCurrentTile();
+            System.out.println("Landed on tile: " + landedTile.getId());
+            
             if (landedTile != null && landedTile.getAction() != null) {
                 System.out.println("Tile Action: " + landedTile.getAction().getDescription());
                 landedTile.getAction().executeAction(currentPlayer, landedTile);
+                System.out.println("New position after action: " + currentPlayer.getCurrentPosition());
             }
             
             // Check if the player has won
