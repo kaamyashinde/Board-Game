@@ -51,6 +51,9 @@ public class SwitchPositionAction implements TileAction {
             Tile tempTile = currentPlayer.getCurrentTile();
             currentPlayer.setCurrentTile(playerInFront.getCurrentTile());
             playerInFront.setCurrentTile(tempTile);
+            System.out.println(currentPlayer.getName() + " switched with " + playerInFront.getName() + ". New positions: " + currentPlayer.getName() + " at tile " + currentPlayer.getCurrentPosition() + ", " + playerInFront.getName() + " at tile " + playerInFront.getCurrentPosition());
+        } else {
+            System.out.println("No player in front to switch with.");
         }
     }
     

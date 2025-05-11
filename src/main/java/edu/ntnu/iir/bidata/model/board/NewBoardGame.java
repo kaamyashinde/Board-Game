@@ -30,6 +30,7 @@ public class NewBoardGame {
     private int currentPlayerIndex;
     private boolean gameOver;
     private boolean gameInitialized;
+    private int roundNumber = 1;
 
     /**
      * Constructor for the NewBoardGame class.
@@ -141,6 +142,12 @@ public class NewBoardGame {
         
         if (gameOver) {
             return false;
+        }
+
+        // Print round number at the start of each round (when first player moves)
+        if (currentPlayerIndex == 0) {
+            System.out.println("\n=== Round " + roundNumber + " ===");
+            roundNumber++;
         }
 
         Player currentPlayer = players.get(currentPlayerIndex);
