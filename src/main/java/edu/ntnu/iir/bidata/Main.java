@@ -1,7 +1,7 @@
 package edu.ntnu.iir.bidata;
 
 import edu.ntnu.iir.bidata.model.board.NewBoardGame;
-import edu.ntnu.iir.bidata.ui.UserInterface;
+import edu.ntnu.iir.bidata.ui.CommandLineInterface;
 
 /**
  * Main class to run the board game.
@@ -18,12 +18,8 @@ public class Main {
         // Start the game
         game.startGame();
         
-        // Play until someone wins
-        while (!game.isGameOver()) {
-            game.makeMove();
-        }
-        
-        // Display the winner
-        System.out.println("Game Over! Winner: " + game.getWinner().getName());
+        // Run the command line interface
+        CommandLineInterface cli = new CommandLineInterface(game);
+        cli.start();
     }
 }
