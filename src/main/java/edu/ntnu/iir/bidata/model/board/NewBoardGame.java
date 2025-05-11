@@ -61,13 +61,13 @@ public class NewBoardGame {
         for (int i = 0; i < board.getSizeOfBoard(); i++) {
             TileAction action = null;
             // Add different tile actions at specific positions
-            if (i == 5) {
+            if (i == 3) {
                 action = new HopFiveStepsAction();
-            } else if (i == 10) {
-                action = new GoToTileAction(15); // Go to tile 15
-            } else if (i == 15) {
+            } else if (i == 7) {
+                action = new GoToTileAction(12); // Go to tile 12
+            } else if (i == 5) {
                 action = new LoseTurnAction();
-            } else if (i == 20) {
+            } else if (i == 15) {
                 action = new SwitchPositionAction(players);
             }
             if (!board.addTile(i, action)) {
@@ -146,6 +146,14 @@ public class NewBoardGame {
         Player currentPlayer = players.get(currentPlayerIndex);
         if (currentPlayer.getCurrentTile() == null) {
             throw new GameException("Current player's position is not set");
+        }
+
+        // Check if player should skip their turn
+        if (currentPlayer.isSkipNextTurn()) {
+            System.out.println("\n" + currentPlayer.getName() + " must skip their turn!");
+            currentPlayer.setSkipNextTurn(false);  // Reset the skip flag
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.size();  // Move to next player
+            return true;
         }
 
         System.out.println("\n" + currentPlayer.getName() + "'s turn");
