@@ -1,4 +1,4 @@
-package edu.ntnu.iir.bidata.view;
+package edu.ntnu.iir.bidata.view.snakesandladders;
 
 import edu.ntnu.iir.bidata.controller.GameController;
 import edu.ntnu.iir.bidata.model.Player;

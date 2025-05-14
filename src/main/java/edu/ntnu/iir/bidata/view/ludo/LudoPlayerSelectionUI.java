@@ -1,4 +1,4 @@
-package edu.ntnu.iir.bidata.view;
+package edu.ntnu.iir.bidata.view.ludo;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
