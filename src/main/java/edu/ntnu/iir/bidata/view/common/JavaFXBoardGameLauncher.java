@@ -1,10 +1,14 @@
-package edu.ntnu.iir.bidata.view;
+package edu.ntnu.iir.bidata.view.common;
 
 import edu.ntnu.iir.bidata.controller.GameController;
-import edu.ntnu.iir.bidata.model.NewBoardGame;
+import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.board.Board;
 import edu.ntnu.iir.bidata.model.board.BoardFactory;
+import edu.ntnu.iir.bidata.view.ludo.LudoGameUI;
+import edu.ntnu.iir.bidata.view.ludo.LudoMenuUI;
+import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI;
+import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersMenuUI;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -97,7 +101,7 @@ public class JavaFXBoardGameLauncher extends Application {
       // Create model (using a default 100-tile board) 
       //TODO: Create a snakes and ladders board in factory
       Board board = BoardFactory.createSnakesAndLaddersBoard(100, players);
-      NewBoardGame boardGame = new NewBoardGame(board, 1);
+      BoardGame boardGame = new BoardGame(board, 1);
 
       // Create controller and connect it with the view
       GameController controller = new GameController(boardGame);
@@ -125,7 +129,7 @@ public class JavaFXBoardGameLauncher extends Application {
 
       // Create model
       Board board = BoardFactory.createLudoBoard(56, players);
-      NewBoardGame boardGame = new NewBoardGame(board, 1);
+      BoardGame boardGame = new BoardGame(board, 1);
 
       // Create controller and connect it with the view
       GameController controller = new GameController(boardGame);

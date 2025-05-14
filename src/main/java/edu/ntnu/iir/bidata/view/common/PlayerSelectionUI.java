@@ -1,4 +1,4 @@
-package edu.ntnu.iir.bidata.view;
+package edu.ntnu.iir.bidata.view.common;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

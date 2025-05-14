@@ -1,6 +1,6 @@
-package edu.ntnu.iir.bidata.view;
+package edu.ntnu.iir.bidata.view.common;
 
-import edu.ntnu.iir.bidata.model.NewBoardGame;
+import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.tile.Tile;
 import edu.ntnu.iir.bidata.model.tile.TileAction;
@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class JavaFXGameUI {
-    private final NewBoardGame boardGame;
+    private final BoardGame boardGame;
     private final Stage primaryStage;
     private final Map<Player, Circle> playerTokens;
     private final Map<Integer, StackPane> tilePanes;
@@ -39,7 +39,7 @@ public class JavaFXGameUI {
     private final DiceView diceView;
     private final VBox gameInfoPane;
 
-    public JavaFXGameUI(NewBoardGame boardGame) {
+    public JavaFXGameUI(BoardGame boardGame) {
         this.boardGame = boardGame;
         this.playerTokens = new HashMap<>();
         this.tilePanes = new HashMap<>();

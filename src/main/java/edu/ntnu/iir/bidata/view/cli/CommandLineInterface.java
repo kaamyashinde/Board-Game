@@ -1,6 +1,6 @@
-package edu.ntnu.iir.bidata.ui;
+package edu.ntnu.iir.bidata.view.cli;
 
-import edu.ntnu.iir.bidata.model.NewBoardGame;
+import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.Player;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,9 +12,9 @@ public class CommandLineInterface {
 
   private static final Logger LOGGER = Logger.getLogger(CommandLineInterface.class.getName());
   private final Scanner scanner;
-  private final NewBoardGame game;
+  private final BoardGame game;
 
-  public CommandLineInterface(NewBoardGame game) {
+  public CommandLineInterface(BoardGame game) {
     this.game = game;
     this.scanner = new Scanner(System.in);
     LOGGER.info("CommandLineInterface initialized");
@@ -46,7 +46,7 @@ public class CommandLineInterface {
       System.out.println("Current position: " + currentPlayer.getCurrentPosition());
       System.out.print("Press Enter to roll the dice...");
       scanner.nextLine();
-      NewBoardGame.MoveResult moveResult = game.makeMoveWithResult();
+      BoardGame.MoveResult moveResult = game.makeMoveWithResult();
       StringBuilder diceStr = new StringBuilder();
       int steps = 0;
       if (moveResult.diceValues != null && moveResult.diceValues.length > 0) {
