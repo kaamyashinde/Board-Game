@@ -38,7 +38,7 @@ public class LudoGameUI {
 
   private static final Logger LOGGER = Logger.getLogger(LudoGameUI.class.getName());
   private final Stage primaryStage;
-  private final List<String> players;
+  private final List<Player> players;
   private final String[] playerColors = {"Red", "Green", "Yellow", "Blue"};
   private final Color[] colorValues = {
       Color.web("#FF0000"), // Red
@@ -70,7 +70,7 @@ public class LudoGameUI {
    * @param primaryStage The primary stage to use for the game UI
    * @param players      List of player names
    */
-  public LudoGameUI(Stage primaryStage, List<String> players) {
+  public LudoGameUI(Stage primaryStage, List<Player> players) {
     LOGGER.info("Initializing Ludo Game UI with players: " + players);
     this.primaryStage = primaryStage;
     // Ensure we have at most 4 players
@@ -157,7 +157,7 @@ public class LudoGameUI {
     LOGGER.info("Initializing player tokens");
     // Initialize tokens for each player
     for (int i = 0; i < players.size(); i++) {
-      String playerName = players.get(i);
+      String playerName = players.get(i).getName();
       String color = playerColors[i];
       List<Circle> tokens = new ArrayList<>();
 
@@ -187,7 +187,7 @@ public class LudoGameUI {
    */
   private void updateUI() {
     LOGGER.info("Updating UI state");
-    String currentPlayerName = players.get(currentPlayerIndex);
+    String currentPlayerName = players.get(currentPlayerIndex).getName();
     String currentPlayerColor = playerColors[currentPlayerIndex];
 
     currentPlayerLabel.setText(
@@ -289,7 +289,7 @@ public class LudoGameUI {
     playerInfo.getChildren().add(playersTitle);
 
     for (int i = 0; i < players.size(); i++) {
-      String playerName = players.get(i);
+      String playerName = players.get(i).getName();
       String colorName = playerColors[i];
 
       HBox playerRow = new HBox(10);
@@ -594,7 +594,7 @@ public class LudoGameUI {
     // Find the player index by name
     int playerIndex = -1;
     for (int i = 0; i < players.size(); i++) {
-      if (players.get(i).equals(player.getName())) {
+      if (players.get(i).getName().equals(player.getName())) {
         playerIndex = i;
         break;
       }

@@ -3,7 +3,7 @@ package edu.ntnu.iir.bidata.model.board;
 import edu.ntnu.iir.bidata.model.exception.GameException;
 import edu.ntnu.iir.bidata.model.tile.*;
 import java.util.List;
-
+import edu.ntnu.iir.bidata.model.Player;
 public class BoardFactory {
 
     /**
@@ -12,7 +12,7 @@ public class BoardFactory {
      * @param players The player list (needed for SwitchPositionAction).
      * @return A fully initialized Board.
      */
-    public static Board createStandardBoard(int boardSize, List<edu.ntnu.iir.bidata.model.Player> players) {
+    public static Board createStandardBoard(int boardSize, List<Player> players) {
         Board board = new Board(boardSize);
 
         // Add tiles and actions

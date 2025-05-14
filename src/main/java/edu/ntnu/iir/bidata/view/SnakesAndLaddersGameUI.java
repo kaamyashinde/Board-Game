@@ -19,6 +19,7 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.logging.Level;
 
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ public class SnakesAndLaddersGameUI {
     private VBox playerPanel;
     private Button rollDiceBtn;
     private Label statusLabel;
-    private List<String> playerNames;
+    private List<Player> playerNames;
     private GameController controller;
 
     private final int TILE_SIZE = 50;
@@ -53,7 +54,7 @@ public class SnakesAndLaddersGameUI {
      * @param primaryStage The primary stage
      * @param playerNames List of player names selected in the menu
      */
-    public SnakesAndLaddersGameUI(Stage primaryStage, List<String> playerNames) {
+    public SnakesAndLaddersGameUI(Stage primaryStage, List<Player> playerNames) {
         LOGGER.info("Initializing Snakes and Ladders Game UI with players: " + playerNames);
         this.primaryStage = primaryStage;
         this.playerNames = playerNames;
@@ -62,7 +63,7 @@ public class SnakesAndLaddersGameUI {
         if (this.playerNames == null || this.playerNames.isEmpty()) {
             LOGGER.warning("No players provided, adding default player");
             this.playerNames = new ArrayList<>();
-            this.playerNames.add("Player 1");
+            this.playerNames.add(new Player("Player 1"));
         }
 
         setupGamePage();
@@ -76,7 +77,7 @@ public class SnakesAndLaddersGameUI {
     public void setController(GameController controller) {
         LOGGER.info("Setting game controller");
         this.controller = controller;
-        controller.setPlayerNames(playerNames);
+        controller.setPlayerNames(playerNames.stream().map(Player::getName).collect(Collectors.toList()));
         updateCurrentPlayerIndicator(controller.getCurrentSnakesAndLaddersPlayerName());
     }
 
@@ -127,7 +128,7 @@ public class SnakesAndLaddersGameUI {
 
         // Create player tokens and labels based on selected players
         for (int i = 0; i < playerNames.size(); i++) {
-            String playerName = playerNames.get(i);
+            String playerName = playerNames.get(i).getName();
 
             // Create player info section
             VBox playerBox = new VBox(5);
@@ -185,9 +186,9 @@ public class SnakesAndLaddersGameUI {
      */
     private void initializePlayerPositions() {
         LOGGER.info("Initializing player positions");
-        for (String playerName : playerNames) {
+        for (Player player : playerNames) {
             // Move token to starting position
-            movePlayerToken(playerName, 0);
+            movePlayerToken(player.getName(), 0);
         }
     }
 
@@ -375,8 +376,8 @@ public class SnakesAndLaddersGameUI {
         // The board is already displayed in the UI
         // This would update all player positions based on the model
         if (controller != null) {
-            for (String playerName : playerNames) {
-                updatePlayerPosition(playerName);
+            for (Player player : playerNames) {
+                updatePlayerPosition(player.getName());
             }
         }
     }

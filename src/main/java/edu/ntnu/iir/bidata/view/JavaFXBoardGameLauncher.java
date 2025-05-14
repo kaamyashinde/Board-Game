@@ -2,6 +2,10 @@ package edu.ntnu.iir.bidata.view;
 
 import edu.ntnu.iir.bidata.controller.GameController;
 import edu.ntnu.iir.bidata.model.NewBoardGame;
+import edu.ntnu.iir.bidata.model.Player;
+import edu.ntnu.iir.bidata.model.board.Board;
+import edu.ntnu.iir.bidata.model.board.BoardFactory;
+
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -58,7 +62,10 @@ public class JavaFXBoardGameLauncher extends Application {
   private void showSnakesAndLaddersMenu(Stage stage) {
     LOGGER.info("Showing Snakes and Ladders menu");
     SnakesAndLaddersMenuUI menuUI = new SnakesAndLaddersMenuUI(stage,
-        selectedPlayers -> showSnakesAndLaddersGameBoard(stage, selectedPlayers));
+        selectedPlayerNames -> {
+            List<Player> players = selectedPlayerNames.stream().map(Player::new).toList();
+            showSnakesAndLaddersGameBoard(stage, players);
+        });
   }
 
   /**
@@ -69,7 +76,10 @@ public class JavaFXBoardGameLauncher extends Application {
   private void showLudoMenu(Stage stage) {
     LOGGER.info("Showing Ludo menu");
     LudoMenuUI menuUI = new LudoMenuUI(stage,
-        selectedPlayers -> showLudoGameBoard(stage, selectedPlayers));
+        selectedPlayerNames -> {
+            List<Player> players = selectedPlayerNames.stream().map(Player::new).toList();
+            showLudoGameBoard(stage, players);
+        });
   }
 
   /**
@@ -78,14 +88,16 @@ public class JavaFXBoardGameLauncher extends Application {
    * @param stage   The primary stage to show the game on
    * @param players The list of player names to use in the game
    */
-  private void showSnakesAndLaddersGameBoard(Stage stage, List<String> players) {
+  private void showSnakesAndLaddersGameBoard(Stage stage, List<Player> players) {
     LOGGER.info("Initializing Snakes and Ladders game with players: " + players);
     try {
       // Create view
       SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(stage, players);
 
-      // Create model (using a default 100-tile board)
-      NewBoardGame boardGame = new NewBoardGame(1, 100);
+      // Create model (using a default 100-tile board) 
+      //TODO: Create a snakes and ladders board in factory
+      Board board = BoardFactory.createStandardBoard(100, players);
+      NewBoardGame boardGame = new NewBoardGame(board, 1);
 
       // Create controller and connect it with the view
       GameController controller = new GameController(boardGame);
@@ -105,14 +117,15 @@ public class JavaFXBoardGameLauncher extends Application {
    * @param stage   The primary stage to show the game on
    * @param players The list of player names to use in the game
    */
-  private void showLudoGameBoard(Stage stage, List<String> players) {
+  private void showLudoGameBoard(Stage stage, List<Player> players) {
     LOGGER.info("Initializing Ludo game with players: " + players);
     try {
       // Create view
       LudoGameUI gameUI = new LudoGameUI(stage, players);
 
       // Create model
-      NewBoardGame boardGame = new NewBoardGame(1, 52); // Typical Ludo board size
+      Board board = BoardFactory.createStandardBoard(100, players);
+      NewBoardGame boardGame = new NewBoardGame(board, 1);
 
       // Create controller and connect it with the view
       GameController controller = new GameController(boardGame);
