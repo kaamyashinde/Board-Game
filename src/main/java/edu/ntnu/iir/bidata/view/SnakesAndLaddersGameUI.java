@@ -3,6 +3,7 @@ package edu.ntnu.iir.bidata.view;
 import edu.ntnu.iir.bidata.controller.GameController;
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.tile.TileAction;
+import edu.ntnu.iir.bidata.view.common.DiceView;
 import javafx.animation.PauseTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;

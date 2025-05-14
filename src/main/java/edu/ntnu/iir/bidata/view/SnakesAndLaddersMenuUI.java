@@ -12,6 +12,9 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+
+import edu.ntnu.iir.bidata.view.common.BoardManagementUI;
+import edu.ntnu.iir.bidata.view.common.PlayerSelectionUI;
 import lombok.Getter;
 
 public class SnakesAndLaddersMenuUI {

@@ -1,4 +1,4 @@
-package edu.ntnu.iir.bidata.view;
+package edu.ntnu.iir.bidata.view.common;
 
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.Player;

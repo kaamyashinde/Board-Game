@@ -1,10 +1,14 @@
-package edu.ntnu.iir.bidata.view;
+package edu.ntnu.iir.bidata.view.common;
 
 import edu.ntnu.iir.bidata.controller.GameController;
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.board.Board;
 import edu.ntnu.iir.bidata.model.board.BoardFactory;
+import edu.ntnu.iir.bidata.view.LudoGameUI;
+import edu.ntnu.iir.bidata.view.LudoMenuUI;
+import edu.ntnu.iir.bidata.view.SnakesAndLaddersGameUI;
+import edu.ntnu.iir.bidata.view.SnakesAndLaddersMenuUI;
 
 import java.util.List;
 import java.util.logging.Level;
