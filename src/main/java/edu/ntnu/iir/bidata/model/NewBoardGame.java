@@ -40,19 +40,16 @@ public class NewBoardGame {
      * @param numberOfDice The number of dice to use in the game
      * @throws IllegalArgumentException if boardSize or numberOfDice is invalid
      */
-    public NewBoardGame(int boardSize, int numberOfDice) {
-        ParameterValidation.validateNonZeroPositiveInteger(boardSize, "board size");
+    public NewBoardGame(Board board, int numberOfDice) {
         ParameterValidation.validateNonZeroPositiveInteger(numberOfDice, "number of dice");
         
-        this.board = new Board(boardSize);
+        this.board = board;
         this.players = new ArrayList<>();
         this.dice = new Dice(numberOfDice);
         this.currentPlayerIndex = 0;
         this.gameOver = false;
         this.gameInitialized = false;
-        
-        // Initialize the board with connected tiles
-        initializeBoard();
+
     }
 
     /**

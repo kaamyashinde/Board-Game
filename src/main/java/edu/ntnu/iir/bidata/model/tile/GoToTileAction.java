@@ -58,4 +58,8 @@ public class GoToTileAction implements TileAction {
         
         player.setCurrentTile(targetTile);
     }
+
+    public int getTargetTileId() {
+        return targetTileId;
+    }
 } 
