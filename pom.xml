@@ -83,7 +83,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>edu.ntnu.iir.bidata.view.JavaFXBoardGameLauncher</mainClass>
+                    <mainClass>edu.ntnu.iir.bidata.view.common.JavaFXBoardGameLauncher</mainClass>
                 </configuration>
             </plugin>
         </plugins>
