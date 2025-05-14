@@ -22,6 +22,7 @@ import java.util.List;
 public class BoardManagementUI {
   private final Stage ownerStage;
   private List<String> boardsList = new ArrayList<>();
+  private edu.ntnu.iir.bidata.model.board.Board currentBoard = null;
 
   /**
    * Creates a new board management UI class
@@ -198,14 +199,16 @@ public class BoardManagementUI {
       boardListBox.getChildren().add(boardEntry);
     }
 
-    // Create bottom buttons (ADD and REMOVE)
+    // Create bottom buttons (ADD, REMOVE, LOAD JSON, SAVE JSON)
     HBox buttonsBox = new HBox(30);
     buttonsBox.setAlignment(Pos.CENTER);
 
     Button addButton = createStyledButton("ADD", 120, 40);
     Button removeButton = createStyledButton("REMOVE", 120, 40);
+    Button loadJsonButton = createStyledButton("LOAD FROM JSON", 180, 40);
+    Button saveJsonButton = createStyledButton("SAVE TO JSON", 180, 40);
 
-    buttonsBox.getChildren().addAll(addButton, removeButton);
+    buttonsBox.getChildren().addAll(addButton, removeButton, loadJsonButton, saveJsonButton);
 
     // Handle button actions
     addButton.setOnAction(e -> {
@@ -218,6 +221,16 @@ public class BoardManagementUI {
       showRemoveBoardDialog();
     });
 
+    loadJsonButton.setOnAction(e -> {
+      loadDialog.close();
+      loadBoardFromJson();
+    });
+
+    saveJsonButton.setOnAction(e -> {
+      loadDialog.close();
+      saveBoardToJson();
+    });
+
     // Add all components to the layout
     layout.setTop(titlePane);
     BorderPane.setAlignment(titlePane, Pos.CENTER);
@@ -227,7 +240,7 @@ public class BoardManagementUI {
     layout.setBottom(buttonsBox);
     BorderPane.setMargin(buttonsBox, new Insets(20, 0, 0, 0));
 
-    Scene scene = new Scene(layout, 400, 500);
+    Scene scene = new Scene(layout, 600, 500);
     loadDialog.setScene(scene);
     loadDialog.showAndWait();
   }
@@ -258,5 +271,43 @@ public class BoardManagementUI {
     alert.setHeaderText(null);
     alert.setContentText(message);
     alert.showAndWait();
+  }
+
+  private void loadBoardFromJson() {
+    FileChooser fileChooser = new FileChooser();
+    fileChooser.setTitle("Load Board from JSON");
+    fileChooser.getExtensionFilters().add(
+        new FileChooser.ExtensionFilter("JSON Files", "*.json")
+    );
+    File file = fileChooser.showOpenDialog(ownerStage);
+    if (file != null) {
+      try {
+        currentBoard = new edu.ntnu.iir.bidata.filehandling.board.BoardFileReaderGson().readBoard(file.toPath());
+        showAlert("Board loaded from JSON file!");
+      } catch (Exception e) {
+        showAlert("Error loading board: " + e.getMessage());
+      }
+    }
+  }
+
+  private void saveBoardToJson() {
+    // For demo: create a standard board if none loaded
+    if (currentBoard == null) {
+      currentBoard = edu.ntnu.iir.bidata.model.board.BoardFactory.createStandardBoard(16, new java.util.ArrayList<>());
+    }
+    FileChooser fileChooser = new FileChooser();
+    fileChooser.setTitle("Save Board to JSON");
+    fileChooser.getExtensionFilters().add(
+        new FileChooser.ExtensionFilter("JSON Files", "*.json")
+    );
+    File file = fileChooser.showSaveDialog(ownerStage);
+    if (file != null) {
+      try {
+        new edu.ntnu.iir.bidata.filehandling.board.BoardFileWriterGson().writeBoard(currentBoard, file.toPath());
+        showAlert("Board saved to JSON file!");
+      } catch (Exception e) {
+        showAlert("Error saving board: " + e.getMessage());
+      }
+    }
   }
 }
