@@ -1,6 +1,6 @@
 package edu.ntnu.iir.bidata.controller;
 
-import edu.ntnu.iir.bidata.model.NewBoardGame;
+import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.tile.TileAction;
 import java.util.HashMap;
@@ -16,7 +16,7 @@ import lombok.Setter;
 public class GameController {
 
   private static final Logger LOGGER = Logger.getLogger(GameController.class.getName());
-  private final NewBoardGame boardGame;
+  private final BoardGame boardGame;
   // Snakes and Ladders specific data
   private final int[][] snakes = {
       {99, 41}, {95, 75}, {89, 86}, {78, 15}, {38, 2}, {29, 11}
@@ -40,7 +40,7 @@ public class GameController {
   @Setter
   private boolean movingPiece = false;
 
-  public GameController(NewBoardGame boardGame) {
+  public GameController(BoardGame boardGame) {
     this.boardGame = boardGame;
     LOGGER.info("GameController initialized");
   }
@@ -141,7 +141,7 @@ public class GameController {
     if (!boardGame.isGameOver()) {
       Player currentPlayer = boardGame.getCurrentPlayer();
       // Handle turn logic here
-    } else if (boardGame instanceof NewBoardGame) {
+    } else if (boardGame instanceof BoardGame) {
       // For Snakes and Ladders specific turn management
       String currentPlayer = playerNames.get(currentPlayerIndex);
       // Handle turn logic here
@@ -229,7 +229,7 @@ public class GameController {
 
   public void rollDice() {
     LOGGER.info("Rolling dice");
-    NewBoardGame.MoveResult result = boardGame.makeMoveWithResult();
+    BoardGame.MoveResult result = boardGame.makeMoveWithResult();
     if (result != null) {
       LOGGER.info("Dice rolled: " + result.diceValues);
     }
@@ -238,7 +238,7 @@ public class GameController {
   public void movePlayer() {
     Player currentPlayer = boardGame.getCurrentPlayer();
     int oldPosition = currentPlayer.getCurrentPosition();
-    NewBoardGame.MoveResult result = boardGame.makeMoveWithResult();
+    BoardGame.MoveResult result = boardGame.makeMoveWithResult();
     if (result != null) {
       LOGGER.info(String.format("Player %s moved from position %d to %d",
           currentPlayer.getName(), oldPosition, result.posAfterMove));
@@ -259,9 +259,9 @@ public class GameController {
     return player;
   }
 
-  public NewBoardGame.MoveResult makeMove() {
+  public BoardGame.MoveResult makeMove() {
     LOGGER.info("Making move for current player");
-    NewBoardGame.MoveResult result = boardGame.makeMoveWithResult();
+    BoardGame.MoveResult result = boardGame.makeMoveWithResult();
     if (result != null) {
       LOGGER.info(String.format("Player %s moved from %d to %d (after action: %d). Action: %s",
           result.playerName, result.prevPos, result.posAfterMove, result.posAfterAction,

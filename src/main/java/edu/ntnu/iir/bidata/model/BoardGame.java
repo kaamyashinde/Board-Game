@@ -24,7 +24,7 @@ import java.util.List;
  * @version 1.0.0
  */
 @Getter
-public class NewBoardGame {
+public class BoardGame {
     private final Board board;
     private final List<Player> players;
     private final Dice dice;
@@ -40,7 +40,7 @@ public class NewBoardGame {
      * @param numberOfDice The number of dice to use in the game
      * @throws IllegalArgumentException if boardSize or numberOfDice is invalid
      */
-    public NewBoardGame(Board board, int numberOfDice) {
+    public BoardGame(Board board, int numberOfDice) {
         ParameterValidation.validateNonZeroPositiveInteger(numberOfDice, "number of dice");
         
         this.board = board;

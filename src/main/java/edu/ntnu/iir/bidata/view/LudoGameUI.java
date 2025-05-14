@@ -1,7 +1,7 @@
 package edu.ntnu.iir.bidata.view;
 
 import edu.ntnu.iir.bidata.controller.GameController;
-import edu.ntnu.iir.bidata.model.NewBoardGame;
+import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.tile.TileAction;
 import java.util.ArrayList;
@@ -631,7 +631,7 @@ public class LudoGameUI {
   private void handleDiceRoll() {
     LOGGER.info("Handling dice roll");
     try {
-      NewBoardGame.MoveResult result = controller.makeMove();
+      BoardGame.MoveResult result = controller.makeMove();
       if (result != null) {
         LOGGER.info(String.format("Player %s rolled %s and moved from %d to %d",
             result.playerName, result.diceValues, result.prevPos, result.posAfterMove));

@@ -1,6 +1,6 @@
 package edu.ntnu.iir.bidata;
 
-import edu.ntnu.iir.bidata.model.NewBoardGame;
+import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.board.Board;
 import edu.ntnu.iir.bidata.model.board.BoardFactory;
 import edu.ntnu.iir.bidata.ui.CommandLineInterface;
@@ -18,7 +18,7 @@ public class Main {
         try {
             // Create a new game with a board size of 25 and 1 die
             Board board = BoardFactory.createStandardBoard(100, null);
-            NewBoardGame game = new NewBoardGame(board, 1);
+            BoardGame game = new BoardGame(board, 1);
             LOGGER.info("Game initialized with board size 25 and 1 die");
             
             // Run the command line interface
