@@ -20,4 +20,20 @@ public class PlayerFileReaderCSV implements PlayerFileReader {
             throw new RuntimeException("Failed to read player from CSV file", e);
         }
     }
+
+    @Override
+    public java.util.List<Player> readPlayers(Path filePath) {
+        java.util.List<Player> players = new java.util.ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath.toFile()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.trim().isEmpty()) {
+                    players.add(new Player(line.trim()));
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read players from CSV file", e);
+        }
+        return players;
+    }
 }

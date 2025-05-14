@@ -55,6 +55,7 @@ public class PlayerSelectionUI {
     centerContent.setAlignment(Pos.CENTER);
 
     Button csvLoadButton = createStyledButton("load from CSV File", 200, 50);
+    Button csvSaveButton = createStyledButton("save to CSV File", 200, 50);
 
     playersListView.setPrefHeight(300);
     playersListView.setMaxWidth(300);
@@ -94,12 +95,13 @@ public class PlayerSelectionUI {
     statusLabel.setStyle("-fx-text-fill: #006400; -fx-font-size: 14px;");
 
     // Add everything to the center content
-    centerContent.getChildren().addAll(csvLoadButton, playersListView, limitLabels, playerControls, statusLabel);
+    centerContent.getChildren().addAll(csvLoadButton, csvSaveButton, playersListView, limitLabels, playerControls, statusLabel);
 
     root.setCenter(centerContent);
 
     // Button actions
     csvLoadButton.setOnAction(e -> loadPlayersFromCSV());
+    csvSaveButton.setOnAction(e -> savePlayersToCSV());
     addPlayerButton.setOnAction(e -> showAddPlayerDialog());
     removePlayerButton.setOnAction(e -> showRemovePlayerDialog());
 
@@ -135,20 +137,45 @@ public class PlayerSelectionUI {
 
     File file = fileChooser.showOpenDialog(stage);
     if (file != null) {
-      try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-        String line;
+      try {
+        java.util.List<edu.ntnu.iir.bidata.model.Player> loadedPlayers =
+            new edu.ntnu.iir.bidata.filehandling.player.PlayerFileReaderCSV().readPlayers(file.toPath());
         int count = 0;
-        while ((line = reader.readLine()) != null && count < 5) {
-          // Simple CSV parsing - assuming one name per line
-          String name = line.trim();
-          if (!name.isEmpty() && !playersList.contains(name)) {
+        for (edu.ntnu.iir.bidata.model.Player player : loadedPlayers) {
+          String name = player.getName();
+          if (!name.isEmpty() && !playersList.contains(name) && count < 5) {
             playersList.add(name);
             count++;
           }
         }
         statusLabel.setText("Loaded " + count + " players from CSV");
-      } catch (IOException e) {
+      } catch (Exception e) {
         statusLabel.setText("Error loading CSV: " + e.getMessage());
+      }
+    }
+  }
+
+  private void savePlayersToCSV() {
+    if (playersList.isEmpty()) {
+      statusLabel.setText("No players to save!");
+      return;
+    }
+    FileChooser fileChooser = new FileChooser();
+    fileChooser.setTitle("Save Players to CSV File");
+    fileChooser.getExtensionFilters().add(
+        new FileChooser.ExtensionFilter("CSV Files", "*.csv")
+    );
+    File file = fileChooser.showSaveDialog(stage);
+    if (file != null) {
+      try {
+        java.util.List<edu.ntnu.iir.bidata.model.Player> playersToSave = new java.util.ArrayList<>();
+        for (String name : playersList) {
+          playersToSave.add(new edu.ntnu.iir.bidata.model.Player(name));
+        }
+        new edu.ntnu.iir.bidata.filehandling.player.PlayerFileWriterCSV().writePlayers(playersToSave, file.toPath());
+        statusLabel.setText("Saved " + playersList.size() + " players to CSV");
+      } catch (Exception e) {
+        statusLabel.setText("Error saving CSV: " + e.getMessage());
       }
     }
   }
