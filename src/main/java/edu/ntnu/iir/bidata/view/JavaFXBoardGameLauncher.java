@@ -96,7 +96,7 @@ public class JavaFXBoardGameLauncher extends Application {
 
       // Create model (using a default 100-tile board) 
       //TODO: Create a snakes and ladders board in factory
-      Board board = BoardFactory.createStandardBoard(100, players);
+      Board board = BoardFactory.createSnakesAndLaddersBoard(100, players);
       NewBoardGame boardGame = new NewBoardGame(board, 1);
 
       // Create controller and connect it with the view
@@ -124,7 +124,7 @@ public class JavaFXBoardGameLauncher extends Application {
       LudoGameUI gameUI = new LudoGameUI(stage, players);
 
       // Create model
-      Board board = BoardFactory.createStandardBoard(100, players);
+      Board board = BoardFactory.createLudoBoard(56, players);
       NewBoardGame boardGame = new NewBoardGame(board, 1);
 
       // Create controller and connect it with the view
