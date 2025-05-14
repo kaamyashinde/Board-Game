@@ -218,7 +218,9 @@ public class SnakesAndLaddersGameUI implements Observer {
 
             // Check for win condition
             if (hasWon) {
-                showWinner(new Player(currentPlayer));
+                // Instead of showWinner, just update the status label and disable the button
+                statusLabel.setText("🏆 " + currentPlayer + " WINS! 🏆");
+                rollDiceBtn.setDisable(true);
                 return;
             }
 
@@ -360,66 +362,13 @@ public class SnakesAndLaddersGameUI implements Observer {
         return new int[] {x, y};
     }
 
-    // Remove all @Override methods and replace with regular methods
-    public void showWelcomeMessage() {
-        statusLabel.setText("Welcome to Snakes & Ladders!");
-    }
-
-    public void showPlayerTurn(Player player) {
-        statusLabel.setText(player.getName() + "'s Turn");
-    }
-
-    public void showDiceRoll(Player player, int rollResult) {
-        statusLabel.setText(player.getName() + " rolled a " + rollResult);
-        diceView.setValue(rollResult);
-    }
-
-    public void updateBoard() {
-        // The board is already displayed in the UI
-        // This would update all player positions based on the model
+    @Override
+    public void update() {
+        // Instead of updateBoard, update all player positions here
         if (controller != null) {
             for (Player player : playerNames) {
                 updatePlayerPosition(player.getName());
             }
-        }
-    }
-
-    public void showWinner(Player winner) {
-        statusLabel.setText("🏆 " + winner.getName() + " WINS! 🏆");
-        rollDiceBtn.setDisable(true);
-
-        // Create a winner announcement
-        Stage winnerStage = new Stage();
-        winnerStage.initOwner(primaryStage);
-        winnerStage.setTitle("Game Over");
-
-        VBox winBox = new VBox(20);
-        winBox.setAlignment(Pos.CENTER);
-        winBox.setPadding(new Insets(30));
-        winBox.setStyle("-fx-background-color: #e6fff2;");
-
-        Label winLabel = new Label(winner.getName() + " WINS!");
-        winLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
-
-        Button okButton = new Button("OK");
-        okButton.setStyle("-fx-background-color: #bdebc8; -fx-font-size: 16px;");
-        okButton.setOnAction(e -> winnerStage.close());
-
-        winBox.getChildren().addAll(winLabel, okButton);
-
-        Scene winScene = new Scene(winBox, 300, 200);
-        winnerStage.setScene(winScene);
-        winnerStage.show();
-    }
-
-    public void showTileAction(Player player, TileAction action) {
-        statusLabel.setText(player.getName() + " " + action.getDescription());
-    }
-
-    @Override
-    public void update() {
-        updateBoard();
-        if (controller != null) {
             String currentPlayer = controller.getCurrentSnakesAndLaddersPlayerName();
             updateCurrentPlayerIndicator(currentPlayer);
             // Optionally, show winner if game is over (if you have such logic)
