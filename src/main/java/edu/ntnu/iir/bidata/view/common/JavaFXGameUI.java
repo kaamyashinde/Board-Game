@@ -21,11 +21,12 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import edu.ntnu.iir.bidata.model.Observer;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class JavaFXGameUI {
+public class JavaFXGameUI implements Observer {
     private final BoardGame boardGame;
     private final Stage primaryStage;
     private final Map<Player, Circle> playerTokens;
@@ -53,6 +54,7 @@ public class JavaFXGameUI {
         this.statusLabel = new Label();
         this.diceView = new DiceView();
         
+        boardGame.addObserver(this);
         initializeUI();
     }
 
@@ -256,5 +258,23 @@ public class JavaFXGameUI {
 
     public void setNextTurnAction(Runnable action) {
         nextTurnButton.setOnAction(e -> action.run());
+    }
+
+    @Override
+    public void update() {
+        Platform.runLater(() -> {
+            updateBoard();
+            Player currentPlayer = boardGame.getCurrentPlayer();
+            if (currentPlayer != null) {
+                currentPlayerLabel.setText("Current Player: " + currentPlayer.getName());
+                statusLabel.setText(currentPlayer.getName() + "'s turn to roll the dice!");
+            }
+            if (boardGame.isGameOver()) {
+                Player winner = boardGame.getWinner();
+                if (winner != null) {
+                    showWinner(winner);
+                }
+            }
+        });
     }
 } 
