@@ -29,12 +29,13 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import edu.ntnu.iir.bidata.model.Observer;
 
 /**
  * JavaFX UI for the Ludo game board. This class implements the game board interface and game flow
  * for Ludo.
  */
-public class LudoGameUI {
+public class LudoGameUI implements Observer {
 
   private static final Logger LOGGER = Logger.getLogger(LudoGameUI.class.getName());
   private final Stage primaryStage;
@@ -585,82 +586,9 @@ public class LudoGameUI {
     }
   }
 
-  // Remove all @Override methods and replace with regular methods
-  public void showWelcomeMessage() {
-    statusLabel.setText("Welcome to Ludo!");
-  }
-
-  public void showPlayerTurn(Player player) {
-    // Find the player index by name
-    int playerIndex = -1;
-    for (int i = 0; i < players.size(); i++) {
-      if (players.get(i).getName().equals(player.getName())) {
-        playerIndex = i;
-        break;
-      }
-    }
-
-    if (playerIndex >= 0) {
-      currentPlayerIndex = playerIndex;
-      String playerColor = playerColors[playerIndex];
-      currentPlayerLabel.setText("Current Player: " + player.getName() + " (" + playerColor + ")");
-      statusLabel.setText(player.getName() + "'s Turn");
-    }
-  }
-
-  public void showDiceRoll(Player player, int rollResult) {
-    diceValue = rollResult;
-    updateDiceDisplay();
-    statusLabel.setText(player.getName() + " rolled a " + rollResult);
-  }
-
-  public void updateBoard() {
-    // The Ludo board is already displayed
-  }
-
-  public void showWinner(Player winner) {
-    statusLabel.setText("🏆 " + winner.getName() + " WINS! 🏆");
-    statusLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: green;");
-    rollDiceButton.setDisable(true);
-  }
-
-  public void showTileAction(Player player, TileAction action) {
-    statusLabel.setText(player.getName() + " " + action.getDescription());
-  }
-
-  private void handleDiceRoll() {
-    LOGGER.info("Handling dice roll");
-    try {
-      BoardGame.MoveResult result = controller.makeMove();
-      if (result != null) {
-        LOGGER.info(String.format("Player %s rolled %s and moved from %d to %d",
-            result.playerName, result.diceValues, result.prevPos, result.posAfterMove));
-
-        if (result.actionDesc != null && !result.actionDesc.isEmpty()) {
-          LOGGER.info("Tile action occurred: " + result.actionDesc);
-        }
-
-        updateTokenPositions(result.playerName, result.posAfterAction);
-        updateUI();
-
-        if (controller.isGameOver()) {
-          LOGGER.info("Game over - winner: " + result.playerName);
-          showGameOverDialog(result.playerName);
-        }
-      }
-    } catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Error during dice roll", e);
-    }
-  }
-
-  private void updateTokenPositions(String playerName, int newPosition) {
-    LOGGER.info(String.format("Updating token positions for player %s to position %d", playerName,
-        newPosition));
-    // Update token positions based on the game state
-  }
-
-  private void showGameOverDialog(String winnerName) {
-    LOGGER.info("Showing game over dialog for winner: " + winnerName);
-    // Show game over dialog
+  @Override
+  public void update() {
+    updateUI();
+    // Optionally, show winner if game is over (if you have such logic)
   }
 }

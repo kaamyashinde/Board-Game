@@ -103,6 +103,9 @@ public class JavaFXBoardGameLauncher extends Application {
       Board board = BoardFactory.createSnakesAndLaddersBoard(100, players);
       BoardGame boardGame = new BoardGame(board, 1);
 
+      // Register the UI as an observer
+      boardGame.addObserver(gameUI);
+
       // Create controller and connect it with the view
       GameController controller = new GameController(boardGame);
       gameUI.setController(controller);
@@ -130,6 +133,9 @@ public class JavaFXBoardGameLauncher extends Application {
       // Create model
       Board board = BoardFactory.createLudoBoard(56, players);
       BoardGame boardGame = new BoardGame(board, 1);
+
+      // Register the UI as an observer
+      boardGame.addObserver(gameUI);
 
       // Create controller and connect it with the view
       GameController controller = new GameController(boardGame);

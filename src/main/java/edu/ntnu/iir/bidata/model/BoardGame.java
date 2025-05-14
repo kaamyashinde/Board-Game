@@ -24,7 +24,7 @@ import java.util.List;
  * @version 1.0.0
  */
 @Getter
-public class BoardGame {
+public class BoardGame implements Observable {
     private final Board board;
     private final List<Player> players;
     private final Dice dice;
@@ -32,6 +32,7 @@ public class BoardGame {
     private boolean gameOver;
     private boolean gameInitialized;
     private int roundNumber = 1;
+    private final List<Observer> observers = new ArrayList<>();
 
     /**
      * Constructor for the NewBoardGame class.
@@ -98,7 +99,9 @@ public class BoardGame {
             return false;
         }
         Player player = new Player(playerName);
-        return players.add(player);
+        boolean added = players.add(player);
+        if (added) notifyObservers();
+        return added;
     }
 
     /**
@@ -124,6 +127,7 @@ public class BoardGame {
         currentPlayerIndex = 0;
         gameOver = false;
         gameInitialized = true;
+        notifyObservers();
     }
 
     /**
@@ -158,6 +162,7 @@ public class BoardGame {
             currentPlayer.setSkipNextTurn(false);
             skipTurn = true;
             currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+            notifyObservers();
             return new MoveResult(playerName, prevPos, prevPos, prevPos, new int[0], "Skip Turn");
         }
         dice.rollAllDice();
@@ -178,9 +183,11 @@ public class BoardGame {
                 gameOver = true;
             }
             currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+            notifyObservers();
             return new MoveResult(playerName, prevPos, posAfterMove, posAfterAction, diceValues, actionDesc);
         } catch (GameException e) {
             gameOver = true;
+            notifyObservers();
             return new MoveResult(playerName, prevPos, posAfterMove, posAfterAction, diceValues, actionDesc + " (GameException: " + e.getMessage() + ")");
         }
     }
@@ -242,5 +249,22 @@ public class BoardGame {
      */
     public int[] getCurrentDiceValues() {
         return dice.getLastRolledValues();
+    }
+
+    @Override
+    public void addObserver(Observer observer) {
+        observers.add(observer);
+    }
+
+    @Override
+    public void removeObserver(Observer observer) {
+        observers.remove(observer);
+    }
+
+    @Override
+    public void notifyObservers() {
+        for (Observer observer : observers) {
+            observer.update();
+        }
     }
 }
