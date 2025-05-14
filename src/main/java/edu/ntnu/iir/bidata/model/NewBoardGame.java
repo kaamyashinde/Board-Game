@@ -56,6 +56,28 @@ public class NewBoardGame {
     }
 
     /**
+     * New constructor for the NewBoardGame class that accepts a Board instance.
+     *
+     * @param board The board instance to use for the game
+     * @param numberOfDice The number of dice to use in the game
+     * @throws IllegalArgumentException if board or numberOfDice is invalid
+     */
+    public NewBoardGame(Board board, int numberOfDice) {
+        if (board == null) {
+            throw new IllegalArgumentException("Board cannot be null");
+        }
+        ParameterValidation.validateNonZeroPositiveInteger(numberOfDice, "number of dice");
+
+        this.board = board;
+        this.players = new ArrayList<>();
+        this.dice = new Dice(numberOfDice);
+        this.currentPlayerIndex = 0;
+        this.gameOver = false;
+        this.gameInitialized = false;
+        // No board initialization here; assume board is already set up
+    }
+
+    /**
      * Initializes the board by creating and connecting all tiles.
      */
     private void initializeBoard() {
