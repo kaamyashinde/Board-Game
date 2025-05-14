@@ -3,7 +3,8 @@ package edu.ntnu.iir.bidata;
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.board.Board;
 import edu.ntnu.iir.bidata.model.board.BoardFactory;
-import edu.ntnu.iir.bidata.ui.CommandLineInterface;
+import edu.ntnu.iir.bidata.view.cli.CommandLineInterface;
+
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
