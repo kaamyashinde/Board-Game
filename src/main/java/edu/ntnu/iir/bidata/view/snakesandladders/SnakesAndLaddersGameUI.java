@@ -28,8 +28,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import edu.ntnu.iir.bidata.model.Observer;
 
-public class SnakesAndLaddersGameUI {
+public class SnakesAndLaddersGameUI implements Observer {
     private static final Logger LOGGER = Logger.getLogger(SnakesAndLaddersGameUI.class.getName());
     private final Stage primaryStage;
     private DiceView diceView;
@@ -413,5 +414,15 @@ public class SnakesAndLaddersGameUI {
 
     public void showTileAction(Player player, TileAction action) {
         statusLabel.setText(player.getName() + " " + action.getDescription());
+    }
+
+    @Override
+    public void update() {
+        updateBoard();
+        if (controller != null) {
+            String currentPlayer = controller.getCurrentSnakesAndLaddersPlayerName();
+            updateCurrentPlayerIndicator(currentPlayer);
+            // Optionally, show winner if game is over (if you have such logic)
+        }
     }
 }

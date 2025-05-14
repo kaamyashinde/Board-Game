@@ -29,12 +29,13 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import edu.ntnu.iir.bidata.model.Observer;
 
 /**
  * JavaFX UI for the Ludo game board. This class implements the game board interface and game flow
  * for Ludo.
  */
-public class LudoGameUI {
+public class LudoGameUI implements Observer {
 
   private static final Logger LOGGER = Logger.getLogger(LudoGameUI.class.getName());
   private final Stage primaryStage;
@@ -662,5 +663,12 @@ public class LudoGameUI {
   private void showGameOverDialog(String winnerName) {
     LOGGER.info("Showing game over dialog for winner: " + winnerName);
     // Show game over dialog
+  }
+
+  @Override
+  public void update() {
+    updateBoard();
+    updateUI();
+    // Optionally, show winner if game is over (if you have such logic)
   }
 }
