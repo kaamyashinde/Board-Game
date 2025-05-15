@@ -21,6 +21,7 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -64,6 +65,7 @@ public class LudoGameUI implements Observer {
   private Label statusLabel;
   private Label currentPlayerLabel;
   private LudoController controller;
+  private Pane tokenLayer;
 
   /**
    * Creates a new Ludo Game UI with the specified players.
@@ -89,26 +91,14 @@ public class LudoGameUI implements Observer {
    */
   private void initializePathCoordinates() {
     LOGGER.info("Initializing path coordinates for each player color");
-    // Initialize path coordinates for each color
-    // Red path (bottom-left)
-    List<int[]> redPath = new ArrayList<>();
-    // Add path coordinates here (x,y grid coordinates)
-    pathCoordinates.put("Red", redPath);
-
-    // Green path (top-left)
-    List<int[]> greenPath = new ArrayList<>();
-    // Add path coordinates here
-    pathCoordinates.put("Green", greenPath);
-
-    // Yellow path (top-right)
-    List<int[]> yellowPath = new ArrayList<>();
-    // Add path coordinates here
-    pathCoordinates.put("Yellow", yellowPath);
-
-    // Blue path (bottom-right)
-    List<int[]> bluePath = new ArrayList<>();
-    // Add path coordinates here
-    pathCoordinates.put("Blue", bluePath);
+    // Example: fill with a simple path for demonstration (diagonal, replace with your actual path)
+    for (String color : playerColors) {
+      List<int[]> path = new ArrayList<>();
+      for (int i = 0; i < 52; i++) {
+        path.add(new int[]{i % 15, i % 15});
+      }
+      pathCoordinates.put(color, path);
+    }
   }
 
   /**
@@ -139,7 +129,29 @@ public class LudoGameUI implements Observer {
     root.setTop(topBar);
 
     // Center: Game board
-    StackPane boardContainer = setupGameBoard();
+    StackPane boardContainer = new StackPane();
+    boardContainer.setPadding(new Insets(10));
+
+    // Create a 15x15 grid for the board
+    boardGrid = new GridPane();
+    boardGrid.setAlignment(Pos.CENTER);
+    boardGrid.setHgap(1);
+    boardGrid.setVgap(1);
+    for (int row = 0; row < 15; row++) {
+      for (int col = 0; col < 15; col++) {
+        StackPane cell = createBoardCell(row, col);
+        boardGrid.add(cell, col, row);
+      }
+    }
+    boardGrid.setStyle("-fx-background-color: black; -fx-padding: 2;");
+    boardGrid.setEffect(new DropShadow(10, Color.GRAY));
+
+    // Add token layer above the board
+    tokenLayer = new Pane();
+    tokenLayer.setPickOnBounds(false); // Allow clicks to pass through empty areas
+    tokenLayer.setPrefSize(15 * 40, 15 * 40); // 15x15 grid, 40px per cell
+
+    boardContainer.getChildren().addAll(boardGrid, tokenLayer);
     root.setCenter(boardContainer);
 
     // Right: Controls
@@ -169,17 +181,18 @@ public class LudoGameUI implements Observer {
         token.setStroke(Color.BLACK);
         token.setStrokeWidth(2);
         token.setEffect(new DropShadow(5, Color.BLACK));
-
-        // Position token in home area
-        int[] homePos = homePositions.get(color);
-        token.setTranslateX(homePos[j * 2] * 50);
-        token.setTranslateY(homePos[j * 2 + 1] * 50);
-
+        tokenLayer.getChildren().add(token); // Add to tokenLayer, not grid
         tokens.add(token);
         tokenPositions.put(token, -1); // -1 indicates token is in home
       }
-
       playerTokens.put(playerName, tokens);
+    }
+    // Place all tokens in their home positions
+    for (int i = 0; i < players.size(); i++) {
+      String playerName = players.get(i).getName();
+      for (int j = 0; j < 4; j++) {
+        updateTokenPosition(playerName, j, -1);
+      }
     }
   }
 
@@ -215,35 +228,6 @@ public class LudoGameUI implements Observer {
 
     topBar.getChildren().addAll(currentPlayerLabel, statusLabel);
     return topBar;
-  }
-
-  /**
-   * Set up the game board grid
-   */
-  private StackPane setupGameBoard() {
-    StackPane boardContainer = new StackPane();
-    boardContainer.setPadding(new Insets(10));
-
-    // Create a 15x15 grid for the board
-    boardGrid = new GridPane();
-    boardGrid.setAlignment(Pos.CENTER);
-    boardGrid.setHgap(1);
-    boardGrid.setVgap(1);
-
-    // Create the board cells
-    for (int row = 0; row < 15; row++) {
-      for (int col = 0; col < 15; col++) {
-        StackPane cell = createBoardCell(row, col);
-        boardGrid.add(cell, col, row);
-      }
-    }
-
-    // Add a border and shadow to the board
-    boardGrid.setStyle("-fx-background-color: black; -fx-padding: 2;");
-    boardGrid.setEffect(new DropShadow(10, Color.GRAY));
-
-    boardContainer.getChildren().add(boardGrid);
-    return boardContainer;
   }
 
   /**
@@ -511,18 +495,43 @@ public class LudoGameUI implements Observer {
    * Update token position in UI
    */
   private void updateTokenPosition(String playerName, int tokenIndex, int position) {
-    // Get the token
     List<Circle> tokens = playerTokens.get(playerName);
     if (tokens == null || tokenIndex < 0 || tokenIndex >= tokens.size()) return;
     Circle token = tokens.get(tokenIndex);
+    int cellSize = 40;
     // Home position
     if (position == -1) {
-      // Place in home area
-      String color = playerColors[currentPlayerIndex];
-      int[] homePos = homePositions.get(color);
-      int x = homePos[tokenIndex * 2];
-      int y = homePos[tokenIndex * 2 + 1];
-      placeTokenAtGridPosition(token, x, y);
+      // Find the correct color for this player
+      String color = null;
+      for (int i = 0; i < players.size(); i++) {
+        if (players.get(i).getName().equals(playerName)) {
+          color = playerColors[i];
+          break;
+        }
+      }
+      if (color == null) color = playerColors[0]; // fallback
+      // Define the top-left cell of the home area for each color
+      int[][] homeBase = {
+        {1, 1},   // Red
+        {1, 10},  // Green
+        {10, 1},  // Yellow
+        {10, 10}  // Blue
+      };
+      int colorIdx = 0;
+      for (int i = 0; i < playerColors.length; i++) {
+        if (playerColors[i].equals(color)) {
+          colorIdx = i;
+          break;
+        }
+      }
+      int baseX = homeBase[colorIdx][0];
+      int baseY = homeBase[colorIdx][1];
+      // 2x2 grid offsets for 4 tokens
+      int[][] offsets = {{0,0},{1,0},{0,1},{1,1}};
+      int x = baseX + offsets[tokenIndex][0];
+      int y = baseY + offsets[tokenIndex][1];
+      token.setLayoutX(x * cellSize + cellSize / 2);
+      token.setLayoutY(y * cellSize + cellSize / 2);
       return;
     }
     // Main path (0-51)
@@ -530,33 +539,11 @@ public class LudoGameUI implements Observer {
     List<int[]> path = pathCoordinates.get(color);
     if (path != null && position >= 0 && position < path.size()) {
       int[] coords = path.get(position);
-      placeTokenAtGridPosition(token, coords[0], coords[1]);
+      token.setLayoutX(coords[0] * cellSize + cellSize / 2);
+      token.setLayoutY(coords[1] * cellSize + cellSize / 2);
       return;
     }
-    // Finish area (optional, if you have finish positions)
-    // You can add logic here for finish area if needed
-  }
-
-  // Place a token at a specific grid position
-  private void placeTokenAtGridPosition(Circle token, int gridX, int gridY) {
-    LOGGER.info(String.format("Placing token at grid position (%d, %d)", gridX, gridY));
-    // Find the cell at the grid position
-    StackPane cell = null;
-    for (javafx.scene.Node node : boardGrid.getChildren()) {
-      if (GridPane.getColumnIndex(node) == gridX && GridPane.getRowIndex(node) == gridY) {
-        cell = (StackPane) node;
-        break;
-      }
-    }
-    if (cell != null) {
-      // Remove from old cell
-      StackPane currentCell = (StackPane) token.getParent();
-      if (currentCell != null) {
-        currentCell.getChildren().remove(token);
-      }
-      // Add to new cell
-      cell.getChildren().add(token);
-    }
+    // Finish area (optional)
   }
 
   /**
