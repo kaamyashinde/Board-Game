@@ -152,13 +152,98 @@ public class LudoController extends BaseGameController {
         return playerTokenFinished.get(playerName);
     }
 
+    public static class MoveResult {
+        public final int tokenIndex;
+        public final int start;
+        public final int end;
+        public final String type; // "normal", "home", "finish", "capture"
+        public MoveResult(int tokenIndex, int start, int end, String type) {
+            this.tokenIndex = tokenIndex;
+            this.start = start;
+            this.end = end;
+            this.type = type;
+        }
+    }
+
     /**
-     * Rolls the dice for the current player
+     * Rolls the dice and returns the value
      */
-    public void rollDiceForLudo() {
+    public int rollDice() {
         boardGame.getDice().rollAllDice();
         diceRolled = true;
-        LOGGER.info("Dice rolled: " + boardGame.getCurrentDiceValues()[0]);
+        int[] values = boardGame.getCurrentDiceValues();
+        return (values != null && values.length > 0) ? values[0] : 0;
+    }
+
+    /**
+     * Returns a list of legal token indices for the current player and dice value
+     */
+    public List<Integer> getLegalMoves(String playerName, int diceValue) {
+        List<Integer> legal = new ArrayList<>();
+        List<Integer> positions = playerTokenPositions.get(playerName);
+        List<Boolean> home = playerTokenHome.get(playerName);
+        List<Boolean> finished = playerTokenFinished.get(playerName);
+        for (int i = 0; i < positions.size(); i++) {
+            if (finished.get(i)) continue;
+            if (home.get(i) && diceValue == 6) legal.add(i);
+            if (!home.get(i) && !finished.get(i)) legal.add(i);
+        }
+        return legal;
+    }
+
+    /**
+     * Moves a token for the player and returns the result
+     */
+    public MoveResult moveToken(String playerName, int tokenIndex, int diceValue) {
+        List<Integer> positions = playerTokenPositions.get(playerName);
+        List<Boolean> home = playerTokenHome.get(playerName);
+        List<Boolean> finished = playerTokenFinished.get(playerName);
+        int start = positions.get(tokenIndex);
+        int end = start;
+        String type = "normal";
+        if (home.get(tokenIndex) && diceValue == 6) {
+            // Move out of home
+            home.set(tokenIndex, false);
+            end = homePositions[playerNames.indexOf(playerName)];
+            positions.set(tokenIndex, end);
+            type = "home";
+        } else if (!home.get(tokenIndex) && !finished.get(tokenIndex)) {
+            // Move on board
+            end = (start + diceValue) % 52;
+            // Check for finish
+            int playerIdx = playerNames.indexOf(playerName);
+            int finishPos = finishPositions[playerIdx];
+            if (start < finishPos && end >= finishPos) {
+                finished.set(tokenIndex, true);
+                type = "finish";
+            }
+            // Capture logic: check if another player's token is at 'end' and not in a safe zone
+            for (String otherPlayer : playerTokenPositions.keySet()) {
+                if (otherPlayer.equals(playerName)) continue;
+                List<Integer> otherPositions = playerTokenPositions.get(otherPlayer);
+                List<Boolean> otherHome = playerTokenHome.get(otherPlayer);
+                List<Boolean> otherFinished = playerTokenFinished.get(otherPlayer);
+                for (int i = 0; i < otherPositions.size(); i++) {
+                    if (!otherHome.get(i) && !otherFinished.get(i) && otherPositions.get(i) == end && !isSafeZone(end)) {
+                        // Send captured token home
+                        otherHome.set(i, true);
+                        otherPositions.set(i, -1);
+                        type = "capture";
+                    }
+                }
+            }
+            positions.set(tokenIndex, end);
+        }
+        return new MoveResult(tokenIndex, start, end, type);
+    }
+
+    // Helper: define safe zones (example: every 8th position is safe)
+    private boolean isSafeZone(int pos) {
+        int[] safeZones = {0, 8, 13, 21, 26, 34, 39, 47};
+        for (int safe : safeZones) {
+            if (pos == safe) return true;
+        }
+        return false;
     }
 
     /**

@@ -366,8 +366,14 @@ public class LudoGameUI implements Observer {
 
     timeline.setCycleCount(10);
     timeline.setOnFinished(event -> {
+      // Use controller to roll dice and get value
+      String currentPlayerName = players.get(currentPlayerIndex).getName();
+      diceValue = controller.rollDice();
+      updateDiceDisplay();
+      // Highlight movable tokens using controller's legal moves
+      List<Integer> legalMoves = controller.getLegalMoves(currentPlayerName, diceValue);
+      highlightMovableTokens(legalMoves);
       rollDiceButton.setDisable(false);
-      highlightMovableTokens();
     });
 
     timeline.play();
@@ -434,27 +440,134 @@ public class LudoGameUI implements Observer {
   /**
    * Highlight tokens that can be moved
    */
-  private void highlightMovableTokens() {
+  private void highlightMovableTokens(List<Integer> legalMoves) {
+    String currentPlayerName = players.get(currentPlayerIndex).getName();
     String currentPlayerColor = playerColors[currentPlayerIndex];
-    List<Circle> currentPlayerTokens = playerTokens.get(currentPlayerColor);
-
-    boolean hasLegalMove = false;
-    for (Circle token : currentPlayerTokens) {
-      int currentPosition = tokenPositions.get(token);
-      // If in home and rolled a 6, can move out
-      if ((currentPosition == -1 && diceValue == 6) || currentPosition >= 0) {
-        hasLegalMove = true;
+    List<Circle> currentPlayerTokens = playerTokens.get(currentPlayerName);
+    boolean hasLegalMove = !legalMoves.isEmpty();
+    for (int i = 0; i < currentPlayerTokens.size(); i++) {
+      Circle token = currentPlayerTokens.get(i);
+      if (legalMoves.contains(i)) {
         token.setEffect(new DropShadow(10, Color.WHITE));
+        // Add click handler for moving this token
+        int tokenIdx = i;
+        token.setOnMouseClicked(e -> {
+          handleTokenMove(tokenIdx);
+        });
+      } else {
+        token.setEffect(null);
+        token.setOnMouseClicked(null);
       }
     }
-
     if (!hasLegalMove) {
       statusLabel.setText("No legal moves. Passing to next player.");
-      // Wait a bit and pass to next player
       Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> nextPlayer()));
       timeline.play();
     } else {
       statusLabel.setText("Select a token to move.");
+    }
+  }
+
+  /**
+   * Handle token move using controller
+   */
+  private void handleTokenMove(int tokenIndex) {
+    String currentPlayerName = players.get(currentPlayerIndex).getName();
+    LudoController.MoveResult result = controller.moveToken(currentPlayerName, tokenIndex, diceValue);
+    // Update UI for token move
+    updateTokenPosition(currentPlayerName, tokenIndex, result.end);
+    // Show message based on move type
+    switch (result.type) {
+      case "home":
+        statusLabel.setText("Token moved out of home!");
+        break;
+      case "finish":
+        statusLabel.setText("Token finished!");
+        break;
+      case "capture":
+        statusLabel.setText("Token captured an opponent! Sent them home.");
+        // Optionally, add animation or highlight here
+        break;
+      default:
+        statusLabel.setText("Token moved.");
+    }
+    // Remove highlights and click handlers
+    clearTokenHighlights();
+    // Check for win (all tokens finished)
+    if (controller.getPlayerTokenFinished(currentPlayerName).stream().allMatch(Boolean::booleanValue)) {
+      statusLabel.setText("🏆 " + currentPlayerName + " WINS! 🏆");
+      rollDiceButton.setDisable(true);
+      return;
+    }
+    // If dice was 6, allow another roll, else next player
+    if (diceValue == 6) {
+      statusLabel.setText("Rolled a 6! Roll again.");
+    } else {
+      nextPlayer();
+    }
+  }
+
+  /**
+   * Update token position in UI
+   */
+  private void updateTokenPosition(String playerName, int tokenIndex, int position) {
+    // Get the token
+    List<Circle> tokens = playerTokens.get(playerName);
+    if (tokens == null || tokenIndex < 0 || tokenIndex >= tokens.size()) return;
+    Circle token = tokens.get(tokenIndex);
+    // Home position
+    if (position == -1) {
+      // Place in home area
+      String color = playerColors[currentPlayerIndex];
+      int[] homePos = homePositions.get(color);
+      int x = homePos[tokenIndex * 2];
+      int y = homePos[tokenIndex * 2 + 1];
+      placeTokenAtGridPosition(token, x, y);
+      return;
+    }
+    // Main path (0-51)
+    String color = playerColors[currentPlayerIndex];
+    List<int[]> path = pathCoordinates.get(color);
+    if (path != null && position >= 0 && position < path.size()) {
+      int[] coords = path.get(position);
+      placeTokenAtGridPosition(token, coords[0], coords[1]);
+      return;
+    }
+    // Finish area (optional, if you have finish positions)
+    // You can add logic here for finish area if needed
+  }
+
+  // Place a token at a specific grid position
+  private void placeTokenAtGridPosition(Circle token, int gridX, int gridY) {
+    LOGGER.info(String.format("Placing token at grid position (%d, %d)", gridX, gridY));
+    // Find the cell at the grid position
+    StackPane cell = null;
+    for (javafx.scene.Node node : boardGrid.getChildren()) {
+      if (GridPane.getColumnIndex(node) == gridX && GridPane.getRowIndex(node) == gridY) {
+        cell = (StackPane) node;
+        break;
+      }
+    }
+    if (cell != null) {
+      // Remove from old cell
+      StackPane currentCell = (StackPane) token.getParent();
+      if (currentCell != null) {
+        currentCell.getChildren().remove(token);
+      }
+      // Add to new cell
+      cell.getChildren().add(token);
+    }
+  }
+
+  /**
+   * Remove highlights and click handlers from all tokens
+   */
+  private void clearTokenHighlights() {
+    for (List<Circle> tokens : playerTokens.values()) {
+      for (Circle t : tokens) {
+        t.setEffect(null);
+        t.setOnMouseClicked(null);
+      }
     }
   }
 
@@ -475,115 +588,6 @@ public class LudoGameUI implements Observer {
   public void setController(LudoController controller) {
     LOGGER.info("Setting game controller");
     this.controller = controller;
-  }
-
-  /**
-   * Move a token (UI only)
-   */
-  private void moveToken(Circle token, int tokenIndex) {
-    String currentPlayerColor = playerColors[currentPlayerIndex];
-    int currentPosition = tokenPositions.get(token);
-
-    // Remove highlights from all tokens
-    for (List<Circle> tokens : playerTokens.values()) {
-      for (Circle t : tokens) {
-        t.setEffect(null);
-      }
-    }
-
-    if (currentPosition == -1) {
-      // Move from home to start position (UI only)
-      if (diceValue == 6) {
-        int startX = getStartPositionX(currentPlayerColor);
-        int startY = getStartPositionY(currentPlayerColor);
-
-        placeTokenAtGridPosition(token, startX, startY);
-        tokenPositions.put(token, 0); // Start position is 0
-
-        statusLabel.setText("Token moved to start! Roll again.");
-        diceValue = 0; // Reset for next roll
-      }
-    } else {
-      // Move along the path (UI only)
-      int newPosition = currentPosition + diceValue;
-
-      // Check if position is valid
-      if (newPosition < pathCoordinates.get(currentPlayerColor).size()) {
-        int[] newCoords = pathCoordinates.get(currentPlayerColor).get(newPosition);
-        placeTokenAtGridPosition(token, newCoords[0], newCoords[1]);
-        tokenPositions.put(token, newPosition);
-
-        // Check if the player gets another roll (UI update only)
-        if (diceValue == 6) {
-          statusLabel.setText("Rolled a 6! Roll again.");
-          diceValue = 0; // Reset for next roll
-        } else {
-          nextPlayer();
-        }
-      }
-    }
-  }
-
-  /**
-   * Get the X coordinate of the start position for a color
-   */
-  private int getStartPositionX(String color) {
-    switch (color) {
-      case "Red":
-        return 6;
-      case "Green":
-        return 1;
-      case "Yellow":
-        return 8;
-      case "Blue":
-        return 13;
-      default:
-        return 0;
-    }
-  }
-
-  /**
-   * Get the Y coordinate of the start position for a color
-   */
-  private int getStartPositionY(String color) {
-    switch (color) {
-      case "Red":
-        return 13;
-      case "Green":
-        return 6;
-      case "Yellow":
-        return 1;
-      case "Blue":
-        return 8;
-      default:
-        return 0;
-    }
-  }
-
-  /**
-   * Place a token at a specific grid position
-   */
-  private void placeTokenAtGridPosition(Circle token, int gridX, int gridY) {
-    LOGGER.info(String.format("Placing token at grid position (%d, %d)", gridX, gridY));
-    // Find the cell at the grid position
-    StackPane cell = null;
-    for (javafx.scene.Node node : boardGrid.getChildren()) {
-      if (GridPane.getColumnIndex(node) == gridX && GridPane.getRowIndex(node) == gridY) {
-        cell = (StackPane) node;
-        break;
-      }
-    }
-
-    if (cell != null) {
-      // Check if token is already in a cell, if so remove it
-      StackPane currentCell = (StackPane) token.getParent();
-      if (currentCell != null) {
-        currentCell.getChildren().remove(token);
-      }
-
-      // Add token to the new cell
-      cell.getChildren().add(token);
-    }
   }
 
   @Override

@@ -133,12 +133,18 @@ public class JavaFXBoardGameLauncher extends Application {
       Board board = BoardFactory.createLudoBoard(56, players);
       BoardGame boardGame = new BoardGame(board, 1);
 
+      // Add players to the model
+      for (Player player : players) {
+        boardGame.addPlayer(player.getName());
+      }
+
       // Register the UI as an observer
       boardGame.addObserver(gameUI);
 
       // Create controller and connect it with the view
       LudoController controller = new LudoController(boardGame);
       gameUI.setController(controller);
+      controller.setPlayerNames(players.stream().map(Player::getName).toList());
 
       // Start the game
       controller.startGame();
