@@ -1,6 +1,6 @@
 package edu.ntnu.iir.bidata.view.ludo;
 
-import edu.ntnu.iir.bidata.controller.GameController;
+import edu.ntnu.iir.bidata.controller.LudoController;
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.tile.TileAction;
@@ -63,7 +63,7 @@ public class LudoGameUI implements Observer {
   private Button rollDiceButton;
   private Label statusLabel;
   private Label currentPlayerLabel;
-  private GameController controller;
+  private LudoController controller;
 
   /**
    * Creates a new Ludo Game UI with the specified players.
@@ -472,7 +472,7 @@ public class LudoGameUI implements Observer {
    *
    * @param controller The game controller
    */
-  public void setController(GameController controller) {
+  public void setController(LudoController controller) {
     LOGGER.info("Setting game controller");
     this.controller = controller;
   }
