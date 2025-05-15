@@ -91,12 +91,64 @@ public class LudoGameUI implements Observer {
    */
   private void initializePathCoordinates() {
     LOGGER.info("Initializing path coordinates for each player color");
-    // Example: fill with a simple path for demonstration (diagonal, replace with your actual path)
-    for (String color : playerColors) {
+    
+    // Define the main path coordinates (clockwise from bottom)
+    int[][] mainPath = {
+      {6, 1}, {6, 2}, {6, 3}, {6, 4}, {6, 5}, {5, 6}, {4, 6}, {3, 6}, {2, 6}, {1, 6},
+      {0, 6}, {0, 7}, {0, 8}, {1, 8}, {2, 8}, {3, 8}, {4, 8}, {5, 8}, {6, 9}, {6, 10},
+      {6, 11}, {6, 12}, {6, 13}, {7, 13}, {8, 13}, {8, 12}, {8, 11}, {8, 10}, {8, 9},
+      {9, 8}, {10, 8}, {11, 8}, {12, 8}, {13, 8}, {13, 7}, {13, 6}, {12, 6}, {11, 6},
+      {10, 6}, {9, 6}, {8, 5}, {8, 4}, {8, 3}, {8, 2}, {8, 1}, {8, 0}, {7, 0}, {7, 1},
+      {7, 2}, {7, 3}, {7, 4}, {7, 5}
+    };
+
+    // Define the home stretch coordinates for each color
+    int[][] redHomeStretch = {
+      {6, 6}, {6, 7}, {6, 8}, {6, 9}, {6, 10}, {6, 11}
+    };
+    int[][] greenHomeStretch = {
+      {7, 8}, {8, 8}, {9, 8}, {10, 8}, {11, 8}, {12, 8}
+    };
+    int[][] yellowHomeStretch = {
+      {8, 7}, {8, 6}, {8, 5}, {8, 4}, {8, 3}, {8, 2}
+    };
+    int[][] blueHomeStretch = {
+      {7, 6}, {6, 6}, {5, 6}, {4, 6}, {3, 6}, {2, 6}
+    };
+
+    // Create paths for each color
+    for (int i = 0; i < playerColors.length; i++) {
       List<int[]> path = new ArrayList<>();
-      for (int i = 0; i < 52; i++) {
-        path.add(new int[]{i % 15, i % 15});
+      String color = playerColors[i];
+      
+      // Add main path coordinates
+      for (int[] coord : mainPath) {
+        path.add(coord);
       }
+      
+      // Add home stretch coordinates based on color
+      int[][] homeStretch;
+      switch (color) {
+        case "Red":
+          homeStretch = redHomeStretch;
+          break;
+        case "Green":
+          homeStretch = greenHomeStretch;
+          break;
+        case "Yellow":
+          homeStretch = yellowHomeStretch;
+          break;
+        case "Blue":
+          homeStretch = blueHomeStretch;
+          break;
+        default:
+          homeStretch = redHomeStretch;
+      }
+      
+      for (int[] coord : homeStretch) {
+        path.add(coord);
+      }
+      
       pathCoordinates.put(color, path);
     }
   }
@@ -106,11 +158,11 @@ public class LudoGameUI implements Observer {
    */
   private void initializeHomePositions() {
     LOGGER.info("Initializing home positions for each player color");
-    // These would be the grid coordinates for each home area
-    homePositions.put("Red", new int[]{2, 2, 2, 3, 3, 2, 3, 3});  // Bottom-left home area
-    homePositions.put("Green", new int[]{2, 12, 2, 13, 3, 12, 3, 13});  // Top-left home area
-    homePositions.put("Yellow", new int[]{12, 12, 12, 13, 13, 12, 13, 13});  // Top-right home area
-    homePositions.put("Blue", new int[]{12, 2, 12, 3, 13, 2, 13, 3});  // Bottom-right home area
+    // Home positions for each color (2x2 grid for each player's home area)
+    homePositions.put("Red", new int[]{1, 1, 1, 2, 2, 1, 2, 2});     // Bottom-left home area
+    homePositions.put("Green", new int[]{1, 11, 1, 12, 2, 11, 2, 12}); // Top-left home area
+    homePositions.put("Yellow", new int[]{11, 11, 11, 12, 12, 11, 12, 12}); // Top-right home area
+    homePositions.put("Blue", new int[]{11, 1, 11, 2, 12, 1, 12, 2});   // Bottom-right home area
   }
 
   /**
@@ -499,43 +551,30 @@ public class LudoGameUI implements Observer {
     if (tokens == null || tokenIndex < 0 || tokenIndex >= tokens.size()) return;
     Circle token = tokens.get(tokenIndex);
     int cellSize = 40;
-    // Home position
+
+    // Find the player's color
+    String color = null;
+    for (int i = 0; i < players.size(); i++) {
+      if (players.get(i).getName().equals(playerName)) {
+        color = playerColors[i];
+        break;
+      }
+    }
+    if (color == null) color = playerColors[0]; // fallback
+
+    // Home position (-1)
     if (position == -1) {
-      // Find the correct color for this player
-      String color = null;
-      for (int i = 0; i < players.size(); i++) {
-        if (players.get(i).getName().equals(playerName)) {
-          color = playerColors[i];
-          break;
-        }
+      int[] homeCoords = homePositions.get(color);
+      if (homeCoords != null) {
+        int baseX = homeCoords[tokenIndex * 2];
+        int baseY = homeCoords[tokenIndex * 2 + 1];
+        token.setLayoutX(baseX * cellSize + cellSize / 2);
+        token.setLayoutY(baseY * cellSize + cellSize / 2);
       }
-      if (color == null) color = playerColors[0]; // fallback
-      // Define the top-left cell of the home area for each color
-      int[][] homeBase = {
-        {1, 1},   // Red
-        {1, 10},  // Green
-        {10, 1},  // Yellow
-        {10, 10}  // Blue
-      };
-      int colorIdx = 0;
-      for (int i = 0; i < playerColors.length; i++) {
-        if (playerColors[i].equals(color)) {
-          colorIdx = i;
-          break;
-        }
-      }
-      int baseX = homeBase[colorIdx][0];
-      int baseY = homeBase[colorIdx][1];
-      // 2x2 grid offsets for 4 tokens
-      int[][] offsets = {{0,0},{1,0},{0,1},{1,1}};
-      int x = baseX + offsets[tokenIndex][0];
-      int y = baseY + offsets[tokenIndex][1];
-      token.setLayoutX(x * cellSize + cellSize / 2);
-      token.setLayoutY(y * cellSize + cellSize / 2);
       return;
     }
-    // Main path (0-51)
-    String color = playerColors[currentPlayerIndex];
+
+    // Main path and home stretch
     List<int[]> path = pathCoordinates.get(color);
     if (path != null && position >= 0 && position < path.size()) {
       int[] coords = path.get(position);
@@ -543,7 +582,35 @@ public class LudoGameUI implements Observer {
       token.setLayoutY(coords[1] * cellSize + cellSize / 2);
       return;
     }
-    // Finish area (optional)
+
+    // Finish area (position >= 52)
+    if (position >= 52) {
+      // Calculate finish area position based on color and token index
+      int finishRow, finishCol;
+      switch (color) {
+        case "Red":
+          finishRow = 6;
+          finishCol = 6 + (position - 52);
+          break;
+        case "Green":
+          finishRow = 6 + (position - 52);
+          finishCol = 8;
+          break;
+        case "Yellow":
+          finishRow = 8;
+          finishCol = 8 - (position - 52);
+          break;
+        case "Blue":
+          finishRow = 8 - (position - 52);
+          finishCol = 6;
+          break;
+        default:
+          finishRow = 6;
+          finishCol = 6;
+      }
+      token.setLayoutX(finishCol * cellSize + cellSize / 2);
+      token.setLayoutY(finishRow * cellSize + cellSize / 2);
+    }
   }
 
   /**
