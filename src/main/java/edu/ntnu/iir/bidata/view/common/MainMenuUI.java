@@ -8,27 +8,33 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 /**
  * MainMenuUI class for the main menu of the game.
  * Pure frontend implementation without backend logic.
  */
 public class MainMenuUI {
+  private static final Logger LOGGER = Logger.getLogger(MainMenuUI.class.getName());
+
+  public enum GameType {
+    LUDO,
+    SNAKES_AND_LADDERS
+  }
+
   private final Stage primaryStage;
-  private final Runnable onSnakesAndLaddersSelected;
-  private final Runnable onLudoSelected;
+  private final Consumer<GameType> gameTypeCallback;
 
   /**
    * Creates a new Main Menu UI
    *
    * @param primaryStage The primary stage
-   * @param onSnakesAndLaddersSelected Callback for when Snakes and Ladders is selected
-   * @param onLudoSelected Callback for when Ludo is selected
+   * @param gameTypeCallback Callback for when a game type is selected
    */
-  public MainMenuUI(Stage primaryStage, Runnable onSnakesAndLaddersSelected, Runnable onLudoSelected) {
+  public MainMenuUI(Stage primaryStage, Consumer<GameType> gameTypeCallback) {
     this.primaryStage = primaryStage;
-    this.onSnakesAndLaddersSelected = onSnakesAndLaddersSelected;
-    this.onLudoSelected = onLudoSelected;
+    this.gameTypeCallback = gameTypeCallback;
     setupMainMenu();
   }
 
@@ -73,7 +79,7 @@ public class MainMenuUI {
         "#2e8b57",
         "Snakes & Ladders",
         createSnakesAndLaddersGrid(),
-        onSnakesAndLaddersSelected
+        () -> gameTypeCallback.accept(GameType.SNAKES_AND_LADDERS)
     );
 
     // Ludo game box
@@ -82,7 +88,7 @@ public class MainMenuUI {
         "#e69a28",
         "Ludo",
         createLudoGrid(),
-        onLudoSelected
+        () -> gameTypeCallback.accept(GameType.LUDO)
     );
 
     menuRow.getChildren().addAll(snakesAndLaddersPane, ludoPane);

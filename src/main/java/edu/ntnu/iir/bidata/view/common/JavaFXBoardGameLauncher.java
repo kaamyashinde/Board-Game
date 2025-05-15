@@ -1,6 +1,7 @@
 package edu.ntnu.iir.bidata.view.common;
 
-import edu.ntnu.iir.bidata.controller.GameController;
+import edu.ntnu.iir.bidata.controller.LudoController;
+import edu.ntnu.iir.bidata.controller.SnakesAndLaddersController;
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.board.Board;
@@ -36,12 +37,8 @@ public class JavaFXBoardGameLauncher extends Application {
 
   @Override
   public void start(Stage primaryStage) {
-    LOGGER.info("Starting JavaFX application");
-    try {
-      showMainMenu(primaryStage);
-    } catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Error starting JavaFX application", e);
-    }
+    LOGGER.info("Starting JavaFX Board Game Launcher");
+    showMainMenu(primaryStage);
   }
 
   /**
@@ -51,10 +48,13 @@ public class JavaFXBoardGameLauncher extends Application {
    */
   private void showMainMenu(Stage stage) {
     LOGGER.info("Showing main menu");
-    new MainMenuUI(stage,
-        () -> showSnakesAndLaddersMenu(stage),  // Callback for Snakes and Ladders
-        () -> showLudoMenu(stage)               // Callback for Ludo
-    );
+    MainMenuUI menuUI = new MainMenuUI(stage,
+        gameType -> {
+            switch (gameType) {
+                case LUDO -> showLudoMenu(stage);
+                case SNAKES_AND_LADDERS -> showSnakesAndLaddersMenu(stage);
+            }
+        });
   }
 
   /**
@@ -98,8 +98,7 @@ public class JavaFXBoardGameLauncher extends Application {
       // Create view
       SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(stage, players);
 
-      // Create model (using a default 100-tile board) 
-      //TODO: Create a snakes and ladders board in factory
+      // Create model
       Board board = BoardFactory.createSnakesAndLaddersBoard(100, players);
       BoardGame boardGame = new BoardGame(board, 1);
 
@@ -107,7 +106,7 @@ public class JavaFXBoardGameLauncher extends Application {
       boardGame.addObserver(gameUI);
 
       // Create controller and connect it with the view
-      GameController controller = new GameController(boardGame);
+      SnakesAndLaddersController controller = new SnakesAndLaddersController(boardGame);
       gameUI.setController(controller);
 
       // Start the game
@@ -131,15 +130,21 @@ public class JavaFXBoardGameLauncher extends Application {
       LudoGameUI gameUI = new LudoGameUI(stage, players);
 
       // Create model
-      Board board = BoardFactory.createLudoBoard(56, players);
+      Board board = BoardFactory.createLudoBoard(players);
       BoardGame boardGame = new BoardGame(board, 1);
+
+      // Add players to the model
+      for (Player player : players) {
+        boardGame.addPlayer(player.getName());
+      }
 
       // Register the UI as an observer
       boardGame.addObserver(gameUI);
 
       // Create controller and connect it with the view
-      GameController controller = new GameController(boardGame);
+      LudoController controller = new LudoController(boardGame);
       gameUI.setController(controller);
+      controller.setPlayerNames(players.stream().map(Player::getName).toList());
 
       // Start the game
       controller.startGame();

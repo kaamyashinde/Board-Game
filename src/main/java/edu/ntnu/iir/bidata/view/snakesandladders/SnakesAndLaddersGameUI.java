@@ -1,6 +1,6 @@
 package edu.ntnu.iir.bidata.view.snakesandladders;
 
-import edu.ntnu.iir.bidata.controller.GameController;
+import edu.ntnu.iir.bidata.controller.SnakesAndLaddersController;
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.tile.TileAction;
 import edu.ntnu.iir.bidata.view.common.DiceView;
@@ -41,7 +41,7 @@ public class SnakesAndLaddersGameUI implements Observer {
     private Button rollDiceBtn;
     private Label statusLabel;
     private List<Player> playerNames;
-    private GameController controller;
+    private SnakesAndLaddersController controller;
 
     private final int TILE_SIZE = 50;
     private final int BOARD_SIZE = 10; // 10x10 board
@@ -76,7 +76,7 @@ public class SnakesAndLaddersGameUI implements Observer {
      * Sets the game controller
      * @param controller The game controller
      */
-    public void setController(GameController controller) {
+    public void setController(SnakesAndLaddersController controller) {
         LOGGER.info("Setting game controller");
         this.controller = controller;
         controller.setPlayerNames(playerNames.stream().map(Player::getName).collect(Collectors.toList()));
@@ -204,31 +204,32 @@ public class SnakesAndLaddersGameUI implements Observer {
 
         String currentPlayer = controller.getCurrentSnakesAndLaddersPlayerName();
 
-        int roll = controller.rollDiceForSnakesAndLadders();
+        controller.rollDiceForSnakesAndLadders();
+        int roll = controller.getLastDiceRoll();
         diceView.setValue(roll);
 
         statusLabel.setText(currentPlayer + " rolled a " + roll + "!");
 
         PauseTransition pause = new PauseTransition(Duration.millis(800));
         pause.setOnFinished(event -> {
-            boolean hasWon = controller.updateSnakesAndLaddersPosition(currentPlayer, roll);
+            SnakesAndLaddersController.MoveResult result = controller.movePlayer(currentPlayer, roll);
 
-            // Update the UI with new position
             updatePlayerPosition(currentPlayer);
 
-            // Check for win condition
-            if (hasWon) {
-                // Instead of showWinner, just update the status label and disable the button
+            if (result.type.equals("snake")) {
+                displaySnakeOrLadderMessage(currentPlayer, result.start, result.end, "snake");
+            } else if (result.type.equals("ladder")) {
+                displaySnakeOrLadderMessage(currentPlayer, result.start, result.end, "ladder");
+            }
+
+            if (result.end == 100) {
                 statusLabel.setText("🏆 " + currentPlayer + " WINS! 🏆");
                 rollDiceBtn.setDisable(true);
                 return;
             }
 
-            // Move to next player
             controller.nextSnakesAndLaddersPlayer();
             updateCurrentPlayerIndicator(controller.getCurrentSnakesAndLaddersPlayerName());
-
-            // Re-enable roll button
             rollDiceBtn.setDisable(false);
         });
         pause.play();

@@ -78,29 +78,61 @@ public class BoardFactory {
     }
 
     /**
-     * Creates a Ludo board. For now, this is a simple linear board with no special actions.
-     * @param boardSize The size of the board (can be 52 or 56 for classic Ludo, or any value for now).
-     * @param players The player list.
+     * Creates a Ludo board with the standard 52-tile layout including home areas, safe spots,
+     * and entry points for each player.
+     * @param players The list of players (2-4 players supported).
      * @return A fully initialized Ludo Board.
+     * @throws GameException if invalid number of players or board creation fails.
      */
-    public static Board createLudoBoard(int boardSize, List<Player> players) {
-        Board board = new Board(boardSize);
-        // Add plain tiles (no special actions for now)
-        for (int i = 0; i < board.getSizeOfBoard(); i++) {
-            if (!board.addTile(i, null)) {
+    public static Board createLudoBoard(List<Player> players) {
+        if (players.size() < 2 || players.size() > 4) {
+            throw new GameException("Ludo requires 2-4 players");
+        }
+
+        // Standard Ludo board has 52 tiles in the main track
+        final int MAIN_TRACK_SIZE = 52;
+        Board board = new Board(MAIN_TRACK_SIZE);
+
+        // Add tiles with their respective actions
+        for (int i = 0; i < MAIN_TRACK_SIZE; i++) {
+            TileAction action = null;
+            
+            // Safe spots (every 13th tile)
+            if (i % 13 == 0) {
+                action = new SafeSpotAction();
+            }
+            
+            // Entry points for each player
+            if (i == 0) { // Red player entry
+                action = new EntryPointAction(players.get(0));
+            } else if (i == 13) { // Green player entry
+                action = new EntryPointAction(players.get(1));
+            } else if (i == 26 && players.size() > 2) { // Yellow player entry
+                action = new EntryPointAction(players.get(2));
+            } else if (i == 39 && players.size() > 3) { // Blue player entry
+                action = new EntryPointAction(players.get(3));
+            }
+
+            if (!board.addTile(i, action)) {
                 throw new GameException("Failed to add tile at position " + i);
             }
         }
-        // Connect tiles
-        for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
+
+        // Connect tiles in the main track
+        for (int i = 0; i < MAIN_TRACK_SIZE - 1; i++) {
             board.connectTiles(i, board.getTile(i + 1));
         }
+        // Connect last tile to first tile to complete the loop
+        board.connectTiles(MAIN_TRACK_SIZE - 1, board.getTile(0));
+
         // Validate connections
-        for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
-            if (!board.isValidTileConnection(i, i + 1)) {
-                throw new GameException("Invalid tile connection between tiles " + i + " and " + (i + 1));
+        for (int i = 0; i < MAIN_TRACK_SIZE; i++) {
+            int nextTile = (i + 1) % MAIN_TRACK_SIZE;
+            if (!board.isValidTileConnection(i, nextTile)) {
+                throw new GameException("Invalid tile connection between tiles " + i + " and " + nextTile);
             }
         }
+
         return board;
     }
 

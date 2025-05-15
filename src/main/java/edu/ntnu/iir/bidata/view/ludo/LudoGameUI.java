@@ -1,6 +1,6 @@
 package edu.ntnu.iir.bidata.view.ludo;
 
-import edu.ntnu.iir.bidata.controller.GameController;
+import edu.ntnu.iir.bidata.controller.LudoController;
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.tile.TileAction;
@@ -21,6 +21,7 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -63,7 +64,8 @@ public class LudoGameUI implements Observer {
   private Button rollDiceButton;
   private Label statusLabel;
   private Label currentPlayerLabel;
-  private GameController controller;
+  private LudoController controller;
+  private Pane tokenLayer;
 
   /**
    * Creates a new Ludo Game UI with the specified players.
@@ -89,26 +91,66 @@ public class LudoGameUI implements Observer {
    */
   private void initializePathCoordinates() {
     LOGGER.info("Initializing path coordinates for each player color");
-    // Initialize path coordinates for each color
-    // Red path (bottom-left)
-    List<int[]> redPath = new ArrayList<>();
-    // Add path coordinates here (x,y grid coordinates)
-    pathCoordinates.put("Red", redPath);
+    
+    // Define the main path coordinates (clockwise from bottom)
+    int[][] mainPath = {
+      {6, 1}, {6, 2}, {6, 3}, {6, 4}, {6, 5}, {5, 6}, {4, 6}, {3, 6}, {2, 6}, {1, 6},
+      {0, 6}, {0, 7}, {0, 8}, {1, 8}, {2, 8}, {3, 8}, {4, 8}, {5, 8}, {6, 9}, {6, 10},
+      {6, 11}, {6, 12}, {6, 13}, {7, 13}, {8, 13}, {8, 12}, {8, 11}, {8, 10}, {8, 9},
+      {9, 8}, {10, 8}, {11, 8}, {12, 8}, {13, 8}, {13, 7}, {13, 6}, {12, 6}, {11, 6},
+      {10, 6}, {9, 6}, {8, 5}, {8, 4}, {8, 3}, {8, 2}, {8, 1}, {8, 0}, {7, 0}, {7, 1},
+      {7, 2}, {7, 3}, {7, 4}, {7, 5}
+    };
 
-    // Green path (top-left)
-    List<int[]> greenPath = new ArrayList<>();
-    // Add path coordinates here
-    pathCoordinates.put("Green", greenPath);
+    // Define the home stretch coordinates for each color
+    int[][] redHomeStretch = {
+      {6, 6}, {6, 7}, {6, 8}, {6, 9}, {6, 10}, {6, 11}
+    };
+    int[][] greenHomeStretch = {
+      {7, 8}, {8, 8}, {9, 8}, {10, 8}, {11, 8}, {12, 8}
+    };
+    int[][] yellowHomeStretch = {
+      {8, 7}, {8, 6}, {8, 5}, {8, 4}, {8, 3}, {8, 2}
+    };
+    int[][] blueHomeStretch = {
+      {7, 6}, {6, 6}, {5, 6}, {4, 6}, {3, 6}, {2, 6}
+    };
 
-    // Yellow path (top-right)
-    List<int[]> yellowPath = new ArrayList<>();
-    // Add path coordinates here
-    pathCoordinates.put("Yellow", yellowPath);
-
-    // Blue path (bottom-right)
-    List<int[]> bluePath = new ArrayList<>();
-    // Add path coordinates here
-    pathCoordinates.put("Blue", bluePath);
+    // Create paths for each color
+    for (int i = 0; i < playerColors.length; i++) {
+      List<int[]> path = new ArrayList<>();
+      String color = playerColors[i];
+      
+      // Add main path coordinates
+      for (int[] coord : mainPath) {
+        path.add(coord);
+      }
+      
+      // Add home stretch coordinates based on color
+      int[][] homeStretch;
+      switch (color) {
+        case "Red":
+          homeStretch = redHomeStretch;
+          break;
+        case "Green":
+          homeStretch = greenHomeStretch;
+          break;
+        case "Yellow":
+          homeStretch = yellowHomeStretch;
+          break;
+        case "Blue":
+          homeStretch = blueHomeStretch;
+          break;
+        default:
+          homeStretch = redHomeStretch;
+      }
+      
+      for (int[] coord : homeStretch) {
+        path.add(coord);
+      }
+      
+      pathCoordinates.put(color, path);
+    }
   }
 
   /**
@@ -116,11 +158,11 @@ public class LudoGameUI implements Observer {
    */
   private void initializeHomePositions() {
     LOGGER.info("Initializing home positions for each player color");
-    // These would be the grid coordinates for each home area
-    homePositions.put("Red", new int[]{2, 2, 2, 3, 3, 2, 3, 3});  // Bottom-left home area
-    homePositions.put("Green", new int[]{2, 12, 2, 13, 3, 12, 3, 13});  // Top-left home area
-    homePositions.put("Yellow", new int[]{12, 12, 12, 13, 13, 12, 13, 13});  // Top-right home area
-    homePositions.put("Blue", new int[]{12, 2, 12, 3, 13, 2, 13, 3});  // Bottom-right home area
+    // Home positions for each color (2x2 grid for each player's home area)
+    homePositions.put("Red", new int[]{1, 1, 1, 2, 2, 1, 2, 2});     // Bottom-left home area
+    homePositions.put("Green", new int[]{1, 11, 1, 12, 2, 11, 2, 12}); // Top-left home area
+    homePositions.put("Yellow", new int[]{11, 11, 11, 12, 12, 11, 12, 12}); // Top-right home area
+    homePositions.put("Blue", new int[]{11, 1, 11, 2, 12, 1, 12, 2});   // Bottom-right home area
   }
 
   /**
@@ -139,7 +181,29 @@ public class LudoGameUI implements Observer {
     root.setTop(topBar);
 
     // Center: Game board
-    StackPane boardContainer = setupGameBoard();
+    StackPane boardContainer = new StackPane();
+    boardContainer.setPadding(new Insets(10));
+
+    // Create a 15x15 grid for the board
+    boardGrid = new GridPane();
+    boardGrid.setAlignment(Pos.CENTER);
+    boardGrid.setHgap(1);
+    boardGrid.setVgap(1);
+    for (int row = 0; row < 15; row++) {
+      for (int col = 0; col < 15; col++) {
+        StackPane cell = createBoardCell(row, col);
+        boardGrid.add(cell, col, row);
+      }
+    }
+    boardGrid.setStyle("-fx-background-color: black; -fx-padding: 2;");
+    boardGrid.setEffect(new DropShadow(10, Color.GRAY));
+
+    // Add token layer above the board
+    tokenLayer = new Pane();
+    tokenLayer.setPickOnBounds(false); // Allow clicks to pass through empty areas
+    tokenLayer.setPrefSize(15 * 40, 15 * 40); // 15x15 grid, 40px per cell
+
+    boardContainer.getChildren().addAll(boardGrid, tokenLayer);
     root.setCenter(boardContainer);
 
     // Right: Controls
@@ -169,17 +233,18 @@ public class LudoGameUI implements Observer {
         token.setStroke(Color.BLACK);
         token.setStrokeWidth(2);
         token.setEffect(new DropShadow(5, Color.BLACK));
-
-        // Position token in home area
-        int[] homePos = homePositions.get(color);
-        token.setTranslateX(homePos[j * 2] * 50);
-        token.setTranslateY(homePos[j * 2 + 1] * 50);
-
+        tokenLayer.getChildren().add(token); // Add to tokenLayer, not grid
         tokens.add(token);
         tokenPositions.put(token, -1); // -1 indicates token is in home
       }
-
       playerTokens.put(playerName, tokens);
+    }
+    // Place all tokens in their home positions
+    for (int i = 0; i < players.size(); i++) {
+      String playerName = players.get(i).getName();
+      for (int j = 0; j < 4; j++) {
+        updateTokenPosition(playerName, j, -1);
+      }
     }
   }
 
@@ -215,35 +280,6 @@ public class LudoGameUI implements Observer {
 
     topBar.getChildren().addAll(currentPlayerLabel, statusLabel);
     return topBar;
-  }
-
-  /**
-   * Set up the game board grid
-   */
-  private StackPane setupGameBoard() {
-    StackPane boardContainer = new StackPane();
-    boardContainer.setPadding(new Insets(10));
-
-    // Create a 15x15 grid for the board
-    boardGrid = new GridPane();
-    boardGrid.setAlignment(Pos.CENTER);
-    boardGrid.setHgap(1);
-    boardGrid.setVgap(1);
-
-    // Create the board cells
-    for (int row = 0; row < 15; row++) {
-      for (int col = 0; col < 15; col++) {
-        StackPane cell = createBoardCell(row, col);
-        boardGrid.add(cell, col, row);
-      }
-    }
-
-    // Add a border and shadow to the board
-    boardGrid.setStyle("-fx-background-color: black; -fx-padding: 2;");
-    boardGrid.setEffect(new DropShadow(10, Color.GRAY));
-
-    boardContainer.getChildren().add(boardGrid);
-    return boardContainer;
   }
 
   /**
@@ -366,8 +402,14 @@ public class LudoGameUI implements Observer {
 
     timeline.setCycleCount(10);
     timeline.setOnFinished(event -> {
+      // Use controller to roll dice and get value
+      String currentPlayerName = players.get(currentPlayerIndex).getName();
+      diceValue = controller.rollDice();
+      updateDiceDisplay();
+      // Highlight movable tokens using controller's legal moves
+      List<Integer> legalMoves = controller.getLegalMoves(currentPlayerName, diceValue);
+      highlightMovableTokens(legalMoves);
       rollDiceButton.setDisable(false);
-      highlightMovableTokens();
     });
 
     timeline.play();
@@ -434,27 +476,123 @@ public class LudoGameUI implements Observer {
   /**
    * Highlight tokens that can be moved
    */
-  private void highlightMovableTokens() {
+  private void highlightMovableTokens(List<Integer> legalMoves) {
+    String currentPlayerName = players.get(currentPlayerIndex).getName();
     String currentPlayerColor = playerColors[currentPlayerIndex];
-    List<Circle> currentPlayerTokens = playerTokens.get(currentPlayerColor);
-
-    boolean hasLegalMove = false;
-    for (Circle token : currentPlayerTokens) {
-      int currentPosition = tokenPositions.get(token);
-      // If in home and rolled a 6, can move out
-      if ((currentPosition == -1 && diceValue == 6) || currentPosition >= 0) {
-        hasLegalMove = true;
+    List<Circle> currentPlayerTokens = playerTokens.get(currentPlayerName);
+    boolean hasLegalMove = !legalMoves.isEmpty();
+    for (int i = 0; i < currentPlayerTokens.size(); i++) {
+      Circle token = currentPlayerTokens.get(i);
+      if (legalMoves.contains(i)) {
         token.setEffect(new DropShadow(10, Color.WHITE));
+        // Add click handler for moving this token
+        int tokenIdx = i;
+        token.setOnMouseClicked(e -> {
+          handleTokenMove(tokenIdx);
+        });
+      } else {
+        token.setEffect(null);
+        token.setOnMouseClicked(null);
       }
     }
-
     if (!hasLegalMove) {
       statusLabel.setText("No legal moves. Passing to next player.");
-      // Wait a bit and pass to next player
       Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> nextPlayer()));
       timeline.play();
     } else {
       statusLabel.setText("Select a token to move.");
+    }
+  }
+
+  /**
+   * Handle token move using controller
+   */
+  private void handleTokenMove(int tokenIndex) {
+    if (controller == null) return;
+
+    String currentPlayer = controller.getCurrentPlayerName();
+    LudoController.MoveResult result = controller.moveToken(currentPlayer, tokenIndex, diceValue);
+
+    // Update UI based on move result
+    switch (result.type) {
+      case "home":
+        statusLabel.setText(currentPlayer + " moved token " + (tokenIndex + 1) + " out of home");
+        break;
+      case "finish":
+        statusLabel.setText(currentPlayer + "'s token " + (tokenIndex + 1) + " has finished!");
+        break;
+      case "capture":
+        statusLabel.setText(currentPlayer + " captured an opponent's token!");
+        break;
+      default:
+        statusLabel.setText(currentPlayer + " moved token " + (tokenIndex + 1) + " to position " + result.end);
+    }
+
+    // Clear highlights and update UI
+    clearTokenHighlights();
+    controller.setMovingPiece(false);
+    update();
+  }
+
+  /**
+   * Update token position in UI
+   */
+  private void updateTokenPosition(String playerName, int tokenIndex, int position) {
+    List<Circle> tokens = playerTokens.get(playerName);
+    if (tokens == null || tokenIndex >= tokens.size()) return;
+
+    Circle token = tokens.get(tokenIndex);
+    tokenPositions.put(token, position);
+
+    if (position == -1) {
+      // Token is in home
+      int[] homeCoords = homePositions.get(playerColors[players.indexOf(players.stream()
+          .filter(p -> p.getName().equals(playerName))
+          .findFirst()
+          .orElse(null))]);
+      if (homeCoords != null) {
+        int x = homeCoords[tokenIndex * 2] * 40 + 20;
+        int y = homeCoords[tokenIndex * 2 + 1] * 40 + 20;
+        token.setLayoutX(x);
+        token.setLayoutY(y);
+      }
+    } else if (position >= 100) {
+      // Token is finished
+      int finishIndex = position - 100;
+      String color = playerColors[players.indexOf(players.stream()
+          .filter(p -> p.getName().equals(playerName))
+          .findFirst()
+          .orElse(null))];
+      List<int[]> path = pathCoordinates.get(color);
+      if (path != null && finishIndex < 6) {
+        int[] coords = path.get(path.size() - 6 + finishIndex);
+        token.setLayoutX(coords[0] * 40 + 20);
+        token.setLayoutY(coords[1] * 40 + 20);
+      }
+    } else {
+      // Token is on the board
+      String color = playerColors[players.indexOf(players.stream()
+          .filter(p -> p.getName().equals(playerName))
+          .findFirst()
+          .orElse(null))];
+      List<int[]> path = pathCoordinates.get(color);
+      if (path != null && position < path.size()) {
+        int[] coords = path.get(position);
+        token.setLayoutX(coords[0] * 40 + 20);
+        token.setLayoutY(coords[1] * 40 + 20);
+      }
+    }
+  }
+
+  /**
+   * Remove highlights and click handlers from all tokens
+   */
+  private void clearTokenHighlights() {
+    for (List<Circle> tokens : playerTokens.values()) {
+      for (Circle t : tokens) {
+        t.setEffect(null);
+        t.setOnMouseClicked(null);
+      }
     }
   }
 
@@ -472,123 +610,55 @@ public class LudoGameUI implements Observer {
    *
    * @param controller The game controller
    */
-  public void setController(GameController controller) {
+  public void setController(LudoController controller) {
     LOGGER.info("Setting game controller");
     this.controller = controller;
   }
 
-  /**
-   * Move a token (UI only)
-   */
-  private void moveToken(Circle token, int tokenIndex) {
-    String currentPlayerColor = playerColors[currentPlayerIndex];
-    int currentPosition = tokenPositions.get(token);
+  @Override
+  public void update() {
+    if (controller == null) return;
 
-    // Remove highlights from all tokens
-    for (List<Circle> tokens : playerTokens.values()) {
-      for (Circle t : tokens) {
-        t.setEffect(null);
-      }
+    // Update current player
+    String currentPlayer = controller.getCurrentPlayerName();
+    currentPlayerLabel.setText("Current Player: " + currentPlayer);
+
+    // Update dice value
+    int[] diceValues = controller.getBoardGame().getCurrentDiceValues();
+    if (diceValues != null && diceValues.length > 0) {
+      diceValue = diceValues[0];
+      updateDiceDisplay();
     }
 
-    if (currentPosition == -1) {
-      // Move from home to start position (UI only)
-      if (diceValue == 6) {
-        int startX = getStartPositionX(currentPlayerColor);
-        int startY = getStartPositionY(currentPlayerColor);
+    // Update token positions
+    for (String playerName : players.stream().map(Player::getName).toList()) {
+      List<Integer> positions = controller.getPlayerTokenPositions(playerName);
+      List<Boolean> home = controller.getPlayerTokenHome(playerName);
+      List<Boolean> finished = controller.getPlayerTokenFinished(playerName);
 
-        placeTokenAtGridPosition(token, startX, startY);
-        tokenPositions.put(token, 0); // Start position is 0
-
-        statusLabel.setText("Token moved to start! Roll again.");
-        diceValue = 0; // Reset for next roll
-      }
-    } else {
-      // Move along the path (UI only)
-      int newPosition = currentPosition + diceValue;
-
-      // Check if position is valid
-      if (newPosition < pathCoordinates.get(currentPlayerColor).size()) {
-        int[] newCoords = pathCoordinates.get(currentPlayerColor).get(newPosition);
-        placeTokenAtGridPosition(token, newCoords[0], newCoords[1]);
-        tokenPositions.put(token, newPosition);
-
-        // Check if the player gets another roll (UI update only)
-        if (diceValue == 6) {
-          statusLabel.setText("Rolled a 6! Roll again.");
-          diceValue = 0; // Reset for next roll
+      for (int i = 0; i < positions.size(); i++) {
+        if (home.get(i)) {
+          updateTokenPosition(playerName, i, -1); // -1 indicates home
+        } else if (finished.get(i)) {
+          updateTokenPosition(playerName, i, 100 + i); // 100+ indicates finished
         } else {
-          nextPlayer();
+          updateTokenPosition(playerName, i, positions.get(i));
         }
       }
     }
-  }
 
-  /**
-   * Get the X coordinate of the start position for a color
-   */
-  private int getStartPositionX(String color) {
-    switch (color) {
-      case "Red":
-        return 6;
-      case "Green":
-        return 1;
-      case "Yellow":
-        return 8;
-      case "Blue":
-        return 13;
-      default:
-        return 0;
-    }
-  }
-
-  /**
-   * Get the Y coordinate of the start position for a color
-   */
-  private int getStartPositionY(String color) {
-    switch (color) {
-      case "Red":
-        return 13;
-      case "Green":
-        return 6;
-      case "Yellow":
-        return 1;
-      case "Blue":
-        return 8;
-      default:
-        return 0;
-    }
-  }
-
-  /**
-   * Place a token at a specific grid position
-   */
-  private void placeTokenAtGridPosition(Circle token, int gridX, int gridY) {
-    LOGGER.info(String.format("Placing token at grid position (%d, %d)", gridX, gridY));
-    // Find the cell at the grid position
-    StackPane cell = null;
-    for (javafx.scene.Node node : boardGrid.getChildren()) {
-      if (GridPane.getColumnIndex(node) == gridX && GridPane.getRowIndex(node) == gridY) {
-        cell = (StackPane) node;
-        break;
-      }
+    // Update UI state
+    if (controller.isMovingPiece()) {
+      List<Integer> legalMoves = controller.getLegalMoves(currentPlayer, diceValue);
+      highlightMovableTokens(legalMoves);
+    } else {
+      clearTokenHighlights();
     }
 
-    if (cell != null) {
-      // Check if token is already in a cell, if so remove it
-      StackPane currentCell = (StackPane) token.getParent();
-      if (currentCell != null) {
-        currentCell.getChildren().remove(token);
-      }
-
-      // Add token to the new cell
-      cell.getChildren().add(token);
+    // Check for game over
+    if (controller.isGameOver()) {
+      statusLabel.setText(currentPlayer + " has won the game!");
+      rollDiceButton.setDisable(true);
     }
-  }
-
-  @Override
-  public void update() {
-    updateUI();
-    // Optionally, show winner if game is over (if you have such logic)
   }
 }
