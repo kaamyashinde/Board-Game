@@ -508,39 +508,30 @@ public class LudoGameUI implements Observer {
    * Handle token move using controller
    */
   private void handleTokenMove(int tokenIndex) {
-    String currentPlayerName = players.get(currentPlayerIndex).getName();
-    LudoController.MoveResult result = controller.moveToken(currentPlayerName, tokenIndex, diceValue);
-    // Update UI for token move
-    updateTokenPosition(currentPlayerName, tokenIndex, result.end);
-    // Show message based on move type
+    if (controller == null) return;
+
+    String currentPlayer = controller.getCurrentPlayerName();
+    LudoController.MoveResult result = controller.moveToken(currentPlayer, tokenIndex, diceValue);
+
+    // Update UI based on move result
     switch (result.type) {
       case "home":
-        statusLabel.setText("Token moved out of home!");
+        statusLabel.setText(currentPlayer + " moved token " + (tokenIndex + 1) + " out of home");
         break;
       case "finish":
-        statusLabel.setText("Token finished!");
+        statusLabel.setText(currentPlayer + "'s token " + (tokenIndex + 1) + " has finished!");
         break;
       case "capture":
-        statusLabel.setText("Token captured an opponent! Sent them home.");
-        // Optionally, add animation or highlight here
+        statusLabel.setText(currentPlayer + " captured an opponent's token!");
         break;
       default:
-        statusLabel.setText("Token moved.");
+        statusLabel.setText(currentPlayer + " moved token " + (tokenIndex + 1) + " to position " + result.end);
     }
-    // Remove highlights and click handlers
+
+    // Clear highlights and update UI
     clearTokenHighlights();
-    // Check for win (all tokens finished)
-    if (controller.getPlayerTokenFinished(currentPlayerName).stream().allMatch(Boolean::booleanValue)) {
-      statusLabel.setText("🏆 " + currentPlayerName + " WINS! 🏆");
-      rollDiceButton.setDisable(true);
-      return;
-    }
-    // If dice was 6, allow another roll, else next player
-    if (diceValue == 6) {
-      statusLabel.setText("Rolled a 6! Roll again.");
-    } else {
-      nextPlayer();
-    }
+    controller.setMovingPiece(false);
+    update();
   }
 
   /**
@@ -548,68 +539,48 @@ public class LudoGameUI implements Observer {
    */
   private void updateTokenPosition(String playerName, int tokenIndex, int position) {
     List<Circle> tokens = playerTokens.get(playerName);
-    if (tokens == null || tokenIndex < 0 || tokenIndex >= tokens.size()) return;
+    if (tokens == null || tokenIndex >= tokens.size()) return;
+
     Circle token = tokens.get(tokenIndex);
-    int cellSize = 40;
+    tokenPositions.put(token, position);
 
-    // Find the player's color
-    String color = null;
-    for (int i = 0; i < players.size(); i++) {
-      if (players.get(i).getName().equals(playerName)) {
-        color = playerColors[i];
-        break;
-      }
-    }
-    if (color == null) color = playerColors[0]; // fallback
-
-    // Home position (-1)
     if (position == -1) {
-      int[] homeCoords = homePositions.get(color);
+      // Token is in home
+      int[] homeCoords = homePositions.get(playerColors[players.indexOf(players.stream()
+          .filter(p -> p.getName().equals(playerName))
+          .findFirst()
+          .orElse(null))]);
       if (homeCoords != null) {
-        int baseX = homeCoords[tokenIndex * 2];
-        int baseY = homeCoords[tokenIndex * 2 + 1];
-        token.setLayoutX(baseX * cellSize + cellSize / 2);
-        token.setLayoutY(baseY * cellSize + cellSize / 2);
+        int x = homeCoords[tokenIndex * 2] * 40 + 20;
+        int y = homeCoords[tokenIndex * 2 + 1] * 40 + 20;
+        token.setLayoutX(x);
+        token.setLayoutY(y);
       }
-      return;
-    }
-
-    // Main path and home stretch
-    List<int[]> path = pathCoordinates.get(color);
-    if (path != null && position >= 0 && position < path.size()) {
-      int[] coords = path.get(position);
-      token.setLayoutX(coords[0] * cellSize + cellSize / 2);
-      token.setLayoutY(coords[1] * cellSize + cellSize / 2);
-      return;
-    }
-
-    // Finish area (position >= 52)
-    if (position >= 52) {
-      // Calculate finish area position based on color and token index
-      int finishRow, finishCol;
-      switch (color) {
-        case "Red":
-          finishRow = 6;
-          finishCol = 6 + (position - 52);
-          break;
-        case "Green":
-          finishRow = 6 + (position - 52);
-          finishCol = 8;
-          break;
-        case "Yellow":
-          finishRow = 8;
-          finishCol = 8 - (position - 52);
-          break;
-        case "Blue":
-          finishRow = 8 - (position - 52);
-          finishCol = 6;
-          break;
-        default:
-          finishRow = 6;
-          finishCol = 6;
+    } else if (position >= 100) {
+      // Token is finished
+      int finishIndex = position - 100;
+      String color = playerColors[players.indexOf(players.stream()
+          .filter(p -> p.getName().equals(playerName))
+          .findFirst()
+          .orElse(null))];
+      List<int[]> path = pathCoordinates.get(color);
+      if (path != null && finishIndex < 6) {
+        int[] coords = path.get(path.size() - 6 + finishIndex);
+        token.setLayoutX(coords[0] * 40 + 20);
+        token.setLayoutY(coords[1] * 40 + 20);
       }
-      token.setLayoutX(finishCol * cellSize + cellSize / 2);
-      token.setLayoutY(finishRow * cellSize + cellSize / 2);
+    } else {
+      // Token is on the board
+      String color = playerColors[players.indexOf(players.stream()
+          .filter(p -> p.getName().equals(playerName))
+          .findFirst()
+          .orElse(null))];
+      List<int[]> path = pathCoordinates.get(color);
+      if (path != null && position < path.size()) {
+        int[] coords = path.get(position);
+        token.setLayoutX(coords[0] * 40 + 20);
+        token.setLayoutY(coords[1] * 40 + 20);
+      }
     }
   }
 
@@ -646,7 +617,48 @@ public class LudoGameUI implements Observer {
 
   @Override
   public void update() {
-    updateUI();
-    // Optionally, show winner if game is over (if you have such logic)
+    if (controller == null) return;
+
+    // Update current player
+    String currentPlayer = controller.getCurrentPlayerName();
+    currentPlayerLabel.setText("Current Player: " + currentPlayer);
+
+    // Update dice value
+    int[] diceValues = controller.getBoardGame().getCurrentDiceValues();
+    if (diceValues != null && diceValues.length > 0) {
+      diceValue = diceValues[0];
+      updateDiceDisplay();
+    }
+
+    // Update token positions
+    for (String playerName : players.stream().map(Player::getName).toList()) {
+      List<Integer> positions = controller.getPlayerTokenPositions(playerName);
+      List<Boolean> home = controller.getPlayerTokenHome(playerName);
+      List<Boolean> finished = controller.getPlayerTokenFinished(playerName);
+
+      for (int i = 0; i < positions.size(); i++) {
+        if (home.get(i)) {
+          updateTokenPosition(playerName, i, -1); // -1 indicates home
+        } else if (finished.get(i)) {
+          updateTokenPosition(playerName, i, 100 + i); // 100+ indicates finished
+        } else {
+          updateTokenPosition(playerName, i, positions.get(i));
+        }
+      }
+    }
+
+    // Update UI state
+    if (controller.isMovingPiece()) {
+      List<Integer> legalMoves = controller.getLegalMoves(currentPlayer, diceValue);
+      highlightMovableTokens(legalMoves);
+    } else {
+      clearTokenHighlights();
+    }
+
+    // Check for game over
+    if (controller.isGameOver()) {
+      statusLabel.setText(currentPlayer + " has won the game!");
+      rollDiceButton.setDisable(true);
+    }
   }
 }

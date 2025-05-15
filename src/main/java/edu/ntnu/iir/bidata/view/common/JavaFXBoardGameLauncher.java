@@ -130,7 +130,7 @@ public class JavaFXBoardGameLauncher extends Application {
       LudoGameUI gameUI = new LudoGameUI(stage, players);
 
       // Create model
-      Board board = BoardFactory.createLudoBoard(56, players);
+      Board board = BoardFactory.createLudoBoard(players);
       BoardGame boardGame = new BoardGame(board, 1);
 
       // Add players to the model
