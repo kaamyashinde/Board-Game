@@ -24,6 +24,7 @@ import javafx.stage.Stage;
 public class JavaFXBoardGameLauncher extends Application {
 
   private static final Logger LOGGER = Logger.getLogger(JavaFXBoardGameLauncher.class.getName());
+  private static JavaFXBoardGameLauncher instance;
 
   /**
    * Main method - entry point for the application.
@@ -38,7 +39,15 @@ public class JavaFXBoardGameLauncher extends Application {
   @Override
   public void start(Stage primaryStage) {
     LOGGER.info("Starting JavaFX Board Game Launcher");
+    instance = this;
     showMainMenu(primaryStage);
+  }
+
+  /**
+   * Get the singleton instance of the launcher
+   */
+  public static JavaFXBoardGameLauncher getInstance() {
+    return instance;
   }
 
   /**
@@ -46,7 +55,7 @@ public class JavaFXBoardGameLauncher extends Application {
    *
    * @param stage The primary stage to show the menu on
    */
-  private void showMainMenu(Stage stage) {
+  public void showMainMenu(Stage stage) {
     LOGGER.info("Showing main menu");
     MainMenuUI menuUI = new MainMenuUI(stage,
         gameType -> {
@@ -63,7 +72,7 @@ public class JavaFXBoardGameLauncher extends Application {
    *
    * @param stage The primary stage to show the menu on
    */
-  private void showSnakesAndLaddersMenu(Stage stage) {
+  public void showSnakesAndLaddersMenu(Stage stage) {
     LOGGER.info("Showing Snakes and Ladders menu");
     SnakesAndLaddersMenuUI menuUI = new SnakesAndLaddersMenuUI(stage,
         selectedPlayerNames -> {
@@ -77,7 +86,7 @@ public class JavaFXBoardGameLauncher extends Application {
    *
    * @param stage The primary stage to show the menu on
    */
-  private void showLudoMenu(Stage stage) {
+  public void showLudoMenu(Stage stage) {
     LOGGER.info("Showing Ludo menu");
     LudoMenuUI menuUI = new LudoMenuUI(stage,
         selectedPlayerNames -> {

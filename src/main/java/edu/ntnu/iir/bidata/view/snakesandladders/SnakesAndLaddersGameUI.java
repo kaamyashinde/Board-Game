@@ -4,6 +4,7 @@ import edu.ntnu.iir.bidata.controller.SnakesAndLaddersController;
 import edu.ntnu.iir.bidata.model.Observer;
 import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.view.common.DiceView;
+import edu.ntnu.iir.bidata.view.common.JavaFXBoardGameLauncher;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +43,7 @@ public class SnakesAndLaddersGameUI implements Observer {
   private Pane playerLayer;
   private VBox playerPanel;
   private Button rollDiceBtn;
+  private Button backButton;
   private Label statusLabel;
   private List<Player> playerNames;
   private SnakesAndLaddersController controller;
@@ -96,6 +98,20 @@ public class SnakesAndLaddersGameUI implements Observer {
     BorderPane root = new BorderPane();
     root.setPadding(new Insets(20));
     root.setStyle("-fx-background-color: #f5fff5;");
+
+    // Create top bar with back button
+    HBox topBar = new HBox(10);
+    topBar.setPadding(new Insets(10));
+    topBar.setAlignment(Pos.CENTER_LEFT);
+    
+    backButton = new Button("← Back to Menu");
+    backButton.setStyle("-fx-background-color: #e8c9ad; -fx-font-weight: bold;");
+    backButton.setOnAction(e -> {
+      JavaFXBoardGameLauncher.getInstance().showSnakesAndLaddersMenu(primaryStage);
+    });
+    
+    topBar.getChildren().add(backButton);
+    root.setTop(topBar);
 
     // --- Board (center) ---
     StackPane boardPane = new StackPane();

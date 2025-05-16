@@ -3,6 +3,8 @@ package edu.ntnu.iir.bidata.view.ludo;
 import edu.ntnu.iir.bidata.controller.LudoController;
 import edu.ntnu.iir.bidata.model.Observer;
 import edu.ntnu.iir.bidata.model.Player;
+import edu.ntnu.iir.bidata.view.common.DiceView;
+import edu.ntnu.iir.bidata.view.common.JavaFXBoardGameLauncher;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -64,6 +66,19 @@ public class LudoGameUI implements Observer {
   private Label currentPlayerLabel;
   private LudoController controller;
   private Pane tokenLayer;
+  private final Map<String, Circle> playerTokenMap = new HashMap<>();
+  private final Map<String, Label> playerPositionLabels = new HashMap<>();
+  private final int TILE_SIZE = 50;
+  private final int BOARD_SIZE = 10; // 10x10 board
+  private final Color[] PLAYER_COLORS = {
+      Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.PURPLE
+  };
+  private DiceView diceView;
+  private Pane playerLayer;
+  private VBox playerPanel;
+  private Button rollDiceBtn;
+  private Button backButton;
+  private List<Player> playerNames;
 
   /**
    * Creates a new Ludo Game UI with the specified players.
@@ -272,7 +287,14 @@ public class LudoGameUI implements Observer {
     statusLabel = new Label("Game started. Roll the dice!");
     statusLabel.setStyle("-fx-font-size: 14px;");
 
-    topBar.getChildren().addAll(currentPlayerLabel, statusLabel);
+    // Create back button
+    backButton = new Button("← Back to Menu");
+    backButton.setStyle("-fx-background-color: #e8c9ad; -fx-font-weight: bold;");
+    backButton.setOnAction(e -> {
+      JavaFXBoardGameLauncher.getInstance().showLudoMenu(primaryStage);
+    });
+
+    topBar.getChildren().addAll(backButton, currentPlayerLabel, statusLabel);
     return topBar;
   }
 
