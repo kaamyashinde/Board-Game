@@ -53,7 +53,16 @@ public class SnakesAndLaddersController extends BaseGameController {
     @Override
     public void setPlayerNames(List<String> playerNames) {
         super.setPlayerNames(playerNames);
-        // No need to initialize positions here; handled by BoardGame
+        // Initialize positions for all players
+        for (String playerName : playerNames) {
+            for (Player player : boardGame.getPlayers()) {
+                if (player.getName().equals(playerName)) {
+                    player.setCurrentTile(boardGame.getBoard().getTile(0));
+                    break;
+                }
+            }
+        }
+        LOGGER.info("Setting player names: " + playerNames);
     }
 
     public int getPlayerPosition(String playerName) {
@@ -114,28 +123,42 @@ public class SnakesAndLaddersController extends BaseGameController {
                 int start = player.getCurrentPosition();
                 int end = start + roll;
                 String type = "normal";
-                if (end >= 100) end = 100;
+                
+                // Ensure we don't go past 100
+                if (end > 100) {
+                    end = 100;
+                }
+                
+                // Move the player to the new position first
+                int steps = end - start;
+                player.move(steps);
+                
                 // Check for snakes
                 for (int[] snake : snakes) {
                     if (end == snake[0]) {
+                        // Move player to snake tail
+                        steps = snake[1] - end;
+                        player.move(steps);
                         end = snake[1];
                         type = "snake";
                         break;
                     }
                 }
-                // Check for ladders
+                
+                // Check for ladders only if it's a normal move
                 if (type.equals("normal")) {
                     for (int[] ladder : ladders) {
                         if (end == ladder[0]) {
+                            // Move player to ladder top
+                            steps = ladder[1] - end;
+                            player.move(steps);
                             end = ladder[1];
                             type = "ladder";
                             break;
                         }
                     }
                 }
-                // Move the player to the new position
-                int steps = end - start;
-                player.move(steps);
+                
                 return new MoveResult(start, end, type);
             }
         }

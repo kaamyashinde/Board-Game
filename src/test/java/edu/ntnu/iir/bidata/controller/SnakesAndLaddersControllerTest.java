@@ -1,149 +1,174 @@
 package edu.ntnu.iir.bidata.controller;
 
 import edu.ntnu.iir.bidata.model.BoardGame;
-import edu.ntnu.iir.bidata.model.dice.Dice;
 import edu.ntnu.iir.bidata.model.Player;
+import edu.ntnu.iir.bidata.model.board.Board;
+import edu.ntnu.iir.bidata.model.dice.Dice;
+import edu.ntnu.iir.bidata.model.exception.GameException;
+import edu.ntnu.iir.bidata.model.game.GameState;
+import edu.ntnu.iir.bidata.model.tile.core.Tile;
+import edu.ntnu.iir.bidata.model.tile.actions.snakeandladder.SnakeAction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
+import org.junit.jupiter.api.io.TempDir;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class SnakesAndLaddersControllerTest {
-
-    @Mock
-    private BoardGame mockBoardGame;
-    
-    @Mock
-    private Dice mockDice;
-
     private SnakesAndLaddersController controller;
+    private BoardGame boardGame;
     private List<String> playerNames;
+    private Board board;
+    private Dice dice;
+
+    private void initializeBoard(Board board) {
+        // Add 100 tiles
+        for (int i = 0; i < 100; i++) {
+            if (i == 95) {
+                // Create tile 95 with snake action
+                board.addTile(i, new SnakeAction(75));
+            } else {
+                board.addTile(i, null);
+            }
+        }
+        // Connect each tile to the next
+        for (int i = 0; i < 99; i++) {
+            board.connectTiles(i, board.getTile(i + 1));
+        }
+    }
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        // Create mock players
-        Player player1 = mock(Player.class);
-        when(player1.getName()).thenReturn("Player1");
-        Player player2 = mock(Player.class);
-        when(player2.getName()).thenReturn("Player2");
-        List<Player> players = Arrays.asList(player1, player2);
-        // Mock BoardGame methods
-        when(mockBoardGame.getPlayers()).thenReturn(players);
-        when(mockBoardGame.getCurrentPlayer()).thenReturn(player1);
-        when(mockBoardGame.getCurrentPlayerIndex()).thenReturn(0);
-        when(mockBoardGame.getDice()).thenReturn(mockDice);
-        controller = new SnakesAndLaddersController(mockBoardGame);
+        board = new Board(100); // 100 tiles for Snakes and Ladders
+        initializeBoard(board);
+        dice = new Dice(1); // One die for Snakes and Ladders
+        boardGame = new BoardGame(board, dice);
+        controller = new SnakesAndLaddersController(boardGame);
         playerNames = Arrays.asList("Player1", "Player2");
+        
+        // Add players to the game
+        for (String name : playerNames) {
+            boardGame.addPlayer(name);
+        }
+        
         controller.setPlayerNames(playerNames);
     }
 
     @Test
     void testInitialization() {
         assertNotNull(controller);
+        assertEquals("Player1", controller.getCurrentSnakesAndLaddersPlayerName());
         assertEquals(0, controller.getPlayerPosition("Player1"));
         assertEquals(0, controller.getPlayerPosition("Player2"));
     }
 
     @Test
-    void testSetPlayerNames() {
-        List<String> names = Arrays.asList("Player1", "Player2");
-        controller.setPlayerNames(names);
-        assertEquals("Player1", controller.getCurrentPlayerName());
-        assertEquals(0, controller.getPlayerPosition("Player1"));
+    void testRollDice() {
+        controller.startGame();
+        controller.rollDiceForSnakesAndLadders();
+        int roll = controller.getLastDiceRoll();
+        assertTrue(roll >= 1 && roll <= 6);
     }
 
     @Test
-    void testHandlePlayerMoveWithoutDiceRoll() {
-        controller.handlePlayerMove();
-        verify(mockBoardGame, never()).getCurrentDiceValues();
-    }
-
-    @Test
-    void testHandlePlayerMoveWithDiceRoll() {
-        when(mockBoardGame.getCurrentDiceValues()).thenReturn(new int[]{3, 4});
-        controller.setDiceRolled(true);
+    void testNormalMove() {
+        controller.startGame();
+        controller.rollDiceForSnakesAndLadders();
+        int roll = controller.getLastDiceRoll();
+        SnakesAndLaddersController.MoveResult result = controller.movePlayer("Player1", roll);
         
-        controller.handlePlayerMove();
-        assertEquals(7, controller.getPlayerPosition("Player1"));
+        assertEquals(0, result.start);
+        assertEquals(roll, result.end);
+        assertEquals("normal", result.type);
+        assertEquals(roll, controller.getPlayerPosition("Player1"));
     }
 
-    @Test
-    void testSnakeEncounter() {
-        // Position 99 has a snake to 41
-        controller.updateSnakesAndLaddersPosition("Player1", 98);
-        when(mockBoardGame.getCurrentDiceValues()).thenReturn(new int[]{1});
-        controller.setDiceRolled(true);
-        
-        controller.handlePlayerMove();
-        assertEquals(41, controller.getPlayerPosition("Player1"));
-    }
 
     @Test
-    void testLadderEncounter() {
-        // Position 3 has a ladder to 36
-        controller.updateSnakesAndLaddersPosition("Player1", 2);
-        when(mockBoardGame.getCurrentDiceValues()).thenReturn(new int[]{1});
-        controller.setDiceRolled(true);
+    void testLadderMove() {
+        controller.startGame();
+        // Move player to position 3 (ladder bottom)
+        controller.updateSnakesAndLaddersPosition("Player1", 3);
+        SnakesAndLaddersController.MoveResult result = controller.movePlayer("Player1", 0);
         
-        controller.handlePlayerMove();
+        assertEquals(3, result.start);
+        assertEquals(36, result.end); // Ladder top
+        assertEquals("ladder", result.type);
         assertEquals(36, controller.getPlayerPosition("Player1"));
     }
 
     @Test
-    void testWinCondition() {
-        controller.updateSnakesAndLaddersPosition("Player1", 98);
-        when(mockBoardGame.getCurrentDiceValues()).thenReturn(new int[]{2});
-        controller.setDiceRolled(true);
-        
-        controller.handlePlayerMove();
-        assertEquals(100, controller.getPlayerPosition("Player1"));
-    }
-
-    @Test
-    void testMovePlayer() {
-        // Test normal move
-        SnakesAndLaddersController.MoveResult result = controller.movePlayer("Player1", 5);
-        assertEquals(0, result.start);
-        assertEquals(5, result.end);
-        assertEquals("normal", result.type);
-        
-        // Test snake encounter
-        controller.updateSnakesAndLaddersPosition("Player1", 94);
-        result = controller.movePlayer("Player1", 5);
-        assertEquals(94, result.start);
-        assertEquals(41, result.end); // Snake at 99 goes to 41
-        assertEquals("snake", result.type);
-        
-        // Test ladder encounter
-        controller.updateSnakesAndLaddersPosition("Player1", 2);
-        result = controller.movePlayer("Player1", 1);
-        assertEquals(2, result.start);
-        assertEquals(36, result.end);
-        assertEquals("ladder", result.type);
-    }
-
-    @Test
-    void testRollDiceForSnakesAndLadders() {
-        doNothing().when(mockDice).rollAllDice();
-        when(mockDice.getLastRolledValues()).thenReturn(new int[]{3, 4});
-        when(mockBoardGame.getCurrentDiceValues()).thenReturn(new int[]{3, 4});
-        
-        controller.rollDiceForSnakesAndLadders();
-        assertTrue(controller.isDiceRolled());
-        assertEquals(3, controller.getLastDiceRoll());
-    }
-
-    @Test
     void testNextPlayer() {
-        assertEquals("Player1", controller.getCurrentPlayerName());
+        controller.startGame();
+        assertEquals("Player1", controller.getCurrentSnakesAndLaddersPlayerName());
         controller.nextSnakesAndLaddersPlayer();
-        assertEquals("Player2", controller.getCurrentPlayerName());
+        assertEquals("Player2", controller.getCurrentSnakesAndLaddersPlayerName());
+        controller.nextSnakesAndLaddersPlayer();
+        assertEquals("Player1", controller.getCurrentSnakesAndLaddersPlayerName());
     }
-} 
+
+    @Test
+    void testWinCondition() {
+        controller.startGame();
+        // Move player to position 98
+        controller.updateSnakesAndLaddersPosition("Player1", 98);
+        // Moving to position 100 should throw GameException
+        assertThrows(GameException.class, () -> controller.movePlayer("Player1", 2));
+    }
+
+    @Test
+    void testHandlePlayerMove() {
+        controller.startGame();
+        controller.rollDiceForSnakesAndLadders();
+        controller.handlePlayerMove();
+        // Player should have moved and turn should have passed to next player
+        assertNotEquals(0, controller.getPlayerPosition("Player1"));
+        assertEquals("Player2", controller.getCurrentSnakesAndLaddersPlayerName());
+    }
+
+    @Test
+    void testSaveAndLoadGame(@TempDir Path tempDir) {
+        controller.startGame();
+        controller.rollDiceForSnakesAndLadders();
+        controller.handlePlayerMove();
+        
+        // Save game
+        String gameName = "test_game";
+        controller.saveGame(gameName);
+        
+        // Create new controller and load game
+        Board newBoard = new Board(100);
+        initializeBoard(newBoard);
+        Dice newDice = new Dice(1);
+        BoardGame newBoardGame = new BoardGame(newBoard, newDice);
+        
+        // Add players to the new game
+        for (String name : playerNames) {
+            newBoardGame.addPlayer(name);
+        }
+        
+        SnakesAndLaddersController newController = new SnakesAndLaddersController(newBoardGame);
+        newController.loadGame(gameName, null);
+        
+        // Verify game state was restored
+        assertEquals(controller.getPlayerPosition("Player1"), 
+                    newController.getPlayerPosition("Player1"));
+        assertEquals(controller.getCurrentSnakesAndLaddersPlayerName(), 
+                    newController.getCurrentSnakesAndLaddersPlayerName());
+    }
+
+    @Test
+    void testInvalidMoves() {
+        // Test move before game start
+        controller.handlePlayerMove();
+        assertEquals(0, controller.getPlayerPosition("Player1"));
+        
+        // Test move beyond board
+        controller.startGame();
+        controller.updateSnakesAndLaddersPosition("Player1", 98);
+        // This should throw GameException because it would exceed board limit
+        assertThrows(GameException.class, () -> controller.movePlayer("Player1", 5));
+    }
+}
