@@ -38,62 +38,6 @@ public class BoardManagementUI {
   }
 
   /**
-   * Shows the Add New Board dialog
-   */
-  public void showAddBoardDialog() {
-    Stage addDialog = new Stage();
-    addDialog.initOwner(ownerStage);
-    addDialog.initModality(Modality.APPLICATION_MODAL);
-    addDialog.setTitle("Add New Board");
-
-    VBox layout = new VBox(20);
-    layout.setPadding(new Insets(20));
-    layout.setAlignment(Pos.CENTER);
-    layout.setStyle("-fx-background-color: #f5fff5; -fx-background-radius: 20;");
-
-    // Create the green title bar
-    StackPane titlePane = new StackPane();
-    titlePane.setPrefSize(300, 50);
-    titlePane.setStyle("-fx-background-color: #BDEBC8; -fx-background-radius: 15;");
-    Label titleLabel = new Label("Add New Board");
-    titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-    titlePane.getChildren().add(titleLabel);
-
-    // Create name input with green circle marker
-    HBox nameBox = new HBox(10);
-    nameBox.setAlignment(Pos.CENTER_LEFT);
-
-    Circle greenMarker = new Circle(10, Color.DARKGREEN);
-    Label nameLabel = new Label("NAME:");
-    nameLabel.setStyle("-fx-font-weight: bold;");
-
-    TextField nameField = new TextField();
-    nameField.setPrefWidth(200);
-
-    nameBox.getChildren().addAll(greenMarker, nameLabel, nameField);
-
-    // Add Button
-    Button addButton = createStyledButton("ADD", 120, 40);
-
-    // Add components to layout
-    layout.getChildren().addAll(titlePane, nameBox, addButton);
-
-    // Handle add button action
-    addButton.setOnAction(e -> {
-      String boardName = nameField.getText().trim();
-      if (!boardName.isEmpty() && !boardsList.contains(boardName)) {
-        boardsList.add(boardName);
-        addDialog.close();
-        // In a real implementation, you would save the board configuration here
-      }
-    });
-
-    Scene scene = new Scene(layout, 350, 200);
-    addDialog.setScene(scene);
-    addDialog.showAndWait();
-  }
-
-  /**
    * Shows the Remove Board dialog
    */
   public void showRemoveBoardDialog() {

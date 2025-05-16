@@ -84,13 +84,11 @@ public class LudoMenuUI {
 
     HBox boardButtons = new HBox(30);
     boardButtons.setAlignment(Pos.CENTER);
-    Button newBoardBtn = createMenuButton("NEW BOARD");
     Button loadBoardBtn = createMenuButton("LOAD BOARD");
 
-    newBoardBtn.setOnAction(e -> boardManagementUI.showAddBoardDialog());
     loadBoardBtn.setOnAction(e -> boardManagementUI.showLoadBoardDialog());
 
-    boardButtons.getChildren().addAll(newBoardBtn, loadBoardBtn);
+    boardButtons.getChildren().add(loadBoardBtn);
     centerBox.getChildren().add(boardButtons);
 
     // Choose The Players button
