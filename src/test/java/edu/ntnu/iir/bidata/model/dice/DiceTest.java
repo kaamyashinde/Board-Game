@@ -1,5 +1,4 @@
-package edu.ntnu.iir.bidata.model;
-import edu.ntnu.iir.bidata.model.dice.Dice;
+package edu.ntnu.iir.bidata.model.dice;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

@@ -1,14 +1,13 @@
 package edu.ntnu.iir.bidata.view.ludo;
 
 import edu.ntnu.iir.bidata.controller.LudoController;
-import edu.ntnu.iir.bidata.model.BoardGame;
+import edu.ntnu.iir.bidata.model.Observer;
 import edu.ntnu.iir.bidata.model.Player;
-import edu.ntnu.iir.bidata.model.tile.TileAction;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -30,7 +29,6 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import edu.ntnu.iir.bidata.model.Observer;
 
 /**
  * JavaFX UI for the Ludo game board. This class implements the game board interface and game flow
@@ -91,41 +89,39 @@ public class LudoGameUI implements Observer {
    */
   private void initializePathCoordinates() {
     LOGGER.info("Initializing path coordinates for each player color");
-    
+
     // Define the main path coordinates (clockwise from bottom)
     int[][] mainPath = {
-      {6, 1}, {6, 2}, {6, 3}, {6, 4}, {6, 5}, {5, 6}, {4, 6}, {3, 6}, {2, 6}, {1, 6},
-      {0, 6}, {0, 7}, {0, 8}, {1, 8}, {2, 8}, {3, 8}, {4, 8}, {5, 8}, {6, 9}, {6, 10},
-      {6, 11}, {6, 12}, {6, 13}, {7, 13}, {8, 13}, {8, 12}, {8, 11}, {8, 10}, {8, 9},
-      {9, 8}, {10, 8}, {11, 8}, {12, 8}, {13, 8}, {13, 7}, {13, 6}, {12, 6}, {11, 6},
-      {10, 6}, {9, 6}, {8, 5}, {8, 4}, {8, 3}, {8, 2}, {8, 1}, {8, 0}, {7, 0}, {7, 1},
-      {7, 2}, {7, 3}, {7, 4}, {7, 5}
+        {6, 1}, {6, 2}, {6, 3}, {6, 4}, {6, 5}, {5, 6}, {4, 6}, {3, 6}, {2, 6}, {1, 6},
+        {0, 6}, {0, 7}, {0, 8}, {1, 8}, {2, 8}, {3, 8}, {4, 8}, {5, 8}, {6, 9}, {6, 10},
+        {6, 11}, {6, 12}, {6, 13}, {7, 13}, {8, 13}, {8, 12}, {8, 11}, {8, 10}, {8, 9},
+        {9, 8}, {10, 8}, {11, 8}, {12, 8}, {13, 8}, {13, 7}, {13, 6}, {12, 6}, {11, 6},
+        {10, 6}, {9, 6}, {8, 5}, {8, 4}, {8, 3}, {8, 2}, {8, 1}, {8, 0}, {7, 0}, {7, 1},
+        {7, 2}, {7, 3}, {7, 4}, {7, 5}
     };
 
     // Define the home stretch coordinates for each color
     int[][] redHomeStretch = {
-      {6, 6}, {6, 7}, {6, 8}, {6, 9}, {6, 10}, {6, 11}
+        {6, 6}, {6, 7}, {6, 8}, {6, 9}, {6, 10}, {6, 11}
     };
     int[][] greenHomeStretch = {
-      {7, 8}, {8, 8}, {9, 8}, {10, 8}, {11, 8}, {12, 8}
+        {7, 8}, {8, 8}, {9, 8}, {10, 8}, {11, 8}, {12, 8}
     };
     int[][] yellowHomeStretch = {
-      {8, 7}, {8, 6}, {8, 5}, {8, 4}, {8, 3}, {8, 2}
+        {8, 7}, {8, 6}, {8, 5}, {8, 4}, {8, 3}, {8, 2}
     };
     int[][] blueHomeStretch = {
-      {7, 6}, {6, 6}, {5, 6}, {4, 6}, {3, 6}, {2, 6}
+        {7, 6}, {6, 6}, {5, 6}, {4, 6}, {3, 6}, {2, 6}
     };
 
     // Create paths for each color
     for (int i = 0; i < playerColors.length; i++) {
       List<int[]> path = new ArrayList<>();
       String color = playerColors[i];
-      
+
       // Add main path coordinates
-      for (int[] coord : mainPath) {
-        path.add(coord);
-      }
-      
+      Collections.addAll(path, mainPath);
+
       // Add home stretch coordinates based on color
       int[][] homeStretch;
       switch (color) {
@@ -144,11 +140,9 @@ public class LudoGameUI implements Observer {
         default:
           homeStretch = redHomeStretch;
       }
-      
-      for (int[] coord : homeStretch) {
-        path.add(coord);
-      }
-      
+
+      Collections.addAll(path, homeStretch);
+
       pathCoordinates.put(color, path);
     }
   }
@@ -508,7 +502,9 @@ public class LudoGameUI implements Observer {
    * Handle token move using controller
    */
   private void handleTokenMove(int tokenIndex) {
-    if (controller == null) return;
+    if (controller == null) {
+      return;
+    }
 
     String currentPlayer = controller.getCurrentPlayerName();
     LudoController.MoveResult result = controller.moveToken(currentPlayer, tokenIndex, diceValue);
@@ -525,7 +521,8 @@ public class LudoGameUI implements Observer {
         statusLabel.setText(currentPlayer + " captured an opponent's token!");
         break;
       default:
-        statusLabel.setText(currentPlayer + " moved token " + (tokenIndex + 1) + " to position " + result.end);
+        statusLabel.setText(
+            currentPlayer + " moved token " + (tokenIndex + 1) + " to position " + result.end);
     }
 
     // Clear highlights and update UI
@@ -539,7 +536,9 @@ public class LudoGameUI implements Observer {
    */
   private void updateTokenPosition(String playerName, int tokenIndex, int position) {
     List<Circle> tokens = playerTokens.get(playerName);
-    if (tokens == null || tokenIndex >= tokens.size()) return;
+    if (tokens == null || tokenIndex >= tokens.size()) {
+      return;
+    }
 
     Circle token = tokens.get(tokenIndex);
     tokenPositions.put(token, position);
@@ -617,7 +616,9 @@ public class LudoGameUI implements Observer {
 
   @Override
   public void update() {
-    if (controller == null) return;
+    if (controller == null) {
+      return;
+    }
 
     // Update current player
     String currentPlayer = controller.getCurrentPlayerName();

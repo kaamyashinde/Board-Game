@@ -2,7 +2,7 @@ package edu.ntnu.iir.bidata.controller;
 
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.Player;
-import edu.ntnu.iir.bidata.model.tile.TileAction;
+import edu.ntnu.iir.bidata.model.tile.core.TileAction;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,15 +24,15 @@ public class GameController {
   private final int[][] ladders = {
       {3, 36}, {8, 12}, {14, 26}, {31, 73}, {59, 80}, {83, 97}, {90, 92}
   };
-  private boolean gameStarted = false;
   // For Snakes and Ladders specific logic
   private final Map<String, Integer> playerPositions = new HashMap<>();
+  // For Ludo specific logic
+  private final int diceValue = 1;
+  private boolean gameStarted = false;
   @Setter
   @Getter
   private int currentPlayerIndex = 0;
   private List<String> playerNames;
-  // For Ludo specific logic
-  private final int diceValue = 1;
   @Setter
   @Getter
   private boolean diceRolled = false;

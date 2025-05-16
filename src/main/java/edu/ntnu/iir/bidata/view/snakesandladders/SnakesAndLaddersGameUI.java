@@ -1,9 +1,16 @@
 package edu.ntnu.iir.bidata.view.snakesandladders;
 
 import edu.ntnu.iir.bidata.controller.SnakesAndLaddersController;
+import edu.ntnu.iir.bidata.model.Observer;
 import edu.ntnu.iir.bidata.model.Player;
-import edu.ntnu.iir.bidata.model.tile.TileAction;
 import edu.ntnu.iir.bidata.view.common.DiceView;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javafx.animation.PauseTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -19,360 +26,362 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.logging.Level;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import edu.ntnu.iir.bidata.model.Observer;
 
 public class SnakesAndLaddersGameUI implements Observer {
-    private static final Logger LOGGER = Logger.getLogger(SnakesAndLaddersGameUI.class.getName());
-    private final Stage primaryStage;
-    private DiceView diceView;
-    private final Map<String, Circle> playerTokenMap = new HashMap<>();
-    private final Map<String, Label> playerPositionLabels = new HashMap<>();
-    private Pane playerLayer;
-    private VBox playerPanel;
-    private Button rollDiceBtn;
-    private Label statusLabel;
-    private List<Player> playerNames;
-    private SnakesAndLaddersController controller;
 
-    private final int TILE_SIZE = 50;
-    private final int BOARD_SIZE = 10; // 10x10 board
+  private static final Logger LOGGER = Logger.getLogger(SnakesAndLaddersGameUI.class.getName());
+  private final Stage primaryStage;
+  private final Map<String, Circle> playerTokenMap = new HashMap<>();
+  private final Map<String, Label> playerPositionLabels = new HashMap<>();
+  private final int TILE_SIZE = 50;
+  private final int BOARD_SIZE = 10; // 10x10 board
+  private final Color[] PLAYER_COLORS = {
+      Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.PURPLE
+  };
+  private DiceView diceView;
+  private Pane playerLayer;
+  private VBox playerPanel;
+  private Button rollDiceBtn;
+  private Label statusLabel;
+  private List<Player> playerNames;
+  private SnakesAndLaddersController controller;
 
-    private final Color[] PLAYER_COLORS = {
-        Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.PURPLE
-    };
+  /**
+   * Constructor that receives the selected players from the menu
+   *
+   * @param primaryStage The primary stage
+   * @param playerNames  List of player names selected in the menu
+   */
+  public SnakesAndLaddersGameUI(Stage primaryStage, List<Player> playerNames) {
+    LOGGER.info("Initializing Snakes and Ladders Game UI with players: " + playerNames);
+    this.primaryStage = primaryStage;
+    this.playerNames = playerNames;
 
-    /**
-     * Constructor that receives the selected players from the menu
-     *
-     * @param primaryStage The primary stage
-     * @param playerNames List of player names selected in the menu
-     */
-    public SnakesAndLaddersGameUI(Stage primaryStage, List<Player> playerNames) {
-        LOGGER.info("Initializing Snakes and Ladders Game UI with players: " + playerNames);
-        this.primaryStage = primaryStage;
-        this.playerNames = playerNames;
-
-        // If no players were passed, add a default player
-        if (this.playerNames == null || this.playerNames.isEmpty()) {
-            LOGGER.warning("No players provided, adding default player");
-            this.playerNames = new ArrayList<>();
-            this.playerNames.add(new Player("Player 1"));
-        }
-
-        setupGamePage();
-        initializePlayerPositions();
+    // If no players were passed, add a default player
+    if (this.playerNames == null || this.playerNames.isEmpty()) {
+      LOGGER.warning("No players provided, adding default player");
+      this.playerNames = new ArrayList<>();
+      this.playerNames.add(new Player("Player 1"));
     }
 
-    /**
-     * Sets the game controller
-     * @param controller The game controller
-     */
-    public void setController(SnakesAndLaddersController controller) {
-        LOGGER.info("Setting game controller");
-        this.controller = controller;
-        controller.setPlayerNames(playerNames.stream().map(Player::getName).collect(Collectors.toList()));
-        updateCurrentPlayerIndicator(controller.getCurrentSnakesAndLaddersPlayerName());
+    setupGamePage();
+    initializePlayerPositions();
+  }
+
+  /**
+   * Sets the game controller
+   *
+   * @param controller The game controller
+   */
+  public void setController(SnakesAndLaddersController controller) {
+    LOGGER.info("Setting game controller");
+    this.controller = controller;
+    controller.setPlayerNames(
+        playerNames.stream().map(Player::getName).collect(Collectors.toList()));
+    updateCurrentPlayerIndicator(controller.getCurrentSnakesAndLaddersPlayerName());
+  }
+
+  /**
+   * Updates the current player indicator in the UI
+   */
+  public void updateCurrentPlayerIndicator(String currentPlayer) {
+    LOGGER.info("Updating current player indicator: " + currentPlayer);
+    statusLabel.setText(currentPlayer + "'s Turn");
+  }
+
+  private void setupGamePage() {
+    LOGGER.info("Setting up game page");
+    primaryStage.setTitle("Snakes & Ladders - Game");
+
+    BorderPane root = new BorderPane();
+    root.setPadding(new Insets(20));
+    root.setStyle("-fx-background-color: #f5fff5;");
+
+    // --- Board (center) ---
+    StackPane boardPane = new StackPane();
+    boardPane.setAlignment(Pos.CENTER_LEFT);
+
+    // Load custom board image
+    Image boardImage = new Image(
+        Objects.requireNonNull(getClass().getResourceAsStream("/snakes_and_ladders_board.jpeg")));
+    ImageView boardView = new ImageView(boardImage);
+    boardView.setFitWidth(TILE_SIZE * BOARD_SIZE);
+    boardView.setFitHeight(TILE_SIZE * BOARD_SIZE);
+    boardView.setPreserveRatio(false);
+
+    // Add the board image to the pane
+    boardPane.getChildren().add(boardView);
+
+    // Create a pane for player tokens that will be positioned over the board
+    playerLayer = new Pane();
+    playerLayer.setPrefSize(boardView.getFitWidth(), boardView.getFitHeight());
+    boardPane.getChildren().add(playerLayer);
+
+    root.setCenter(boardPane);
+
+    // --- Right: Player info panel ---
+    playerPanel = new VBox(15);
+    playerPanel.setPadding(new Insets(20));
+    playerPanel.setStyle("-fx-background-color: #e6fff2; -fx-background-radius: 20;");
+    playerPanel.setPrefWidth(250);
+    playerPanel.setAlignment(Pos.TOP_LEFT);
+
+    // Add status label at the top of the player panel
+    statusLabel = new Label("Game Started!");
+    statusLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+    statusLabel.setWrapText(true);
+
+    playerPanel.getChildren().add(statusLabel);
+    playerPanel.getChildren().add(new Label("--------------------"));
+
+    // Create player tokens and labels based on selected players
+    for (int i = 0; i < playerNames.size(); i++) {
+      String playerName = playerNames.get(i).getName();
+
+      // Create player info section
+      VBox playerBox = new VBox(5);
+      playerBox.setStyle("-fx-padding: 5px;");
+
+      Label playerLabel = new Label(playerName.toUpperCase() + ":");
+      playerLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
+
+      // Position label
+      Label posLabel = new Label("at position: 0");
+      playerPositionLabels.put(playerName, posLabel);
+
+      Circle token = createPlayerToken(i + 1, playerName);
+      playerTokenMap.put(playerName, token);
+
+      HBox nameBox = new HBox(10);
+      nameBox.setAlignment(Pos.CENTER_LEFT);
+      Circle colorIndicator = new Circle(8);
+      colorIndicator.setFill(PLAYER_COLORS[i % PLAYER_COLORS.length]);
+      colorIndicator.setStroke(Color.BLACK);
+      colorIndicator.setStrokeWidth(1);
+      nameBox.getChildren().addAll(colorIndicator, playerLabel);
+
+      playerBox.getChildren().addAll(nameBox, posLabel);
+      playerPanel.getChildren().add(playerBox);
     }
 
-    private void setupGamePage() {
-        LOGGER.info("Setting up game page");
-        primaryStage.setTitle("Snakes & Ladders - Game");
+    root.setRight(playerPanel);
 
-        BorderPane root = new BorderPane();
-        root.setPadding(new Insets(20));
-        root.setStyle("-fx-background-color: #f5fff5;");
+    // --- Top: Roll dice and status ---
+    VBox topBox = new VBox(10);
+    topBox.setAlignment(Pos.CENTER_LEFT);
+    topBox.setPadding(new Insets(10, 0, 10, 20));
 
-        // --- Board (center) ---
-        StackPane boardPane = new StackPane();
-        boardPane.setAlignment(Pos.CENTER_LEFT);
+    HBox diceBox = new HBox(20);
+    diceBox.setAlignment(Pos.CENTER_LEFT);
 
-        // Load custom board image
-        Image boardImage = new Image(
-            Objects.requireNonNull(getClass().getResourceAsStream("/snakes_and_ladders_board.jpeg")));
-        ImageView boardView = new ImageView(boardImage);
-        boardView.setFitWidth(TILE_SIZE * BOARD_SIZE);
-        boardView.setFitHeight(TILE_SIZE * BOARD_SIZE);
-        boardView.setPreserveRatio(false);
+    rollDiceBtn = new Button("ROLL DICE");
+    rollDiceBtn.setStyle(
+        "-fx-background-color: #bdebc8; -fx-font-size: 18px; -fx-background-radius: 15;");
 
-        // Add the board image to the pane
-        boardPane.getChildren().add(boardView);
+    diceView = new DiceView();
+    diceBox.getChildren().addAll(rollDiceBtn, diceView);
+    rollDiceBtn.setOnAction(e -> rollDiceAndMove());
 
-        // Create a pane for player tokens that will be positioned over the board
-        playerLayer = new Pane();
-        playerLayer.setPrefSize(boardView.getFitWidth(), boardView.getFitHeight());
-        boardPane.getChildren().add(playerLayer);
+    topBox.getChildren().add(diceBox);
+    root.setTop(topBox);
 
-        root.setCenter(boardPane);
+    Scene scene = new Scene(root, 1100, 700);
+    primaryStage.setScene(scene);
+    primaryStage.show();
+  }
 
-        // --- Right: Player info panel ---
-        playerPanel = new VBox(15);
-        playerPanel.setPadding(new Insets(20));
-        playerPanel.setStyle("-fx-background-color: #e6fff2; -fx-background-radius: 20;");
-        playerPanel.setPrefWidth(250);
-        playerPanel.setAlignment(Pos.TOP_LEFT);
-
-        // Add status label at the top of the player panel
-        statusLabel = new Label("Game Started!");
-        statusLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
-        statusLabel.setWrapText(true);
-
-        playerPanel.getChildren().add(statusLabel);
-        playerPanel.getChildren().add(new Label("--------------------"));
-
-        // Create player tokens and labels based on selected players
-        for (int i = 0; i < playerNames.size(); i++) {
-            String playerName = playerNames.get(i).getName();
-
-            // Create player info section
-            VBox playerBox = new VBox(5);
-            playerBox.setStyle("-fx-padding: 5px;");
-
-            Label playerLabel = new Label(playerName.toUpperCase() + ":");
-            playerLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
-
-            // Position label
-            Label posLabel = new Label("at position: 0");
-            playerPositionLabels.put(playerName, posLabel);
-
-            Circle token = createPlayerToken(i + 1, playerName);
-            playerTokenMap.put(playerName, token);
-
-            HBox nameBox = new HBox(10);
-            nameBox.setAlignment(Pos.CENTER_LEFT);
-            Circle colorIndicator = new Circle(8);
-            colorIndicator.setFill(PLAYER_COLORS[i % PLAYER_COLORS.length]);
-            colorIndicator.setStroke(Color.BLACK);
-            colorIndicator.setStrokeWidth(1);
-            nameBox.getChildren().addAll(colorIndicator, playerLabel);
-
-            playerBox.getChildren().addAll(nameBox, posLabel);
-            playerPanel.getChildren().add(playerBox);
-        }
-
-        root.setRight(playerPanel);
-
-        // --- Top: Roll dice and status ---
-        VBox topBox = new VBox(10);
-        topBox.setAlignment(Pos.CENTER_LEFT);
-        topBox.setPadding(new Insets(10, 0, 10, 20));
-
-        HBox diceBox = new HBox(20);
-        diceBox.setAlignment(Pos.CENTER_LEFT);
-
-        rollDiceBtn = new Button("ROLL DICE");
-        rollDiceBtn.setStyle("-fx-background-color: #bdebc8; -fx-font-size: 18px; -fx-background-radius: 15;");
-
-        diceView = new DiceView();
-        diceBox.getChildren().addAll(rollDiceBtn, diceView);
-        rollDiceBtn.setOnAction(e -> rollDiceAndMove());
-
-        topBox.getChildren().add(diceBox);
-        root.setTop(topBox);
-
-        Scene scene = new Scene(root, 1100, 700);
-        primaryStage.setScene(scene);
-        primaryStage.show();
+  /**
+   * Initialize all player positions to the starting position
+   */
+  private void initializePlayerPositions() {
+    LOGGER.info("Initializing player positions");
+    for (Player player : playerNames) {
+      // Move token to starting position
+      movePlayerToken(player.getName(), 0);
     }
+  }
 
-    /**
-     * Initialize all player positions to the starting position
-     */
-    private void initializePlayerPositions() {
-        LOGGER.info("Initializing player positions");
-        for (Player player : playerNames) {
-            // Move token to starting position
-            movePlayerToken(player.getName(), 0);
-        }
-    }
+  /**
+   * Roll the dice and move the current player
+   */
+  private void rollDiceAndMove() {
+      if (controller == null) {
+          return;
+      }
 
-    /**
-     * Roll the dice and move the current player
-     */
-    private void rollDiceAndMove() {
-        if (controller == null) return;
+    rollDiceBtn.setDisable(true);
 
+    String currentPlayer = controller.getCurrentSnakesAndLaddersPlayerName();
+
+    controller.rollDiceForSnakesAndLadders();
+    int roll = controller.getLastDiceRoll();
+    diceView.setValue(roll);
+
+    statusLabel.setText(currentPlayer + " rolled a " + roll + "!");
+
+    PauseTransition pause = new PauseTransition(Duration.millis(800));
+    pause.setOnFinished(event -> {
+      SnakesAndLaddersController.MoveResult result = controller.movePlayer(currentPlayer, roll);
+
+      updatePlayerPosition(currentPlayer);
+
+      if (result.type.equals("snake")) {
+        displaySnakeOrLadderMessage(currentPlayer, result.start, result.end, "snake");
+      } else if (result.type.equals("ladder")) {
+        displaySnakeOrLadderMessage(currentPlayer, result.start, result.end, "ladder");
+      }
+
+      if (result.end == 100) {
+        statusLabel.setText("🏆 " + currentPlayer + " WINS! 🏆");
         rollDiceBtn.setDisable(true);
+        return;
+      }
 
-        String currentPlayer = controller.getCurrentSnakesAndLaddersPlayerName();
+      controller.nextSnakesAndLaddersPlayer();
+      updateCurrentPlayerIndicator(controller.getCurrentSnakesAndLaddersPlayerName());
+      rollDiceBtn.setDisable(false);
+    });
+    pause.play();
+  }
 
-        controller.rollDiceForSnakesAndLadders();
-        int roll = controller.getLastDiceRoll();
-        diceView.setValue(roll);
+  /**
+   * Creates a player token with the specified color
+   *
+   * @param playerNumber the player number (1-based)
+   * @param playerName   the player's name
+   * @return the Circle representing the player token
+   */
+  private Circle createPlayerToken(int playerNumber, String playerName) {
+    Circle token = new Circle(10);
+    token.setFill(PLAYER_COLORS[(playerNumber - 1) % PLAYER_COLORS.length]);
+    token.setStroke(Color.BLACK);
+    token.setStrokeWidth(2);
 
-        statusLabel.setText(currentPlayer + " rolled a " + roll + "!");
+    // Add token to the player layer
+    playerLayer.getChildren().add(token);
 
-        PauseTransition pause = new PauseTransition(Duration.millis(800));
-        pause.setOnFinished(event -> {
-            SnakesAndLaddersController.MoveResult result = controller.movePlayer(currentPlayer, roll);
+    // Position token off-board initially
+    token.setTranslateX(20); // off the board
+    token.setTranslateY(20); // off the board
 
-            updatePlayerPosition(currentPlayer);
+    return token;
+  }
 
-            if (result.type.equals("snake")) {
-                displaySnakeOrLadderMessage(currentPlayer, result.start, result.end, "snake");
-            } else if (result.type.equals("ladder")) {
-                displaySnakeOrLadderMessage(currentPlayer, result.start, result.end, "ladder");
-            }
+  /**
+   * Display a message about a snake or ladder
+   */
+  public void displaySnakeOrLadderMessage(String playerName, int fromPosition, int toPosition,
+      String type) {
+    statusLabel.setText(
+        playerName + " hit a " + type + "! Moving from " + fromPosition + " to " + toPosition);
 
-            if (result.end == 100) {
-                statusLabel.setText("🏆 " + currentPlayer + " WINS! 🏆");
-                rollDiceBtn.setDisable(true);
-                return;
-            }
+    // Add a short delay before actually moving the token
+    PauseTransition pause = new PauseTransition(Duration.millis(1000));
+    pause.setOnFinished(e -> {
+      // Move the token to the new position
+      movePlayerToken(playerName, toPosition);
+    });
+    pause.play();
+  }
 
-            controller.nextSnakesAndLaddersPlayer();
-            updateCurrentPlayerIndicator(controller.getCurrentSnakesAndLaddersPlayerName());
-            rollDiceBtn.setDisable(false);
-        });
-        pause.play();
+  @Override
+  public void update() {
+    // Instead of updateBoard, update all player positions here
+    if (controller != null) {
+      for (Player player : playerNames) {
+        updatePlayerPosition(player.getName());
+      }
+      String currentPlayer = controller.getCurrentSnakesAndLaddersPlayerName();
+      updateCurrentPlayerIndicator(currentPlayer);
+      // Optionally, show winner if game is over (if you have such logic)
+    }
+  }
+
+  /**
+   * Updates the position of a player in the UI
+   *
+   * @param playerName the player's name
+   */
+  private void updatePlayerPosition(String playerName) {
+      if (controller == null) {
+          return;
+      }
+
+    // Get current position from controller
+    int position = controller.getPlayerPosition(playerName);
+
+    // Update position label
+    Label positionLabel = playerPositionLabels.get(playerName);
+    positionLabel.setText("at position: " + position);
+
+    // Move the token on the board
+    movePlayerToken(playerName, position);
+  }
+
+  /**
+   * Moves a player token to a specific position on the board
+   *
+   * @param playerName the player's name
+   * @param position   the board position (1-100)
+   */
+  private void movePlayerToken(String playerName, int position) {
+    Circle token = playerTokenMap.get(playerName);
+    if (token == null) {
+      return;
     }
 
-    /**
-     * Updates the current player indicator in the UI
-     */
-    public void updateCurrentPlayerIndicator(String currentPlayer) {
-        LOGGER.info("Updating current player indicator: " + currentPlayer);
-        statusLabel.setText(currentPlayer + "'s Turn");
+    if (position == 0) {
+      // Starting position (off board)
+      token.setTranslateX(20);
+      token.setTranslateY(TILE_SIZE * BOARD_SIZE + 20);
+      return;
     }
 
-    /**
-     * Creates a player token with the specified color
-     * @param playerNumber the player number (1-based)
-     * @param playerName the player's name
-     * @return the Circle representing the player token
-     */
-    private Circle createPlayerToken(int playerNumber, String playerName) {
-        Circle token = new Circle(10);
-        token.setFill(PLAYER_COLORS[(playerNumber - 1) % PLAYER_COLORS.length]);
-        token.setStroke(Color.BLACK);
-        token.setStrokeWidth(2);
-
-        // Add token to the player layer
-        playerLayer.getChildren().add(token);
-
-        // Position token off-board initially
-        token.setTranslateX(20); // off the board
-        token.setTranslateY(20); // off the board
-
-        return token;
+    if (position < 1 || position > 100) {
+      return;
     }
 
-    /**
-     * Updates the position of a player in the UI
-     * @param playerName the player's name
-     */
-    private void updatePlayerPosition(String playerName) {
-        if (controller == null) return;
+    // Calculate coordinates for the position
+    int[] coordinates = getCoordinatesForPosition(position);
 
-        // Get current position from controller
-        int position = controller.getPlayerPosition(playerName);
+    // Add a small offset based on player index to prevent complete overlap
+    int playerIndex = playerNames.indexOf(playerName);
+    int offsetX = playerIndex * 5 - 5;
+    int offsetY = playerIndex * 5 - 5;
 
-        // Update position label
-        Label positionLabel = playerPositionLabels.get(playerName);
-        positionLabel.setText("at position: " + position);
+    // Move the token
+    token.setTranslateX(coordinates[0] + offsetX);
+    token.setTranslateY(coordinates[1] + offsetY);
+  }
 
-        // Move the token on the board
-        movePlayerToken(playerName, position);
+  /**
+   * Maps a board position (1-100) to pixel coordinates on the board image
+   *
+   * @param position the board position (1-100)
+   * @return x, y coordinates for the position on the board
+   */
+  public int[] getCoordinatesForPosition(int position) {
+    if (position < 1 || position > 100) {
+      throw new IllegalArgumentException("Position must be between 1 and 100");
     }
 
-    /**
-     * Moves a player token to a specific position on the board
-     * @param playerName the player's name
-     * @param position the board position (1-100)
-     */
-    private void movePlayerToken(String playerName, int position) {
-        Circle token = playerTokenMap.get(playerName);
-        if (token == null) {
-            return;
-        }
+    int row = (position - 1) / BOARD_SIZE;
+    int col;
 
-        if (position == 0) {
-            // Starting position (off board)
-            token.setTranslateX(20);
-            token.setTranslateY(TILE_SIZE * BOARD_SIZE + 20);
-            return;
-        }
-
-        if (position < 1 || position > 100) {
-            return;
-        }
-
-        // Calculate coordinates for the position
-        int[] coordinates = getCoordinatesForPosition(position);
-
-        // Add a small offset based on player index to prevent complete overlap
-        int playerIndex = playerNames.indexOf(playerName);
-        int offsetX = playerIndex * 5 - 5;
-        int offsetY = playerIndex * 5 - 5;
-
-        // Move the token
-        token.setTranslateX(coordinates[0] + offsetX);
-        token.setTranslateY(coordinates[1] + offsetY);
+    // Handle snake and ladder board row alternating direction
+    if (row % 2 == 0) { // Even rows (0, 2, 4, 6, 8) go left to right
+      col = (position - 1) % BOARD_SIZE;
+    } else { // Odd rows (1, 3, 5, 7, 9) go right to left
+      col = BOARD_SIZE - 1 - ((position - 1) % BOARD_SIZE);
     }
 
-    /**
-     * Display a message about a snake or ladder
-     */
-    public void displaySnakeOrLadderMessage(String playerName, int fromPosition, int toPosition, String type) {
-        statusLabel.setText(playerName + " hit a " + type + "! Moving from " + fromPosition + " to " + toPosition);
+    // Flip row because the board starts from the bottom
+    row = BOARD_SIZE - row;
 
-        // Add a short delay before actually moving the token
-        PauseTransition pause = new PauseTransition(Duration.millis(1000));
-        pause.setOnFinished(e -> {
-            // Move the token to the new position
-            movePlayerToken(playerName, toPosition);
-        });
-        pause.play();
-    }
+    // Calculate pixel coordinates (adding offset to center token in tile)
+    int x = col * TILE_SIZE + TILE_SIZE / 2;
+    int y = row * TILE_SIZE + TILE_SIZE / 2;
 
-    /**
-     * Maps a board position (1-100) to pixel coordinates on the board image
-     * @param position the board position (1-100)
-     * @return x,y coordinates for the position on the board
-     */
-    public int[] getCoordinatesForPosition(int position) {
-        if (position < 1 || position > 100) {
-            throw new IllegalArgumentException("Position must be between 1 and 100");
-        }
-
-        int row = (position - 1) / BOARD_SIZE;
-        int col;
-
-        // Handle snake and ladder board row alternating direction
-        if (row % 2 == 0) { // Even rows (0, 2, 4, 6, 8) go left to right
-            col = (position - 1) % BOARD_SIZE;
-        } else { // Odd rows (1, 3, 5, 7, 9) go right to left
-            col = BOARD_SIZE - 1 - ((position - 1) % BOARD_SIZE);
-        }
-
-        // Flip row because the board starts from the bottom
-        row = BOARD_SIZE - row;
-
-        // Calculate pixel coordinates (adding offset to center token in tile)
-        int x = col * TILE_SIZE + TILE_SIZE / 2;
-        int y = row * TILE_SIZE + TILE_SIZE / 2;
-
-        return new int[] {x, y};
-    }
-
-    @Override
-    public void update() {
-        // Instead of updateBoard, update all player positions here
-        if (controller != null) {
-            for (Player player : playerNames) {
-                updatePlayerPosition(player.getName());
-            }
-            String currentPlayer = controller.getCurrentSnakesAndLaddersPlayerName();
-            updateCurrentPlayerIndicator(currentPlayer);
-            // Optionally, show winner if game is over (if you have such logic)
-        }
-    }
+    return new int[]{x, y};
+  }
 }

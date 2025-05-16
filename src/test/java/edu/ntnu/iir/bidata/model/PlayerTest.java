@@ -1,79 +1,80 @@
 package edu.ntnu.iir.bidata.model;
 
-import edu.ntnu.iir.bidata.model.tile.Tile;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import edu.ntnu.iir.bidata.model.tile.core.Tile;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class PlayerTest {
-    private Player player;
-    private Tile mockTile;
-    private Tile mockNextTile;
 
-    @BeforeEach
-    void setUp() {
-        player = new Player("TestPlayer");
-        mockTile = mock(Tile.class);
-        mockNextTile = mock(Tile.class);
-        player.setCurrentTile(mockTile);
-    }
+  private Player player;
+  private Tile mockTile;
+  private Tile mockNextTile;
 
-    @Test
-    void testConstructor() {
-        Player newPlayer = new Player("NewPlayer");
-        assertEquals("NewPlayer", newPlayer.getName());
-        assertNull(newPlayer.getCurrentTile());
-    }
+  @BeforeEach
+  void setUp() {
+    player = new Player("TestPlayer");
+    mockTile = mock(Tile.class);
+    mockNextTile = mock(Tile.class);
+    player.setCurrentTile(mockTile);
+  }
 
-    @Test
-    void testMove() {
-        when(mockTile.getNextTile(3)).thenReturn(mockNextTile);
-        player.move(3);
-        verify(mockTile).getNextTile(3);
-        assertEquals(mockNextTile, player.getCurrentTile());
-    }
+  @Test
+  void testConstructor() {
+    Player newPlayer = new Player("NewPlayer");
+    assertEquals("NewPlayer", newPlayer.getName());
+    assertNull(newPlayer.getCurrentTile());
+  }
 
-    @Test
-    void testIsOnFirstTile() {
-        when(mockTile.isFirstTile()).thenReturn(true);
-        assertTrue(player.isOnFirstTile());
-        verify(mockTile).isFirstTile();
+  @Test
+  void testMove() {
+    when(mockTile.getNextTile(3)).thenReturn(mockNextTile);
+    player.move(3);
+    verify(mockTile).getNextTile(3);
+    assertEquals(mockNextTile, player.getCurrentTile());
+  }
 
-        when(mockTile.isFirstTile()).thenReturn(false);
-        assertFalse(player.isOnFirstTile());
-    }
+  @Test
+  void testIsOnFirstTile() {
+    when(mockTile.isFirstTile()).thenReturn(true);
+    assertTrue(player.isOnFirstTile());
+    verify(mockTile).isFirstTile();
 
-    @Test
-    void testIsOnLastTile() {
-        when(mockTile.isLastTile()).thenReturn(true);
-        assertTrue(player.isOnLastTile());
-        verify(mockTile).isLastTile();
+    when(mockTile.isFirstTile()).thenReturn(false);
+    assertFalse(player.isOnFirstTile());
+  }
 
-        when(mockTile.isLastTile()).thenReturn(false);
-        assertFalse(player.isOnLastTile());
-    }
+  @Test
+  void testIsOnLastTile() {
+    when(mockTile.isLastTile()).thenReturn(true);
+    assertTrue(player.isOnLastTile());
+    verify(mockTile).isLastTile();
 
-    @Test
-    void testGetCurrentPosition() {
-        when(mockTile.getId()).thenReturn(5);
-        assertEquals(5, player.getCurrentPosition());
-        verify(mockTile).getId();
+    when(mockTile.isLastTile()).thenReturn(false);
+    assertFalse(player.isOnLastTile());
+  }
 
-        // Test when currentTile is null
-        Player playerWithoutTile = new Player("NoTilePlayer");
-        assertEquals(-1, playerWithoutTile.getCurrentPosition());
-    }
+  @Test
+  void testGetCurrentPosition() {
+    when(mockTile.getId()).thenReturn(5);
+    assertEquals(5, player.getCurrentPosition());
+    verify(mockTile).getId();
 
-    @Test
-    void testGettersAndSetters() {
-        // Test name getter and setter
-        player.setName("NewName");
-        assertEquals("NewName", player.getName());
+    // Test when currentTile is null
+    Player playerWithoutTile = new Player("NoTilePlayer");
+    assertEquals(-1, playerWithoutTile.getCurrentPosition());
+  }
 
-        // Test currentTile getter and setter
-        Tile newTile = mock(Tile.class);
-        player.setCurrentTile(newTile);
-        assertEquals(newTile, player.getCurrentTile());
-    }
+  @Test
+  void testGettersAndSetters() {
+    // Test name getter and setter
+    player.setName("NewName");
+    assertEquals("NewName", player.getName());
+
+    // Test currentTile getter and setter
+    Tile newTile = mock(Tile.class);
+    player.setCurrentTile(newTile);
+    assertEquals(newTile, player.getCurrentTile());
+  }
 } 

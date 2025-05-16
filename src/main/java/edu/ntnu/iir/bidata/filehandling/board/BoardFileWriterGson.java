@@ -5,12 +5,11 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import edu.ntnu.iir.bidata.model.board.Board;
-import edu.ntnu.iir.bidata.model.tile.Tile;
-import edu.ntnu.iir.bidata.model.tile.TileAction;
-import edu.ntnu.iir.bidata.model.tile.GoToTileAction;
-import edu.ntnu.iir.bidata.model.tile.snakeandladder.LadderAction;
-import edu.ntnu.iir.bidata.model.tile.snakeandladder.SnakeAction;
-
+import edu.ntnu.iir.bidata.model.tile.actions.base.GoToTileAction;
+import edu.ntnu.iir.bidata.model.tile.core.Tile;
+import edu.ntnu.iir.bidata.model.tile.core.TileAction;
+import edu.ntnu.iir.bidata.model.tile.actions.snakeandladder.LadderAction;
+import edu.ntnu.iir.bidata.model.tile.actions.snakeandladder.SnakeAction;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -37,10 +36,10 @@ public class BoardFileWriterGson implements BoardFileWriter {
     boardJson.add("tiles", tilesArray);
 
     try (FileWriter writer = new FileWriter(path.toFile())) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        gson.toJson(boardJson, writer);
+      Gson gson = new GsonBuilder().setPrettyPrinting().create();
+      gson.toJson(boardJson, writer);
     } catch (IOException e) {
-        throw new RuntimeException("Failed to write board to file", e);
+      throw new RuntimeException("Failed to write board to file", e);
     }
   }
 
