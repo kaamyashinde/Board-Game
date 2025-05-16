@@ -17,6 +17,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -27,6 +29,11 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.scene.control.TextInputDialog;
+import java.util.Optional;
+import java.io.File;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 
 public class SnakesAndLaddersGameUI implements Observer {
 
@@ -44,6 +51,8 @@ public class SnakesAndLaddersGameUI implements Observer {
   private VBox playerPanel;
   private Button rollDiceBtn;
   private Button backButton;
+  private Button saveButton;
+  private Button loadButton;
   private Label statusLabel;
   private List<Player> playerNames;
   private SnakesAndLaddersController controller;
@@ -99,18 +108,87 @@ public class SnakesAndLaddersGameUI implements Observer {
     root.setPadding(new Insets(20));
     root.setStyle("-fx-background-color: #f5fff5;");
 
-    // Create top bar with back button
-    HBox topBar = new HBox(10);
+    // Create top bar with back button and game controls
+    HBox topBar = new HBox(20);
     topBar.setPadding(new Insets(10));
     topBar.setAlignment(Pos.CENTER_LEFT);
     
     backButton = new Button("← Back to Menu");
-    backButton.setStyle("-fx-background-color: #e8c9ad; -fx-font-weight: bold;");
+    backButton.getStyleClass().add("game-control-button");
     backButton.setOnAction(e -> {
-      JavaFXBoardGameLauncher.getInstance().showSnakesAndLaddersMenu(primaryStage);
+      JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
+    });
+
+    saveButton = new Button("Save Game");
+    saveButton.getStyleClass().add("game-control-button");
+    saveButton.setOnAction(e -> {
+      if (controller != null) {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Save Game");
+        dialog.setHeaderText("Enter a name for your saved game");
+        dialog.setContentText("Game name:");
+
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(gameName -> {
+          try {
+            controller.saveGame(gameName);
+            statusLabel.setText("Game saved as: " + gameName);
+          } catch (Exception ex) {
+            statusLabel.setText("Error saving game: " + ex.getMessage());
+          }
+        });
+      }
+    });
+
+    loadButton = new Button("Load Game");
+    loadButton.getStyleClass().add("game-control-button");
+    loadButton.setOnAction(e -> {
+      if (controller != null) {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Load Game");
+        dialog.setHeaderText("Select a saved game to load");
+
+        ComboBox<String> gameList = new ComboBox<>();
+        gameList.setPromptText("Select a game");
+        
+        File savedGamesDir = new File("src/main/resources/saved_games");
+        if (savedGamesDir.exists() && savedGamesDir.isDirectory()) {
+            File[] savedGames = savedGamesDir.listFiles((dir, name) -> name.endsWith(".json"));
+            if (savedGames != null) {
+                for (File game : savedGames) {
+                    String gameName = game.getName().replace(".json", "");
+                    gameList.getItems().add(gameName);
+                }
+            }
+        }
+
+        dialog.getDialogPane().setContent(gameList);
+
+        ButtonType loadButtonType = new ButtonType("Load", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(loadButtonType, ButtonType.CANCEL);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == loadButtonType) {
+                return gameList.getValue();
+            }
+            return null;
+        });
+
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(gameName -> {
+            if (gameName != null) {
+                try {
+                    controller.loadGame(gameName);
+                    statusLabel.setText("Game loaded: " + gameName);
+                } catch (Exception ex) {
+                    statusLabel.setText("Error loading game: " + ex.getMessage());
+                }
+            }
+        });
+      }
     });
     
-    topBar.getChildren().add(backButton);
+    topBar.getChildren().addAll(backButton, saveButton, loadButton);
     root.setTop(topBar);
 
     // --- Board (center) ---
@@ -182,26 +260,27 @@ public class SnakesAndLaddersGameUI implements Observer {
 
     root.setRight(playerPanel);
 
-    // --- Top: Roll dice and status ---
-    VBox topBox = new VBox(10);
-    topBox.setAlignment(Pos.CENTER_LEFT);
-    topBox.setPadding(new Insets(10, 0, 10, 20));
+    // --- Bottom: Roll dice and status ---
+    VBox bottomBox = new VBox(10);
+    bottomBox.setAlignment(Pos.CENTER);
+    bottomBox.setPadding(new Insets(10));
 
     HBox diceBox = new HBox(20);
-    diceBox.setAlignment(Pos.CENTER_LEFT);
+    diceBox.setAlignment(Pos.CENTER);
 
     rollDiceBtn = new Button("ROLL DICE");
-    rollDiceBtn.setStyle(
-        "-fx-background-color: #bdebc8; -fx-font-size: 18px; -fx-background-radius: 15;");
+    rollDiceBtn.getStyleClass().add("game-control-button");
+    rollDiceBtn.setStyle("-fx-font-size: 18px;");
 
     diceView = new DiceView();
     diceBox.getChildren().addAll(rollDiceBtn, diceView);
     rollDiceBtn.setOnAction(e -> rollDiceAndMove());
 
-    topBox.getChildren().add(diceBox);
-    root.setTop(topBox);
+    bottomBox.getChildren().add(diceBox);
+    root.setBottom(bottomBox);
 
     Scene scene = new Scene(root, 1100, 700);
+    scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
     primaryStage.setScene(scene);
     primaryStage.show();
   }

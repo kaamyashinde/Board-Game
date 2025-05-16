@@ -281,4 +281,19 @@ public class BoardGame implements Observable {
       this.actionDesc = actionDesc;
     }
   }
+
+  /**
+   * Sets the players for the game.
+   * @param players The new list of players
+   */
+  public void setPlayers(List<Player> players) {
+    this.players.clear();
+    this.players.addAll(players);
+    // Reset player positions to starting tile
+    Tile startingTile = board.getStartingTile();
+    for (Player player : this.players) {
+      player.setCurrentTile(startingTile);
+    }
+    notifyObservers();
+  }
 }
