@@ -36,20 +36,27 @@ public class BoardGame implements Observable {
   /**
    * Constructor for the NewBoardGame class.
    *
-   * @param boardSize    The size of the game board
+   * @param board The game board
    * @param numberOfDice The number of dice to use in the game
    * @throws IllegalArgumentException if boardSize or numberOfDice is invalid
    */
   public BoardGame(Board board, int numberOfDice) {
-    ParameterValidation.validateNonZeroPositiveInteger(numberOfDice, "number of dice");
+    this(board, new Dice(numberOfDice));
+  }
 
+  /**
+   * Constructor for BoardGame with injected Dice (for testing).
+   *
+   * @param board The game board
+   * @param dice The Dice instance to use
+   */
+  public BoardGame(Board board, Dice dice) {
     this.board = board;
     this.players = new ArrayList<>();
-    this.dice = new Dice(numberOfDice);
+    this.dice = dice;
     this.currentPlayerIndex = 0;
     this.gameOver = false;
     this.gameInitialized = false;
-
   }
 
   /**
