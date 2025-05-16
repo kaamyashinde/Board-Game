@@ -155,10 +155,22 @@ public class SnakesAndLaddersController extends BaseGameController {
     public void loadGame(String gameName, edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI ui) {
         Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
         BoardGame loadedGame = boardGameReader.readBoardGame(savePath);
+        
+        // Update the current controller's state
         this.boardGame = loadedGame;
-        gameStarted = true;
+        this.gameStarted = true;
+        
+        // Update player positions from the loaded game
+        for (Player player : loadedGame.getPlayers()) {
+            updateSnakesAndLaddersPosition(player.getName(), player.getCurrentPosition());
+        }
+        
+        // Set the current player index from the loaded game
+        boardGame.setCurrentPlayerIndex(loadedGame.getCurrentPlayerIndex());
+        
         if (ui != null) {
             ui.setBoardGame(loadedGame);
+            ui.refreshUIFromBoardGame();
         }
         LOGGER.info("Game loaded: " + gameName);
     }
@@ -169,5 +181,24 @@ public class SnakesAndLaddersController extends BaseGameController {
         gameStarted = true;
         // No need to initialize player positions; handled by BoardGame
         LOGGER.info("Snakes and Ladders game started with players: " + playerNames);
+    }
+
+    @Override
+    public void handlePlayerMove() {
+        if (!gameStarted) {
+            LOGGER.warning("Cannot handle player move: Game has not started");
+            return;
+        }
+        
+        String currentPlayer = getCurrentSnakesAndLaddersPlayerName();
+        int roll = getLastDiceRoll();
+        MoveResult result = movePlayer(currentPlayer, roll);
+        
+        if (result.end == 100) {
+            LOGGER.info(currentPlayer + " has won the game!");
+            return;
+        }
+        
+        nextSnakesAndLaddersPlayer();
     }
 } 

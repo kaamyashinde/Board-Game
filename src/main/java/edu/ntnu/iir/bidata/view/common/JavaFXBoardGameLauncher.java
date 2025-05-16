@@ -17,6 +17,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.stage.Stage;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * JavaFX application launcher for the board games UI. This class only handles UI navigation between
@@ -97,6 +99,43 @@ public class JavaFXBoardGameLauncher extends Application {
   }
 
   /**
+   * Displays the Snakes and Ladders game board UI with a loaded game.
+   *
+   * @param stage   The primary stage to show the game on
+   * @param gameName The name of the loaded game
+   */
+  public void showSnakesAndLaddersGameBoardWithLoad(Stage stage, String gameName) {
+    LOGGER.info("Loading Snakes and Ladders game: " + gameName);
+    try {
+      // Load the game state
+      BoardGameFileReaderGson reader = new BoardGameFileReaderGson();
+      Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
+      BoardGame boardGame = reader.readBoardGame(savePath);
+      List<Player> players = boardGame.getPlayers();
+
+      // Create view
+      SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(stage, players);
+      gameUI.setLoadedGame(true, gameName);
+
+      // Create controller and connect it with the view
+      SnakesAndLaddersController controller = new SnakesAndLaddersController(boardGame);
+      gameUI.setController(controller);
+
+      // Load the game state into the controller
+      controller.loadGame(gameName, gameUI);
+
+      // Register the UI as an observer
+      boardGame.addObserver(gameUI);
+
+      // Start the game
+      controller.startGame();
+      LOGGER.info("Snakes and Ladders game loaded successfully");
+    } catch (Exception e) {
+      LOGGER.log(Level.SEVERE, "Error loading Snakes and Ladders game", e);
+    }
+  }
+
+  /**
    * Displays the Snakes and Ladders game board UI.
    *
    * @param stage   The primary stage to show the game on
@@ -166,33 +205,6 @@ public class JavaFXBoardGameLauncher extends Application {
       LOGGER.info("Ludo game started successfully");
     } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Error initializing Ludo game", e);
-    }
-  }
-
-  /**
-   * Loads a saved Snakes and Ladders game and displays the game board UI.
-   *
-   * @param stage The primary stage to show the game on
-   * @param gameName The name of the saved game to load
-   */
-  public void showSnakesAndLaddersGameBoardWithLoad(Stage stage, String gameName) {
-    try {
-      // Load the saved BoardGame
-      BoardGameFileReaderGson reader = new BoardGameFileReaderGson();
-      java.nio.file.Path savePath = java.nio.file.Paths.get("src/main/resources/saved_games", gameName + ".json");
-      edu.ntnu.iir.bidata.model.BoardGame loadedGame = reader.readBoardGame(savePath);
-
-      // Create the UI and controller
-      List<edu.ntnu.iir.bidata.model.Player> players = loadedGame.getPlayers();
-      edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI gameUI = new edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI(stage, players);
-      loadedGame.addObserver(gameUI);
-      edu.ntnu.iir.bidata.controller.SnakesAndLaddersController controller = new edu.ntnu.iir.bidata.controller.SnakesAndLaddersController(loadedGame);
-      gameUI.setController(controller);
-      gameUI.setBoardGame(loadedGame);
-      // Optionally, call refreshUIFromBoardGame if needed
-      gameUI.refreshUIFromBoardGame();
-    } catch (Exception e) {
-      java.util.logging.Logger.getLogger(JavaFXBoardGameLauncher.class.getName()).log(java.util.logging.Level.SEVERE, "Error loading saved game", e);
     }
   }
 }

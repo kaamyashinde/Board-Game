@@ -58,6 +58,8 @@ public class SnakesAndLaddersGameUI implements Observer {
   private List<Player> playerNames;
   private SnakesAndLaddersController controller;
   private BoardGame boardGame;
+  private boolean isLoadedGame = false;
+  private String loadedGameName = null;
 
   /**
    * Constructor that receives the selected players from the menu
@@ -95,6 +97,17 @@ public class SnakesAndLaddersGameUI implements Observer {
   }
 
   /**
+   * Sets whether this is a loaded game and its name
+   * 
+   * @param isLoaded Whether this is a loaded game
+   * @param gameName The name of the loaded game
+   */
+  public void setLoadedGame(boolean isLoaded, String gameName) {
+    this.isLoadedGame = isLoaded;
+    this.loadedGameName = gameName;
+  }
+
+  /**
    * Updates the current player indicator in the UI
    */
   public void updateCurrentPlayerIndicator(String currentPlayer) {
@@ -118,6 +131,9 @@ public class SnakesAndLaddersGameUI implements Observer {
     backButton = new Button("← Back to Menu");
     backButton.getStyleClass().add("game-control-button");
     backButton.setOnAction(e -> {
+      if (isLoadedGame && loadedGameName != null) {
+        controller.saveGame(loadedGameName);
+      }
       JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
     });
 
