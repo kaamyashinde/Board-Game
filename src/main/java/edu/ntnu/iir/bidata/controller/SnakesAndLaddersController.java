@@ -8,6 +8,10 @@ import edu.ntnu.iir.bidata.filehandling.game.GameStateFileWriter;
 import edu.ntnu.iir.bidata.filehandling.game.GameStateFileReader;
 import edu.ntnu.iir.bidata.filehandling.game.GameStateFileWriterGson;
 import edu.ntnu.iir.bidata.filehandling.game.GameStateFileReaderGson;
+import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriter;
+import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReader;
+import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson;
+import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -34,12 +38,18 @@ public class SnakesAndLaddersController extends BaseGameController {
     private final Map<String, Integer> playerPositions = new HashMap<>();
     private final GameStateFileWriter gameStateWriter;
     private final GameStateFileReader gameStateReader;
+    private final BoardGameFileWriter boardGameWriter;
+    private final BoardGameFileReader boardGameReader;
     private boolean gameStarted = false;
+    private BoardGame boardGame;
 
     public SnakesAndLaddersController(BoardGame boardGame) {
         super(boardGame);
+        this.boardGame = boardGame;
         this.gameStateWriter = new GameStateFileWriterGson();
         this.gameStateReader = new GameStateFileReaderGson();
+        this.boardGameWriter = new BoardGameFileWriterGson();
+        this.boardGameReader = new BoardGameFileReaderGson();
         LOGGER.info("SnakesAndLaddersController initialized");
     }
 
@@ -196,18 +206,8 @@ public class SnakesAndLaddersController extends BaseGameController {
             LOGGER.warning("Cannot save game: Game has not started");
             return;
         }
-        
-        // Create a GameState object with current game state
-        GameState gameState = new GameState(
-            boardGame.getBoard(),
-            boardGame.getPlayers(),
-            currentPlayerIndex,
-            gameName
-        );
-        
-        // Save the game state
         Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
-        gameStateWriter.writeGameState(gameState, savePath);
+        boardGameWriter.writeBoardGame(boardGame, savePath);
         LOGGER.info("Game saved: " + gameName);
     }
 
@@ -215,30 +215,14 @@ public class SnakesAndLaddersController extends BaseGameController {
      * Loads a saved game state
      * @param gameName The name of the saved game to load
      */
-    public void loadGame(String gameName) {
+    public void loadGame(String gameName, edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI ui) {
         Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
-        GameState gameState = gameStateReader.readGameState(savePath);
-        
-        // Create a new BoardGame instance with the loaded board
-        BoardGame newBoardGame = new BoardGame(gameState.getBoard(), boardGame.getDice().getLastRolledValues().length);
-        
-        // Add all players from the saved state
-        for (Player player : gameState.getPlayers()) {
-            newBoardGame.addPlayer(player.getName());
-        }
-        
-        // Set the current player index
-        currentPlayerIndex = gameState.getCurrentPlayerIndex();
+        BoardGame loadedGame = boardGameReader.readBoardGame(savePath);
+        this.boardGame = loadedGame;
         gameStarted = true;
-        
-        // Initialize the new game
-        newBoardGame.startGame();
-        
-        // Update the game state in the UI
-        if (boardGame instanceof Observable) {
-            ((Observable) boardGame).notifyObservers();
+        if (ui != null) {
+            ui.setBoardGame(loadedGame);
         }
-        
         LOGGER.info("Game loaded: " + gameName);
     }
 

@@ -27,7 +27,7 @@ public class BoardGame implements Observable {
   private final Board board;
   private final List<Player> players;
   private final Dice dice;
-  private final List<Observer> observers = new ArrayList<>();
+  private transient List<Observer> observers = new ArrayList<>();
   private int currentPlayerIndex;
   private boolean gameOver;
   private boolean gameInitialized;
@@ -244,16 +244,19 @@ public class BoardGame implements Observable {
 
   @Override
   public void addObserver(Observer observer) {
+    if (observers == null) observers = new ArrayList<>();
     observers.add(observer);
   }
 
   @Override
   public void removeObserver(Observer observer) {
+    if (observers == null) observers = new ArrayList<>();
     observers.remove(observer);
   }
 
   @Override
   public void notifyObservers() {
+    if (observers == null) observers = new ArrayList<>();
     for (Observer observer : observers) {
       observer.update();
     }

@@ -34,6 +34,7 @@ import java.util.Optional;
 import java.io.File;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import edu.ntnu.iir.bidata.model.BoardGame;
 
 public class SnakesAndLaddersGameUI implements Observer {
 
@@ -56,6 +57,7 @@ public class SnakesAndLaddersGameUI implements Observer {
   private Label statusLabel;
   private List<Player> playerNames;
   private SnakesAndLaddersController controller;
+  private BoardGame boardGame;
 
   /**
    * Constructor that receives the selected players from the menu
@@ -150,7 +152,6 @@ public class SnakesAndLaddersGameUI implements Observer {
 
         ComboBox<String> gameList = new ComboBox<>();
         gameList.setPromptText("Select a game");
-        
         File savedGamesDir = new File("src/main/resources/saved_games");
         if (savedGamesDir.exists() && savedGamesDir.isDirectory()) {
             File[] savedGames = savedGamesDir.listFiles((dir, name) -> name.endsWith(".json"));
@@ -161,24 +162,20 @@ public class SnakesAndLaddersGameUI implements Observer {
                 }
             }
         }
-
         dialog.getDialogPane().setContent(gameList);
-
         ButtonType loadButtonType = new ButtonType("Load", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(loadButtonType, ButtonType.CANCEL);
-
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == loadButtonType) {
                 return gameList.getValue();
             }
             return null;
         });
-
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(gameName -> {
             if (gameName != null) {
                 try {
-                    controller.loadGame(gameName);
+                    controller.loadGame(gameName, this);
                     statusLabel.setText("Game loaded: " + gameName);
                 } catch (Exception ex) {
                     statusLabel.setText("Error loading game: " + ex.getMessage());
@@ -478,5 +475,22 @@ public class SnakesAndLaddersGameUI implements Observer {
     int y = row * TILE_SIZE + TILE_SIZE / 2;
 
     return new int[]{x, y};
+  }
+
+  public void setBoardGame(BoardGame newBoardGame) {
+    if (this.boardGame != null) {
+      this.boardGame.removeObserver(this);
+    }
+    this.boardGame = newBoardGame;
+    this.boardGame.addObserver(this);
+    refreshUIFromBoardGame();
+  }
+
+  private void refreshUIFromBoardGame() {
+    // TODO: Update all UI elements (player positions, turn, etc.) from boardGame
+    // For example:
+    // - Move tokens to correct positions
+    // - Update labels
+    // - Set current player indicator
   }
 }

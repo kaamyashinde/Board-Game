@@ -29,6 +29,15 @@ public class SwitchPositionAction implements TileAction {
   }
 
   /**
+   * Gets the list of all players in the game.
+   *
+   * @return The list of all players
+   */
+  public List<Player> getAllPlayers() {
+    return allPlayers;
+  }
+
+  /**
    * Executes the position switch action. If there is a player ahead of the current player, their
    * positions will be swapped. If there is no player ahead, no action is taken.
    *
