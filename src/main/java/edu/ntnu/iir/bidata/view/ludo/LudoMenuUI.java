@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import edu.ntnu.iir.bidata.view.common.BoardManagementUI;
+import edu.ntnu.iir.bidata.view.common.MainMenuUI;
+import edu.ntnu.iir.bidata.view.common.JavaFXBoardGameLauncher;
 import lombok.Getter;
 
 public class LudoMenuUI {
@@ -51,6 +53,20 @@ public class LudoMenuUI {
     root.setPadding(new Insets(20));
     root.setStyle("-fx-background-color: #f5f5f0;");
 
+    // Create top bar with back button
+    HBox topBar = new HBox(10);
+    topBar.setPadding(new Insets(10));
+    topBar.setAlignment(Pos.CENTER_LEFT);
+    
+    Button backButton = new Button("← Back to Main Menu");
+    backButton.setStyle("-fx-background-color: #e8c9ad; -fx-font-weight: bold;");
+    backButton.setOnAction(e -> {
+      JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
+    });
+    
+    topBar.getChildren().add(backButton);
+    root.setTop(topBar);
+
     VBox logoStack = createLogoStack();
     root.setLeft(logoStack);
 
@@ -68,13 +84,11 @@ public class LudoMenuUI {
 
     HBox boardButtons = new HBox(30);
     boardButtons.setAlignment(Pos.CENTER);
-    Button newBoardBtn = createMenuButton("NEW BOARD");
     Button loadBoardBtn = createMenuButton("LOAD BOARD");
 
-    newBoardBtn.setOnAction(e -> boardManagementUI.showAddBoardDialog());
     loadBoardBtn.setOnAction(e -> boardManagementUI.showLoadBoardDialog());
 
-    boardButtons.getChildren().addAll(newBoardBtn, loadBoardBtn);
+    boardButtons.getChildren().add(loadBoardBtn);
     centerBox.getChildren().add(boardButtons);
 
     // Choose The Players button

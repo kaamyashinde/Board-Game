@@ -2,7 +2,15 @@ package edu.ntnu.iir.bidata.controller;
 
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.Player;
-import edu.ntnu.iir.bidata.model.tile.TileAction;
+import edu.ntnu.iir.bidata.model.tile.core.TileAction;
+import edu.ntnu.iir.bidata.model.game.GameState;
+import edu.ntnu.iir.bidata.model.Observable;
+import edu.ntnu.iir.bidata.filehandling.game.GameStateFileWriter;
+import edu.ntnu.iir.bidata.filehandling.game.GameStateFileReader;
+import edu.ntnu.iir.bidata.filehandling.game.GameStateFileWriterGson;
+import edu.ntnu.iir.bidata.filehandling.game.GameStateFileReaderGson;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,24 +32,29 @@ public class GameController {
   private final int[][] ladders = {
       {3, 36}, {8, 12}, {14, 26}, {31, 73}, {59, 80}, {83, 97}, {90, 92}
   };
-  private boolean gameStarted = false;
   // For Snakes and Ladders specific logic
   private final Map<String, Integer> playerPositions = new HashMap<>();
+  // For Ludo specific logic
+  private final int diceValue = 1;
+  private boolean gameStarted = false;
   @Setter
   @Getter
   private int currentPlayerIndex = 0;
   private List<String> playerNames;
-  // For Ludo specific logic
-  private final int diceValue = 1;
   @Setter
   @Getter
   private boolean diceRolled = false;
   @Getter
   @Setter
   private boolean movingPiece = false;
+  private final GameStateFileWriter gameStateWriter;
+  private final GameStateFileReader gameStateReader;
+  private boolean isPaused = false;
 
   public GameController(BoardGame boardGame) {
     this.boardGame = boardGame;
+    this.gameStateWriter = new GameStateFileWriterGson();
+    this.gameStateReader = new GameStateFileReaderGson();
     LOGGER.info("GameController initialized");
   }
 
@@ -273,5 +286,64 @@ public class GameController {
   public void handleTileAction(TileAction action) {
     LOGGER.info("Handling tile action: " + action);
     // Handle the tile action
+  }
+
+  public void pauseGame() {
+    isPaused = true;
+    LOGGER.info("Game paused");
+  }
+
+  public void resumeGame() {
+    isPaused = false;
+    LOGGER.info("Game resumed");
+  }
+
+  public boolean isPaused() {
+    return isPaused;
+  }
+
+  public void saveGame(String gameName) {
+    if (!gameStarted) {
+      LOGGER.warning("Cannot save game: Game has not started");
+      return;
+    }
+    
+    GameState gameState = new GameState(
+        boardGame.getBoard(),
+        boardGame.getPlayers(),
+        currentPlayerIndex,
+        gameName
+    );
+    
+    Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
+    gameStateWriter.writeGameState(gameState, savePath);
+    LOGGER.info("Game saved: " + gameName);
+  }
+
+  public void loadGame(String gameName) {
+    Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
+    GameState gameState = gameStateReader.readGameState(savePath);
+    
+    // Create a new BoardGame instance with the loaded board
+    BoardGame newBoardGame = new BoardGame(gameState.getBoard(), boardGame.getDice().getLastRolledValues().length);
+    
+    // Add all players from the saved state
+    for (Player player : gameState.getPlayers()) {
+        newBoardGame.addPlayer(player.getName());
+    }
+    
+    // Set the current player index
+    currentPlayerIndex = gameState.getCurrentPlayerIndex();
+    gameStarted = true;
+    
+    // Initialize the new game
+    newBoardGame.startGame();
+    
+    // Update the game state in the UI
+    if (boardGame instanceof Observable) {
+        ((Observable) boardGame).notifyObservers();
+    }
+    
+    LOGGER.info("Game loaded: " + gameName);
   }
 }

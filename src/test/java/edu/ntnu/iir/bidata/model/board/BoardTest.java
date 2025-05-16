@@ -1,114 +1,133 @@
 package edu.ntnu.iir.bidata.model.board;
 
-import edu.ntnu.iir.bidata.model.tile.Tile;
-import edu.ntnu.iir.bidata.model.tile.TileAction;
+import edu.ntnu.iir.bidata.model.exception.GameException;
+import edu.ntnu.iir.bidata.model.tile.core.Tile;
+import edu.ntnu.iir.bidata.model.tile.core.TileAction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class BoardTest {
-    private Board board;
-    private Tile mockTile;
+
+    @Mock
     private TileAction mockAction;
+    @Mock
+    private Tile mockTile;
+    @Mock
+    private Tile mockNextTile;
+
+    private Board board;
+    private static final int BOARD_SIZE = 10;
 
     @BeforeEach
     void setUp() {
-        board = new Board(5);
-        mockTile = mock(Tile.class);
-        mockAction = mock(TileAction.class);
+        MockitoAnnotations.openMocks(this);
+        board = new Board(BOARD_SIZE);
     }
 
     @Test
-    void testConstructor() {
-        // Test valid constructor
-        Board validBoard = new Board(5);
-        assertNotNull(validBoard);
-        assertEquals(5, validBoard.getSizeOfBoard()); // Board capacity
-        assertEquals(0, validBoard.getTiles().size()); // No tiles added yet
+    void constructor_WithValidSize_ShouldInitializeBoard() {
+        assertNotNull(board);
+        assertEquals(BOARD_SIZE, board.getSizeOfBoard());
+        assertNotNull(board.getTiles());
+        assertTrue(board.getTiles().isEmpty());
+    }
 
-        // Test invalid constructor
+    @Test
+    void constructor_WithInvalidSize_ShouldThrowException() {
         assertThrows(IllegalArgumentException.class, () -> new Board(0));
         assertThrows(IllegalArgumentException.class, () -> new Board(-1));
     }
 
     @Test
-    void testAddTile() {
-        // Test adding a valid tile
+    void addTile_WithValidParameters_ShouldAddTile() {
         assertTrue(board.addTile(0, mockAction));
-        assertEquals(1, board.getTiles().size());
-        assertNotNull(board.getTile(0));
+        assertTrue(board.getTiles().containsKey(0));
+        assertNotNull(board.getTiles().get(0));
+    }
 
-        // Test adding a tile with duplicate ID
+    @Test
+    void addTile_WithDuplicateId_ShouldReturnFalse() {
+        board.addTile(0, mockAction);
         assertFalse(board.addTile(0, mockAction));
-        assertEquals(1, board.getTiles().size());
+    }
 
-        // Test adding a tile with invalid ID
+    @Test
+    void addTile_WithNegativeId_ShouldThrowException() {
         assertThrows(IllegalArgumentException.class, () -> board.addTile(-1, mockAction));
     }
 
-   
     @Test
-    void testGetStartingTile() {
-        // Test when board is empty
-        assertNull(board.getStartingTile());
-
-        // Test when board has tiles
+    void connectTiles_WithValidTiles_ShouldConnect() {
         board.addTile(0, mockAction);
-        assertNotNull(board.getStartingTile());
-        assertEquals(0, board.getStartingTile().getId());
+        board.addTile(1, mockAction);
+        Tile tile0 = board.getTile(0);
+        Tile tile1 = board.getTile(1);
+        
+        board.connectTiles(0, tile1);
+        
+        assertNotNull(tile0.getNextTile(1));
+        assertEquals(tile1, tile0.getNextTile(1));
     }
 
+    @Test
+    void connectTiles_WithNullTile_ShouldNotConnect() {
+        board.addTile(0, mockAction);
+        board.connectTiles(0, null);
+        assertThrows(GameException.class, () -> board.getTile(0).getNextTile(1));
+    }
 
     @Test
-    void testIsValidTileConnection() {
-        // Setup: Add tiles and connect them
+    void getStartingTile_ShouldReturnFirstTile() {
+        board.addTile(0, mockAction);
+        assertEquals(board.getTile(0), board.getStartingTile());
+    }
+
+    @Test
+    void getEndingTile_ShouldReturnLastTile() {
+        board.addTile(BOARD_SIZE - 1, mockAction);
+        assertEquals(board.getTile(BOARD_SIZE - 1), board.getEndingTile());
+    }
+
+    @Test
+    void isValidTileConnection_WithValidConnection_ShouldReturnTrue() {
         board.addTile(0, mockAction);
         board.addTile(1, mockAction);
         board.connectTiles(0, board.getTile(1));
-
-        // Test valid connection
-        assertTrue(board.isValidTileConnection(0, 1));
-
-        // Test invalid connection
-        assertFalse(board.isValidTileConnection(1, 0));
-    }
-
-    @Test
-    void testGetPositionOnBoard() {
-        // Test getting position when tile exists
-        board.addTile(0, mockAction);
-        assertNotNull(board.getPositionOnBoard(0));
-
-        // Test getting position when tile doesn't exist
-        assertNull(board.getPositionOnBoard(1));
-    }
-
-    @Test
-    void testGetSizeOfBoard() {
-        assertEquals(5, board.getSizeOfBoard()); // Board capacity
-        board.addTile(0, mockAction);
-        assertEquals(5, board.getSizeOfBoard()); // Still capacity
-        assertEquals(1, board.getTiles().size()); // Number of tiles added
-    }
-
-    @Test
-    void testGetTiles() {
-        assertNotNull(board.getTiles());
-        assertTrue(board.getTiles().isEmpty());
         
-        board.addTile(0, mockAction);
-        assertEquals(1, board.getTiles().size());
-        assertTrue(board.getTiles().containsKey(0));
+        assertTrue(board.isValidTileConnection(0, 1));
     }
 
     @Test
-    void testGetTile() {
-        // Test getting existing tile
+    void isValidTileConnection_WithInvalidConnection_ShouldReturnFalse() {
         board.addTile(0, mockAction);
-        assertNotNull(board.getTile(0));
+        board.addTile(1, mockAction);
+        
+        assertFalse(board.isValidTileConnection(0, 1));
+    }
 
-        // Test getting non-existing tile
-        assertNull(board.getTile(1));
+    @Test
+    void getPositionOnBoard_WithValidId_ShouldReturnTile() {
+        board.addTile(5, mockAction);
+        assertEquals(board.getTile(5), board.getPositionOnBoard(5));
+    }
+
+    @Test
+    void getPositionOnBoard_WithInvalidId_ShouldReturnNull() {
+        assertNull(board.getPositionOnBoard(999));
+    }
+
+    @Test
+    void getTile_WithValidId_ShouldReturnTile() {
+        board.addTile(5, mockAction);
+        assertNotNull(board.getTile(5));
+    }
+
+    @Test
+    void getTile_WithInvalidId_ShouldReturnNull() {
+        assertNull(board.getTile(999));
     }
 } 

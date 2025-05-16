@@ -1,9 +1,7 @@
 package edu.ntnu.iir.bidata.model.dice;
 
 import lombok.Getter;
-
 import java.util.Random;
-
 
 /**
  * Die class containing a simple random number generator.
@@ -13,22 +11,20 @@ import java.util.Random;
  */
 @Getter
 public class Die {
-  private final Random rand;
-  private int lastRolledValue;
+    private static final Random RAND = new Random();
+    private int lastRolledValue;
 
-  /**
-   * The constructor that initialises the variable storing the random num generation options.
-   */
+    /**
+     * The constructor that initialises the variable storing the random num generation options.
+     */
+    public Die() {
+        // No need to create a new Random instance for each die
+    }
 
-  public Die() {
-    rand = new Random();
-  }
-
-  /**
-   * Generation of a random number between 1-6 and storing it to the lastRolledValue.
-   */
-  public void roll() {
-    lastRolledValue = rand.nextInt(6) + 1;
-  }
-
+    /**
+     * Generation of a random number between 1-6 and storing it to the lastRolledValue.
+     */
+    public void roll() {
+        lastRolledValue = RAND.nextInt(6) + 1;
+    }
 }

@@ -10,12 +10,15 @@ import edu.ntnu.iir.bidata.view.ludo.LudoGameUI;
 import edu.ntnu.iir.bidata.view.ludo.LudoMenuUI;
 import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI;
 import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersMenuUI;
+import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson;
 
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.stage.Stage;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * JavaFX application launcher for the board games UI. This class only handles UI navigation between
@@ -24,6 +27,7 @@ import javafx.stage.Stage;
 public class JavaFXBoardGameLauncher extends Application {
 
   private static final Logger LOGGER = Logger.getLogger(JavaFXBoardGameLauncher.class.getName());
+  private static JavaFXBoardGameLauncher instance;
 
   /**
    * Main method - entry point for the application.
@@ -38,7 +42,15 @@ public class JavaFXBoardGameLauncher extends Application {
   @Override
   public void start(Stage primaryStage) {
     LOGGER.info("Starting JavaFX Board Game Launcher");
+    instance = this;
     showMainMenu(primaryStage);
+  }
+
+  /**
+   * Get the singleton instance of the launcher
+   */
+  public static JavaFXBoardGameLauncher getInstance() {
+    return instance;
   }
 
   /**
@@ -46,7 +58,7 @@ public class JavaFXBoardGameLauncher extends Application {
    *
    * @param stage The primary stage to show the menu on
    */
-  private void showMainMenu(Stage stage) {
+  public void showMainMenu(Stage stage) {
     LOGGER.info("Showing main menu");
     MainMenuUI menuUI = new MainMenuUI(stage,
         gameType -> {
@@ -63,7 +75,7 @@ public class JavaFXBoardGameLauncher extends Application {
    *
    * @param stage The primary stage to show the menu on
    */
-  private void showSnakesAndLaddersMenu(Stage stage) {
+  public void showSnakesAndLaddersMenu(Stage stage) {
     LOGGER.info("Showing Snakes and Ladders menu");
     SnakesAndLaddersMenuUI menuUI = new SnakesAndLaddersMenuUI(stage,
         selectedPlayerNames -> {
@@ -77,13 +89,50 @@ public class JavaFXBoardGameLauncher extends Application {
    *
    * @param stage The primary stage to show the menu on
    */
-  private void showLudoMenu(Stage stage) {
+  public void showLudoMenu(Stage stage) {
     LOGGER.info("Showing Ludo menu");
     LudoMenuUI menuUI = new LudoMenuUI(stage,
         selectedPlayerNames -> {
             List<Player> players = selectedPlayerNames.stream().map(Player::new).toList();
             showLudoGameBoard(stage, players);
         });
+  }
+
+  /**
+   * Displays the Snakes and Ladders game board UI with a loaded game.
+   *
+   * @param stage   The primary stage to show the game on
+   * @param gameName The name of the loaded game
+   */
+  public void showSnakesAndLaddersGameBoardWithLoad(Stage stage, String gameName) {
+    LOGGER.info("Loading Snakes and Ladders game: " + gameName);
+    try {
+      // Load the game state
+      BoardGameFileReaderGson reader = new BoardGameFileReaderGson();
+      Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
+      BoardGame boardGame = reader.readBoardGame(savePath);
+      List<Player> players = boardGame.getPlayers();
+
+      // Create view
+      SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(stage, players);
+      gameUI.setLoadedGame(true, gameName);
+
+      // Create controller and connect it with the view
+      SnakesAndLaddersController controller = new SnakesAndLaddersController(boardGame);
+      gameUI.setController(controller);
+
+      // Load the game state into the controller
+      controller.loadGame(gameName, gameUI);
+
+      // Register the UI as an observer
+      boardGame.addObserver(gameUI);
+
+      // Start the game
+      controller.startGame();
+      LOGGER.info("Snakes and Ladders game loaded successfully");
+    } catch (Exception e) {
+      LOGGER.log(Level.SEVERE, "Error loading Snakes and Ladders game", e);
+    }
   }
 
   /**
@@ -99,8 +148,13 @@ public class JavaFXBoardGameLauncher extends Application {
       SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(stage, players);
 
       // Create model
-      Board board = BoardFactory.createSnakesAndLaddersBoard(100, players);
+      Board board = BoardFactory.createSnakesAndLaddersBoard(90, players);
       BoardGame boardGame = new BoardGame(board, 1);
+
+      // Add players to the model
+      for (Player player : players) {
+        boardGame.addPlayer(player.getName());
+      }
 
       // Register the UI as an observer
       boardGame.addObserver(gameUI);
