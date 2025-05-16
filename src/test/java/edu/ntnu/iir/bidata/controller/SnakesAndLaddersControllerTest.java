@@ -2,6 +2,7 @@ package edu.ntnu.iir.bidata.controller;
 
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.dice.Dice;
+import edu.ntnu.iir.bidata.model.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -27,10 +28,20 @@ class SnakesAndLaddersControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        // Create mock players
+        Player player1 = mock(Player.class);
+        when(player1.getName()).thenReturn("Player1");
+        Player player2 = mock(Player.class);
+        when(player2.getName()).thenReturn("Player2");
+        List<Player> players = Arrays.asList(player1, player2);
+        // Mock BoardGame methods
+        when(mockBoardGame.getPlayers()).thenReturn(players);
+        when(mockBoardGame.getCurrentPlayer()).thenReturn(player1);
+        when(mockBoardGame.getCurrentPlayerIndex()).thenReturn(0);
+        when(mockBoardGame.getDice()).thenReturn(mockDice);
         controller = new SnakesAndLaddersController(mockBoardGame);
         playerNames = Arrays.asList("Player1", "Player2");
         controller.setPlayerNames(playerNames);
-        when(mockBoardGame.getDice()).thenReturn(mockDice);
     }
 
     @Test
