@@ -132,9 +132,39 @@ public class SnakesAndLaddersGameUI implements Observer {
     backButton.getStyleClass().add("game-control-button");
     backButton.setOnAction(e -> {
       if (isLoadedGame && loadedGameName != null) {
+        // Auto-save loaded games
         controller.saveGame(loadedGameName);
+        JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
+      } else {
+        // For new games, ask if user wants to save
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Save Game");
+        dialog.setHeaderText("Would you like to save this game before returning to the main menu?");
+        dialog.setContentText("Choose an option:");
+
+        ButtonType saveButtonType = new ButtonType("Save Game");
+        ButtonType dontSaveButton = new ButtonType("Don't Save");
+        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, dontSaveButton, cancelButton);
+
+        dialog.showAndWait().ifPresent(response -> {
+          if (response == saveButtonType) {
+            // Use the existing save button's functionality
+            saveButton.fire();
+            // Wait a bit for the save to complete before returning to main menu
+            PauseTransition pause = new PauseTransition(Duration.millis(500));
+            pause.setOnFinished(event -> {
+              JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
+            });
+            pause.play();
+          } else if (response == dontSaveButton) {
+            // Return to main menu without saving
+            JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
+          }
+          // If cancel, do nothing and stay on the game screen
+        });
       }
-      JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
     });
 
     saveButton = new Button("Save Game");
