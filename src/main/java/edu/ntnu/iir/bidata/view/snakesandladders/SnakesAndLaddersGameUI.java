@@ -142,50 +142,7 @@ public class SnakesAndLaddersGameUI implements Observer {
       }
     });
 
-    loadButton = new Button("Load Game");
-    loadButton.getStyleClass().add("game-control-button");
-    loadButton.setOnAction(e -> {
-      if (controller != null) {
-        Dialog<String> dialog = new Dialog<>();
-        dialog.setTitle("Load Game");
-        dialog.setHeaderText("Select a saved game to load");
-
-        ComboBox<String> gameList = new ComboBox<>();
-        gameList.setPromptText("Select a game");
-        File savedGamesDir = new File("src/main/resources/saved_games");
-        if (savedGamesDir.exists() && savedGamesDir.isDirectory()) {
-            File[] savedGames = savedGamesDir.listFiles((dir, name) -> name.endsWith(".json"));
-            if (savedGames != null) {
-                for (File game : savedGames) {
-                    String gameName = game.getName().replace(".json", "");
-                    gameList.getItems().add(gameName);
-                }
-            }
-        }
-        dialog.getDialogPane().setContent(gameList);
-        ButtonType loadButtonType = new ButtonType("Load", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(loadButtonType, ButtonType.CANCEL);
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == loadButtonType) {
-                return gameList.getValue();
-            }
-            return null;
-        });
-        Optional<String> result = dialog.showAndWait();
-        result.ifPresent(gameName -> {
-            if (gameName != null) {
-                try {
-                    controller.loadGame(gameName, this);
-                    statusLabel.setText("Game loaded: " + gameName);
-                } catch (Exception ex) {
-                    statusLabel.setText("Error loading game: " + ex.getMessage());
-                }
-            }
-        });
-      }
-    });
-    
-    topBar.getChildren().addAll(backButton, saveButton, loadButton);
+    topBar.getChildren().addAll(backButton, saveButton);
     root.setTop(topBar);
 
     // --- Board (center) ---
@@ -486,11 +443,22 @@ public class SnakesAndLaddersGameUI implements Observer {
     refreshUIFromBoardGame();
   }
 
-  private void refreshUIFromBoardGame() {
-    // TODO: Update all UI elements (player positions, turn, etc.) from boardGame
-    // For example:
-    // - Move tokens to correct positions
-    // - Update labels
-    // - Set current player indicator
+  public void refreshUIFromBoardGame() {
+    // Update all player positions and labels from the loaded BoardGame
+    if (controller == null || boardGame == null) return;
+    for (Player player : boardGame.getPlayers()) {
+      String playerName = player.getName();
+      int position = controller.getPlayerPosition(playerName);
+      // Update position label
+      Label positionLabel = playerPositionLabels.get(playerName);
+      if (positionLabel != null) {
+        positionLabel.setText("at position: " + position);
+      }
+      // Move the token on the board
+      movePlayerToken(playerName, position);
+    }
+    // Update current player indicator
+    String currentPlayer = controller.getCurrentSnakesAndLaddersPlayerName();
+    updateCurrentPlayerIndicator(currentPlayer);
   }
 }

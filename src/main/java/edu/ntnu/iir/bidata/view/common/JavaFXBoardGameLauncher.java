@@ -10,6 +10,7 @@ import edu.ntnu.iir.bidata.view.ludo.LudoGameUI;
 import edu.ntnu.iir.bidata.view.ludo.LudoMenuUI;
 import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI;
 import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersMenuUI;
+import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -165,6 +166,33 @@ public class JavaFXBoardGameLauncher extends Application {
       LOGGER.info("Ludo game started successfully");
     } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Error initializing Ludo game", e);
+    }
+  }
+
+  /**
+   * Loads a saved Snakes and Ladders game and displays the game board UI.
+   *
+   * @param stage The primary stage to show the game on
+   * @param gameName The name of the saved game to load
+   */
+  public void showSnakesAndLaddersGameBoardWithLoad(Stage stage, String gameName) {
+    try {
+      // Load the saved BoardGame
+      BoardGameFileReaderGson reader = new BoardGameFileReaderGson();
+      java.nio.file.Path savePath = java.nio.file.Paths.get("src/main/resources/saved_games", gameName + ".json");
+      edu.ntnu.iir.bidata.model.BoardGame loadedGame = reader.readBoardGame(savePath);
+
+      // Create the UI and controller
+      List<edu.ntnu.iir.bidata.model.Player> players = loadedGame.getPlayers();
+      edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI gameUI = new edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI(stage, players);
+      loadedGame.addObserver(gameUI);
+      edu.ntnu.iir.bidata.controller.SnakesAndLaddersController controller = new edu.ntnu.iir.bidata.controller.SnakesAndLaddersController(loadedGame);
+      gameUI.setController(controller);
+      gameUI.setBoardGame(loadedGame);
+      // Optionally, call refreshUIFromBoardGame if needed
+      gameUI.refreshUIFromBoardGame();
+    } catch (Exception e) {
+      java.util.logging.Logger.getLogger(JavaFXBoardGameLauncher.class.getName()).log(java.util.logging.Level.SEVERE, "Error loading saved game", e);
     }
   }
 }

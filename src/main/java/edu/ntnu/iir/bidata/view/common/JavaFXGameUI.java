@@ -471,4 +471,24 @@ public class JavaFXGameUI implements Observer {
       }
     });
   }
+
+  /**
+   * Refreshes the UI to reflect the current state of the boardGame.
+   */
+  public void refreshUIFromBoardGame() {
+    Platform.runLater(() -> {
+      updateBoard();
+      Player currentPlayer = boardGame.getCurrentPlayer();
+      if (currentPlayer != null) {
+        currentPlayerLabel.setText("Current Player: " + currentPlayer.getName());
+        statusLabel.setText(currentPlayer.getName() + "'s turn to roll the dice!");
+      }
+      if (boardGame.isGameOver()) {
+        Player winner = boardGame.getWinner();
+        if (winner != null) {
+          showWinner(winner);
+        }
+      }
+    });
+  }
 } 

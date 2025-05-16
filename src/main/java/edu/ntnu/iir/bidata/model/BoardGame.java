@@ -299,4 +299,8 @@ public class BoardGame implements Observable {
     }
     notifyObservers();
   }
+
+  public void setCurrentPlayerIndex(int index) {
+    this.currentPlayerIndex = index;
+  }
 }

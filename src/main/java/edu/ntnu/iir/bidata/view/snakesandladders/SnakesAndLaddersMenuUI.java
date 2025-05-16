@@ -103,6 +103,44 @@ public class SnakesAndLaddersMenuUI {
         playerCountLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #006400;");
         centerBox.getChildren().add(playerCountLabel);
 
+        // Load Game button
+        Button loadGameBtn = createMenuButton("LOAD GAME");
+        loadGameBtn.setOnAction(e -> {
+            javafx.scene.control.Dialog<String> dialog = new javafx.scene.control.Dialog<>();
+            dialog.setTitle("Load Game");
+            dialog.setHeaderText("Select a saved game to load");
+
+            javafx.scene.control.ComboBox<String> gameList = new javafx.scene.control.ComboBox<>();
+            gameList.setPromptText("Select a game");
+            java.io.File savedGamesDir = new java.io.File("src/main/resources/saved_games");
+            if (savedGamesDir.exists() && savedGamesDir.isDirectory()) {
+                java.io.File[] savedGames = savedGamesDir.listFiles((dir, name) -> name.endsWith(".json"));
+                if (savedGames != null) {
+                    for (java.io.File game : savedGames) {
+                        String gameName = game.getName().replace(".json", "");
+                        gameList.getItems().add(gameName);
+                    }
+                }
+            }
+            dialog.getDialogPane().setContent(gameList);
+            javafx.scene.control.ButtonType loadButtonType = new javafx.scene.control.ButtonType("Load", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(loadButtonType, javafx.scene.control.ButtonType.CANCEL);
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == loadButtonType) {
+                    return gameList.getValue();
+                }
+                return null;
+            });
+            java.util.Optional<String> result = dialog.showAndWait();
+            result.ifPresent(gameName -> {
+                if (gameName != null) {
+                    // Use the launcher to show the loaded game
+                    JavaFXBoardGameLauncher.getInstance().showSnakesAndLaddersGameBoardWithLoad(primaryStage, gameName);
+                }
+            });
+        });
+        centerBox.getChildren().add(loadGameBtn);
+
         // START button
         Button startGameBtn = createMenuButton("START");
         startGameBtn.setOnAction(e -> {

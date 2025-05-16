@@ -33,9 +33,6 @@ public class SnakesAndLaddersController extends BaseGameController {
     private final int[][] ladders = {
         {3, 36}, {8, 12}, {14, 26}, {31, 73}, {59, 80}, {83, 97}, {90, 92}
     };
-    
-    @Getter
-    private final Map<String, Integer> playerPositions = new HashMap<>();
     private final GameStateFileWriter gameStateWriter;
     private final GameStateFileReader gameStateReader;
     private final BoardGameFileWriter boardGameWriter;
@@ -56,101 +53,45 @@ public class SnakesAndLaddersController extends BaseGameController {
     @Override
     public void setPlayerNames(List<String> playerNames) {
         super.setPlayerNames(playerNames);
-        // Initialize positions for all players
-        for (String playerName : playerNames) {
-            playerPositions.put(playerName, 0);
-        }
+        // No need to initialize positions here; handled by BoardGame
     }
 
-    @Override
-    public void handlePlayerMove() {
-        if (!diceRolled) {
-            LOGGER.warning("Dice must be rolled before moving");
-            return;
-        }
-
-        String currentPlayer = getCurrentPlayerName();
-        int currentPosition = playerPositions.get(currentPlayer);
-        int[] diceValues = boardGame.getCurrentDiceValues();
-        int steps = 0;
-        for (int value : diceValues) {
-            steps += value;
-        }
-
-        // Calculate new position
-        int newPosition = currentPosition + steps;
-        
-        // Check if player won
-        if (newPosition >= 100) {
-            newPosition = 100;
-            LOGGER.info(currentPlayer + " has won the game!");
-        } else {
-            // Check for snakes
-            for (int[] snake : snakes) {
-                if (newPosition == snake[0]) {
-                    newPosition = snake[1];
-                    LOGGER.info(currentPlayer + " landed on a snake! Moving down to " + newPosition);
-                    break;
-                }
-            }
-            
-            // Check for ladders
-            for (int[] ladder : ladders) {
-                if (newPosition == ladder[0]) {
-                    newPosition = ladder[1];
-                    LOGGER.info(currentPlayer + " climbed a ladder! Moving up to " + newPosition);
-                    break;
-                }
-            }
-        }
-
-        // Update player position
-        playerPositions.put(currentPlayer, newPosition);
-        nextPlayer();
-    }
-
-    /**
-     * Gets the current player's position
-     */
     public int getPlayerPosition(String playerName) {
-        return playerPositions.getOrDefault(playerName, 0);
+        for (Player player : boardGame.getPlayers()) {
+            if (player.getName().equals(playerName)) {
+                return player.getCurrentPosition();
+            }
+        }
+        return 0;
     }
 
-    /**
-     * Gets the current player's name for Snakes and Ladders
-     */
     public String getCurrentSnakesAndLaddersPlayerName() {
-        return getCurrentPlayerName();
+        return boardGame.getCurrentPlayer().getName();
     }
 
-    /**
-     * Rolls the dice for the current player
-     */
     public void rollDiceForSnakesAndLadders() {
         boardGame.getDice().rollAllDice();
         diceRolled = true;
         LOGGER.info("Dice rolled: " + boardGame.getCurrentDiceValues()[0]);
     }
 
-    /**
-     * Updates a player's position
-     */
     public void updateSnakesAndLaddersPosition(String playerName, int position) {
-        playerPositions.put(playerName, position);
-        LOGGER.info(playerName + " moved to position " + position);
+        for (Player player : boardGame.getPlayers()) {
+            if (player.getName().equals(playerName)) {
+                // Move the player to the correct tile
+                int steps = position - player.getCurrentPosition();
+                player.move(steps);
+                LOGGER.info(playerName + " moved to position " + position);
+                return;
+            }
+        }
     }
 
-    /**
-     * Moves to the next player
-     */
     public void nextSnakesAndLaddersPlayer() {
-        nextPlayer();
-        LOGGER.info("Next player: " + getCurrentPlayerName());
+        boardGame.setCurrentPlayerIndex((boardGame.getCurrentPlayerIndex() + 1) % boardGame.getPlayers().size());
+        LOGGER.info("Next player: " + getCurrentSnakesAndLaddersPlayerName());
     }
 
-    /**
-     * Gets the last dice roll value
-     */
     public int getLastDiceRoll() {
         int[] values = boardGame.getCurrentDiceValues();
         return (values != null && values.length > 0) ? values[0] : 0;
@@ -167,40 +108,40 @@ public class SnakesAndLaddersController extends BaseGameController {
         }
     }
 
-    /**
-     * Moves the player and returns the result (final position and move type)
-     */
     public MoveResult movePlayer(String playerName, int roll) {
-        int start = playerPositions.getOrDefault(playerName, 0);
-        int end = start + roll;
-        String type = "normal";
-        if (end >= 100) end = 100;
-        // Check for snakes
-        for (int[] snake : snakes) {
-            if (end == snake[0]) {
-                end = snake[1];
-                type = "snake";
-                break;
-            }
-        }
-        // Check for ladders
-        if (type.equals("normal")) {
-            for (int[] ladder : ladders) {
-                if (end == ladder[0]) {
-                    end = ladder[1];
-                    type = "ladder";
-                    break;
+        for (Player player : boardGame.getPlayers()) {
+            if (player.getName().equals(playerName)) {
+                int start = player.getCurrentPosition();
+                int end = start + roll;
+                String type = "normal";
+                if (end >= 100) end = 100;
+                // Check for snakes
+                for (int[] snake : snakes) {
+                    if (end == snake[0]) {
+                        end = snake[1];
+                        type = "snake";
+                        break;
+                    }
                 }
+                // Check for ladders
+                if (type.equals("normal")) {
+                    for (int[] ladder : ladders) {
+                        if (end == ladder[0]) {
+                            end = ladder[1];
+                            type = "ladder";
+                            break;
+                        }
+                    }
+                }
+                // Move the player to the new position
+                int steps = end - start;
+                player.move(steps);
+                return new MoveResult(start, end, type);
             }
         }
-        playerPositions.put(playerName, end);
-        return new MoveResult(start, end, type);
+        return new MoveResult(0, 0, "normal");
     }
 
-    /**
-     * Saves the current game state
-     * @param gameName The name to save the game as
-     */
     public void saveGame(String gameName) {
         if (!gameStarted) {
             LOGGER.warning("Cannot save game: Game has not started");
@@ -211,10 +152,6 @@ public class SnakesAndLaddersController extends BaseGameController {
         LOGGER.info("Game saved: " + gameName);
     }
 
-    /**
-     * Loads a saved game state
-     * @param gameName The name of the saved game to load
-     */
     public void loadGame(String gameName, edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI ui) {
         Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
         BoardGame loadedGame = boardGameReader.readBoardGame(savePath);
@@ -230,10 +167,7 @@ public class SnakesAndLaddersController extends BaseGameController {
     public void startGame() {
         super.startGame();
         gameStarted = true;
-        // Initialize player positions
-        for (String playerName : playerNames) {
-            playerPositions.put(playerName, 0);
-        }
+        // No need to initialize player positions; handled by BoardGame
         LOGGER.info("Snakes and Ladders game started with players: " + playerNames);
     }
 } 
