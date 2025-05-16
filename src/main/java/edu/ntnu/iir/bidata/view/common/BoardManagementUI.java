@@ -164,87 +164,39 @@ public class BoardManagementUI {
    * Shows the Load Board dialog with options to add or remove boards
    */
   public void showLoadBoardDialog() {
-    Stage loadDialog = new Stage();
-    loadDialog.initOwner(ownerStage);
-    loadDialog.initModality(Modality.APPLICATION_MODAL);
-    loadDialog.setTitle("Load Board");
+            javafx.scene.control.Dialog<String> dialog = new javafx.scene.control.Dialog<>();
+            dialog.setTitle("Load Game");
+            dialog.setHeaderText("Select a saved game to load");
 
-    BorderPane layout = new BorderPane();
-    layout.setPadding(new Insets(20));
-    layout.setStyle("-fx-background-color: #f5fff5; -fx-background-radius: 20;");
-
-    // Create the green title bar
-    StackPane titlePane = new StackPane();
-    titlePane.setPrefSize(300, 50);
-    titlePane.setStyle("-fx-background-color: #BDEBC8; -fx-background-radius: 15;");
-    Label titleLabel = new Label("Load Board");
-    titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-    titlePane.getChildren().add(titleLabel);
-
-    // Create board list with green circle markers
-    VBox boardListBox = new VBox(10);
-    boardListBox.setPadding(new Insets(20, 0, 20, 0));
-    boardListBox.setAlignment(Pos.CENTER_LEFT);
-
-    // Display each board with a green circle marker
-    for (String boardName : boardsList) {
-      HBox boardEntry = new HBox(10);
-      boardEntry.setAlignment(Pos.CENTER_LEFT);
-
-      Circle marker = new Circle(10, Color.DARKGREEN);
-      Label nameLabel = new Label(boardName);
-      nameLabel.setStyle("-fx-font-weight: bold;");
-
-      boardEntry.getChildren().addAll(marker, nameLabel);
-      boardListBox.getChildren().add(boardEntry);
-    }
-
-    // Create bottom buttons (ADD, REMOVE, LOAD JSON, SAVE JSON)
-    HBox buttonsBox = new HBox(30);
-    buttonsBox.setAlignment(Pos.CENTER);
-
-    Button addButton = createStyledButton("ADD", 120, 40);
-    Button removeButton = createStyledButton("REMOVE", 120, 40);
-    Button loadJsonButton = createStyledButton("LOAD FROM JSON", 180, 40);
-    Button saveJsonButton = createStyledButton("SAVE TO JSON", 180, 40);
-
-    buttonsBox.getChildren().addAll(addButton, removeButton, loadJsonButton, saveJsonButton);
-
-    // Handle button actions
-    addButton.setOnAction(e -> {
-      loadDialog.close();
-      showAddBoardDialog();
-    });
-
-    removeButton.setOnAction(e -> {
-      loadDialog.close();
-      showRemoveBoardDialog();
-    });
-
-    loadJsonButton.setOnAction(e -> {
-      loadDialog.close();
-      loadBoardFromJson();
-    });
-
-    saveJsonButton.setOnAction(e -> {
-      loadDialog.close();
-      saveBoardToJson();
-    });
-
-    // Add all components to the layout
-    layout.setTop(titlePane);
-    BorderPane.setAlignment(titlePane, Pos.CENTER);
-    BorderPane.setMargin(titlePane, new Insets(0, 0, 20, 0));
-
-    layout.setCenter(boardListBox);
-    layout.setBottom(buttonsBox);
-    BorderPane.setMargin(buttonsBox, new Insets(20, 0, 0, 0));
-
-    Scene scene = new Scene(layout, 600, 500);
-    loadDialog.setScene(scene);
-    loadDialog.showAndWait();
-  }
-
+            javafx.scene.control.ComboBox<String> gameList = new javafx.scene.control.ComboBox<>();
+            gameList.setPromptText("Select a game");
+            java.io.File savedGamesDir = new java.io.File("src/main/resources/saved_games");
+            if (savedGamesDir.exists() && savedGamesDir.isDirectory()) {
+                java.io.File[] savedGames = savedGamesDir.listFiles((dir, name) -> name.endsWith(".json"));
+                if (savedGames != null) {
+                    for (java.io.File game : savedGames) {
+                        String gameName = game.getName().replace(".json", "");
+                        gameList.getItems().add(gameName);
+                    }
+                }
+            }
+            dialog.getDialogPane().setContent(gameList);
+            javafx.scene.control.ButtonType loadButtonType = new javafx.scene.control.ButtonType("Load", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(loadButtonType, javafx.scene.control.ButtonType.CANCEL);
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == loadButtonType) {
+                    return gameList.getValue();
+                }
+                return null;
+            });
+            java.util.Optional<String> result = dialog.showAndWait();
+            result.ifPresent(gameName -> {
+                if (gameName != null) {
+                    // Use the launcher to show the loaded game
+                    JavaFXBoardGameLauncher.getInstance().showSnakesAndLaddersGameBoardWithLoad(ownerStage, gameName);
+                }
+            });
+        }
   /**
    * Creates a styled button with consistent appearance
    */

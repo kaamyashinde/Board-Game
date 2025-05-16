@@ -148,7 +148,7 @@ public class JavaFXBoardGameLauncher extends Application {
       SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(stage, players);
 
       // Create model
-      Board board = BoardFactory.createSnakesAndLaddersBoard(100, players);
+      Board board = BoardFactory.createSnakesAndLaddersBoard(90, players);
       BoardGame boardGame = new BoardGame(board, 1);
 
       // Add players to the model
