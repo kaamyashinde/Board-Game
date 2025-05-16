@@ -288,12 +288,17 @@ public class SnakesAndLaddersGameUI implements Observer {
     pause.setOnFinished(event -> {
       SnakesAndLaddersController.MoveResult result = controller.movePlayer(currentPlayer, roll);
 
+      // Update the player position immediately after the move
       updatePlayerPosition(currentPlayer);
 
       if (result.type.equals("snake")) {
         displaySnakeOrLadderMessage(currentPlayer, result.start, result.end, "snake");
+        // Update position again after snake
+        updatePlayerPosition(currentPlayer);
       } else if (result.type.equals("ladder")) {
         displaySnakeOrLadderMessage(currentPlayer, result.start, result.end, "ladder");
+        // Update position again after ladder
+        updatePlayerPosition(currentPlayer);
       }
 
       if (result.end == 100) {
@@ -345,6 +350,11 @@ public class SnakesAndLaddersGameUI implements Observer {
     pause.setOnFinished(e -> {
       // Move the token to the new position
       movePlayerToken(playerName, toPosition);
+      // Update the position label
+      Label positionLabel = playerPositionLabels.get(playerName);
+      if (positionLabel != null) {
+        positionLabel.setText("at position: " + toPosition);
+      }
     });
     pause.play();
   }
