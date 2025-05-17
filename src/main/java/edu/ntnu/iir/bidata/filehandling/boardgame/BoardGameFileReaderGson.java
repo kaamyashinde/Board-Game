@@ -3,20 +3,29 @@ package edu.ntnu.iir.bidata.filehandling.boardgame;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.ntnu.iir.bidata.model.BoardGame;
-import java.io.FileReader;
-import java.io.IOException;
+import edu.ntnu.iir.bidata.model.gamestate.MonopolyGameState;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.io.IOException;
 
 public class BoardGameFileReaderGson implements BoardGameFileReader {
+    private final Gson gson;
+
+    public BoardGameFileReaderGson() {
+        this.gson = new GsonBuilder()
+            .setPrettyPrinting()
+            .create();
+    }
+
     @Override
-    public BoardGame readBoardGame(Path path) {
-        try (FileReader reader = new FileReader(path.toFile())) {
-            Gson gson = new GsonBuilder()
-                .registerTypeAdapterFactory(new TileActionTypeAdapterFactory())
-                .create();
-            return gson.fromJson(reader, BoardGame.class);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read board game from file", e);
-        }
+    public BoardGame readBoardGame(Path path) throws IOException {
+        String json = Files.readString(path);
+        MonopolyGameState gameState = gson.fromJson(json, MonopolyGameState.class);
+        return gameState.toBoardGame();
+    }
+
+    public MonopolyGameState readMonopolyGameState(Path path) throws IOException {
+        String json = Files.readString(path);
+        return gson.fromJson(json, MonopolyGameState.class);
     }
 } 

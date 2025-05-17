@@ -12,6 +12,7 @@ import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI;
 import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersMenuUI;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson;
 import edu.ntnu.iir.bidata.view.common.PlayerSelectionUI;
+import edu.ntnu.iir.bidata.view.monopoly.MonopolyMenuUI;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -109,31 +110,24 @@ public class JavaFXBoardGameLauncher extends Application {
    * @param stage The primary stage to show the menu on
    */
   public void showMonopolyMenu(Stage stage) {
-    LOGGER.info("Showing Monopoly game");
-    // Show player selection popup
-    PlayerSelectionUI playerSelection = new PlayerSelectionUI(stage);
-    List<String> playerNames = playerSelection.showAndWait();
-    if (playerNames == null || playerNames.size() < 2) {
-        // Show a warning dialog if not enough players
-        Alert alert = new Alert(Alert.AlertType.WARNING, "Please select at least 2 players for Monopoly!", ButtonType.OK);
-        alert.initOwner(stage);
-        alert.showAndWait();
-        return;
-    }
-    try {
-        Board board = edu.ntnu.iir.bidata.filehandling.board.MonopolyBoardFactory.createBoard();
-        BoardGame boardGame = new BoardGame(board, 1);
-        List<Player> players = new ArrayList<>();
-        for (String name : playerNames) {
-            players.add(new edu.ntnu.iir.bidata.model.player.SimpleMonopolyPlayer(name));
-        }
-        boardGame.setPlayers(players);
-        edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI gameUI = new edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI(boardGame);
-        stage.setScene(gameUI.getScene());
-        stage.show();
-    } catch (Exception e) {
-        LOGGER.log(Level.SEVERE, "Error initializing Monopoly game", e);
-    }
+    LOGGER.info("Showing Monopoly menu");
+    MonopolyMenuUI menuUI = new edu.ntnu.iir.bidata.view.monopoly.MonopolyMenuUI(stage,
+        selectedPlayerNames -> {
+            try {
+                Board board = edu.ntnu.iir.bidata.filehandling.board.MonopolyBoardFactory.createBoard();
+                BoardGame boardGame = new BoardGame(board, 1);
+                List<Player> players = new ArrayList<>();
+                for (String name : selectedPlayerNames) {
+                    players.add(new edu.ntnu.iir.bidata.model.player.SimpleMonopolyPlayer(name));
+                }
+                boardGame.setPlayers(players);
+                edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI gameUI = new edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI(boardGame, stage);
+                stage.setScene(gameUI.getScene());
+                stage.show();
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Error initializing Monopoly game", e);
+            }
+        });
   }
 
   /**
@@ -243,6 +237,31 @@ public class JavaFXBoardGameLauncher extends Application {
       LOGGER.info("Ludo game started successfully");
     } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Error initializing Ludo game", e);
+    }
+  }
+
+  /**
+   * Displays the Monopoly game board UI with a loaded game.
+   *
+   * @param stage   The primary stage to show the game on
+   * @param gameName The name of the loaded game
+   */
+  public void showMonopolyGameBoardWithLoad(Stage stage, String gameName) {
+    LOGGER.info("Loading Monopoly game: " + gameName);
+    try {
+      // Load the game state
+      edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson reader = new edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson();
+      java.nio.file.Path savePath = java.nio.file.Paths.get("src/main/resources/saved_games", gameName + ".json");
+      edu.ntnu.iir.bidata.model.gamestate.MonopolyGameState gameState = reader.readMonopolyGameState(savePath);
+      edu.ntnu.iir.bidata.model.BoardGame boardGame = gameState.toBoardGame();
+
+      // Create view
+      edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI gameUI = new edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI(boardGame, stage);
+      stage.setScene(gameUI.getScene());
+      stage.show();
+      LOGGER.info("Monopoly game loaded successfully");
+    } catch (Exception e) {
+      LOGGER.log(Level.SEVERE, "Error loading Monopoly game", e);
     }
   }
 }

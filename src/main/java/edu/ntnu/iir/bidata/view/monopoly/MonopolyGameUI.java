@@ -16,14 +16,21 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import java.io.File;
 import java.util.*;
 import java.util.logging.Logger;
+import javafx.stage.Stage;
 
 /**
  * JavaFX UI implementation for the Monopoly game.
@@ -40,6 +47,9 @@ public class MonopolyGameUI extends JavaFXGameUI {
     private final Button payRentButton = new Button("Pay Rent");
     private final Button jailRollButton = new Button("Roll Dice (Jail)");
     private final Button jailPayButton = new Button("Pay $50");
+    private final Button saveButton = new Button("Save Game");
+    private final Button loadButton = new Button("Load Game");
+    private final Button backButton = new Button("Back to Main Menu");
     private final Label actionLabel = new Label("");
     private final MonopolyController controller;
     private final Color BLANK_COLOR = Color.LIGHTGRAY;
@@ -53,9 +63,13 @@ public class MonopolyGameUI extends JavaFXGameUI {
     private final VBox playerInfoPanel;
     private final HBox gameControls;
     private final Label diceLabel = new Label("Dice: -");
+    protected BoardGame boardGame;
+    private final Stage primaryStage;
 
-    public MonopolyGameUI(BoardGame boardGame) {
+    public MonopolyGameUI(BoardGame boardGame, Stage primaryStage) {
         super(boardGame);
+        this.boardGame = boardGame;
+        this.primaryStage = primaryStage;
         this.controller = new MonopolyController(boardGame);
         this.mainLayout = new BorderPane();
         this.boardPane = new GridPane();
@@ -108,13 +122,82 @@ public class MonopolyGameUI extends JavaFXGameUI {
         payRentButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #E53935; -fx-text-fill: white;");
         jailRollButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #4CAF50; -fx-text-fill: white;");
         jailPayButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #FFD600; -fx-text-fill: black;");
+        backButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #f7e6c7; -fx-text-fill: #3b3b6d;");
         buyButton.setOnAction(e -> handleBuyProperty());
         skipButton.setOnAction(e -> handleSkipAction());
         payRentButton.setOnAction(e -> handlePayRent());
         jailRollButton.setOnAction(e -> handleJailRoll());
         jailPayButton.setOnAction(e -> handleJailPay());
+        backButton.setOnAction(e -> handleBackToMainMenu());
         actionLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;");
-        gameControls.getChildren().addAll(diceLabel, rollDiceButton, actionLabel, buyButton, skipButton, payRentButton, jailRollButton, jailPayButton);
+        saveButton.getStyleClass().add("game-control-button");
+        loadButton.getStyleClass().add("game-control-button");
+        
+        saveButton.setOnAction(e -> {
+            if (controller != null) {
+                TextInputDialog dialog = new TextInputDialog();
+                dialog.setTitle("Save Game");
+                dialog.setHeaderText("Enter a name for your saved game");
+                dialog.setContentText("Game name:");
+
+                Optional<String> result = dialog.showAndWait();
+                result.ifPresent(gameName -> {
+                    try {
+                        controller.saveGame(gameName);
+                        actionLabel.setText("Game saved as: " + gameName);
+                    } catch (Exception ex) {
+                        actionLabel.setText("Error saving game: " + ex.getMessage());
+                    }
+                });
+            }
+        });
+
+        loadButton.setOnAction(e -> {
+            if (controller != null) {
+                Dialog<String> dialog = new Dialog<>();
+                dialog.setTitle("Load Game");
+                dialog.setHeaderText("Select a saved game to load");
+
+                ComboBox<String> gameList = new ComboBox<>();
+                gameList.setPromptText("Select a game");
+                
+                File savedGamesDir = new File("src/main/resources/saved_games");
+                if (savedGamesDir.exists() && savedGamesDir.isDirectory()) {
+                    File[] savedGames = savedGamesDir.listFiles((dir, name) -> name.endsWith(".json"));
+                    if (savedGames != null) {
+                        for (File game : savedGames) {
+                            String gameName = game.getName().replace(".json", "");
+                            gameList.getItems().add(gameName);
+                        }
+                    }
+                }
+
+                dialog.getDialogPane().setContent(gameList);
+                ButtonType loadButtonType = new ButtonType("Load", ButtonBar.ButtonData.OK_DONE);
+                dialog.getDialogPane().getButtonTypes().addAll(loadButtonType, ButtonType.CANCEL);
+
+                dialog.setResultConverter(dialogButton -> {
+                    if (dialogButton == loadButtonType) {
+                        return gameList.getValue();
+                    }
+                    return null;
+                });
+
+                Optional<String> result = dialog.showAndWait();
+                result.ifPresent(gameName -> {
+                    try {
+                        controller.loadGame(gameName, this);
+                        actionLabel.setText("Game loaded: " + gameName);
+                    } catch (Exception ex) {
+                        actionLabel.setText("Error loading game: " + ex.getMessage());
+                    }
+                });
+            }
+        });
+
+        gameControls.getChildren().add(backButton);
+        gameControls.getChildren().addAll(rollDiceButton, buyButton, skipButton, payRentButton, 
+            jailRollButton, jailPayButton, saveButton, loadButton, diceLabel);
         buyButton.setVisible(false);
         skipButton.setVisible(false);
         payRentButton.setVisible(false);
@@ -299,6 +382,32 @@ public class MonopolyGameUI extends JavaFXGameUI {
         updateUI();
     }
 
+    private void handleBackToMainMenu() {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Exit Monopoly");
+        alert.setHeaderText("Do you want to save your game before exiting?");
+        javafx.scene.control.ButtonType saveAndExit = new javafx.scene.control.ButtonType("Save and Exit");
+        javafx.scene.control.ButtonType exitWithoutSaving = new javafx.scene.control.ButtonType("Exit without Saving");
+        javafx.scene.control.ButtonType cancel = new javafx.scene.control.ButtonType("Cancel", javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(saveAndExit, exitWithoutSaving, cancel);
+        java.util.Optional<javafx.scene.control.ButtonType> result = alert.showAndWait();
+        if (result.isPresent()) {
+            if (result.get() == saveAndExit) {
+                javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog();
+                dialog.setTitle("Save Game");
+                dialog.setHeaderText("Enter a name for your saved game:");
+                java.util.Optional<String> saveName = dialog.showAndWait();
+                saveName.ifPresent(name -> {
+                    controller.saveGame(name);
+                    edu.ntnu.iir.bidata.view.common.JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
+                });
+            } else if (result.get() == exitWithoutSaving) {
+                edu.ntnu.iir.bidata.view.common.JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
+            }
+            // If cancel, do nothing
+        }
+    }
+
     private void updateUI() {
         Platform.runLater(() -> {
             updatePlayerInfoPanel();
@@ -357,5 +466,11 @@ public class MonopolyGameUI extends JavaFXGameUI {
     @Override
     public Scene getScene() {
         return super.getScene();
+    }
+
+    public void setBoardGame(BoardGame boardGame) {
+        this.boardGame = boardGame;
+        initializeBoard();
+        updateUI();
     }
 } 

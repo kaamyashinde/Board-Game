@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import lombok.Getter;
+import java.io.IOException;
 
 /**
  * Controller class specifically for Snakes and Ladders game logic.
@@ -170,32 +171,35 @@ public class SnakesAndLaddersController extends BaseGameController {
             LOGGER.warning("Cannot save game: Game has not started");
             return;
         }
-        Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
-        boardGameWriter.writeBoardGame(boardGame, savePath);
-        LOGGER.info("Game saved: " + gameName);
+        try {
+            Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
+            boardGameWriter.writeBoardGame(boardGame, savePath);
+            LOGGER.info("Game saved: " + gameName);
+        } catch (IOException e) {
+            LOGGER.severe("Failed to save game: " + e.getMessage());
+        }
     }
 
     public void loadGame(String gameName, edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI ui) {
-        Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
-        BoardGame loadedGame = boardGameReader.readBoardGame(savePath);
-        
-        // Update the current controller's state
-        this.boardGame = loadedGame;
-        this.gameStarted = true;
-        
-        // Update player positions from the loaded game
-        for (Player player : loadedGame.getPlayers()) {
-            updateSnakesAndLaddersPosition(player.getName(), player.getCurrentPosition());
+        try {
+            Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
+            BoardGame loadedGame = boardGameReader.readBoardGame(savePath);
+            // Update the current controller's state
+            this.boardGame = loadedGame;
+            this.gameStarted = true;
+            // Update player positions from the loaded game
+            for (Player player : loadedGame.getPlayers()) {
+                updateSnakesAndLaddersPosition(player.getName(), player.getCurrentPosition());
+            }
+            // Set the current player index from the loaded game
+            boardGame.setCurrentPlayerIndex(loadedGame.getCurrentPlayerIndex());
+            if (ui != null) {
+                ui.refreshUIFromBoardGame();
+            }
+            LOGGER.info("Game loaded: " + gameName);
+        } catch (IOException e) {
+            LOGGER.severe("Failed to load game: " + e.getMessage());
         }
-        
-        // Set the current player index from the loaded game
-        boardGame.setCurrentPlayerIndex(loadedGame.getCurrentPlayerIndex());
-        
-        if (ui != null) {
-            ui.setBoardGame(loadedGame);
-            ui.refreshUIFromBoardGame();
-        }
-        LOGGER.info("Game loaded: " + gameName);
     }
 
     @Override
