@@ -21,6 +21,12 @@ public class SimpleMonopolyPlayer extends Player {
     @Getter
     @Setter
     private List<PropertyTile> ownedProperties;
+    @Getter
+    @Setter
+    private boolean inJail = false;
+    @Getter
+    @Setter
+    private boolean paidToLeaveJail = false;
 
     /**
      * Constructor for the SimpleMonopolyPlayer class.
@@ -74,5 +80,19 @@ public class SimpleMonopolyPlayer extends Player {
 
     public void collectMoney(int amount) {
         money += amount;
+    }
+
+    public void goToJail() {
+        this.inJail = true;
+        this.paidToLeaveJail = false;
+    }
+
+    public void leaveJail() {
+        this.inJail = false;
+        this.paidToLeaveJail = false;
+    }
+
+    public boolean isInJail() {
+        return inJail;
     }
 }

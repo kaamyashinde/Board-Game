@@ -24,6 +24,8 @@ public class MonopolyController extends BaseGameController {
     private PropertyTile pendingPropertyTile = null;
     private boolean awaitingRentAction = false;
     private PropertyTile pendingRentPropertyTile = null;
+    private boolean awaitingJailAction = false;
+    private boolean jailRolledSix = false;
 
     public MonopolyController(BoardGame boardGame) {
         super(boardGame);
@@ -74,19 +76,64 @@ public class MonopolyController extends BaseGameController {
         LOGGER.info(player.getName() + " collected $" + amount + " in rent");
     }
 
+    public boolean isCurrentPlayerInJail() {
+        return boardGame.getCurrentPlayer() instanceof SimpleMonopolyPlayer &&
+               ((SimpleMonopolyPlayer) boardGame.getCurrentPlayer()).isInJail();
+    }
+
+    public boolean isCurrentPlayerCanLeaveJail() {
+        return jailRolledSix || ((SimpleMonopolyPlayer) boardGame.getCurrentPlayer()).isPaidToLeaveJail();
+    }
+
+    public void handleJailRollDice() {
+        SimpleMonopolyPlayer currentPlayer = (SimpleMonopolyPlayer) boardGame.getCurrentPlayer();
+        boardGame.getDice().rollAllDice();
+        int[] diceValues = boardGame.getCurrentDiceValues();
+        jailRolledSix = false;
+        for (int value : diceValues) {
+            if (value == 6) {
+                jailRolledSix = true;
+                break;
+            }
+        }
+        awaitingJailAction = false;
+    }
+
+    public void handleJailPay() {
+        SimpleMonopolyPlayer currentPlayer = (SimpleMonopolyPlayer) boardGame.getCurrentPlayer();
+        try {
+            currentPlayer.payRent(50);
+            currentPlayer.setPaidToLeaveJail(true);
+        } catch (Exception e) {
+            // Not enough money, do nothing
+        }
+        awaitingJailAction = false;
+    }
+
     @Override
     public void handlePlayerMove() {
+        SimpleMonopolyPlayer currentPlayer = (SimpleMonopolyPlayer) boardGame.getCurrentPlayer();
+        if (currentPlayer.isInJail()) {
+            if (isCurrentPlayerCanLeaveJail()) {
+                currentPlayer.leaveJail();
+                jailRolledSix = false;
+                currentPlayer.setPaidToLeaveJail(false);
+                // Now allow normal move
+            } else {
+                awaitingJailAction = true;
+                return;
+            }
+        }
         if (!gameStarted) {
             gameStarted = true;
             LOGGER.info("First turn started");
         }
-        if (awaitingPlayerAction || awaitingRentAction) {
+        if (awaitingPlayerAction || awaitingRentAction || awaitingJailAction) {
             LOGGER.warning("Still awaiting player action. Turn cannot proceed.");
             return;
         }
         // Roll the dice before moving
         boardGame.getDice().rollAllDice();
-        SimpleMonopolyPlayer currentPlayer = (SimpleMonopolyPlayer) boardGame.getCurrentPlayer();
         int[] diceValues = boardGame.getCurrentDiceValues();
         int steps = 0;
         for (int value : diceValues) {

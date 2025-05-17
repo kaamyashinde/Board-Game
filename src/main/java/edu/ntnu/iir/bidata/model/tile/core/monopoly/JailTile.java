@@ -1,7 +1,6 @@
 package edu.ntnu.iir.bidata.model.tile.core.monopoly;
 
 import edu.ntnu.iir.bidata.model.tile.core.Tile;
-import edu.ntnu.iir.bidata.model.tile.actions.monopoly.GoToJailAction;
 /**
  * A tile that represents the Jail tile in the Monopoly game.
  * 
@@ -10,6 +9,6 @@ import edu.ntnu.iir.bidata.model.tile.actions.monopoly.GoToJailAction;
  */
 public class JailTile extends Tile {
     public JailTile(int id) {
-        super(id, new GoToJailAction());
+        super(id, null); // No action, just visiting
     }
 }

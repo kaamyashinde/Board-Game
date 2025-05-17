@@ -37,6 +37,8 @@ public class MonopolyGameUI extends JavaFXGameUI {
     private final Button buyButton = new Button("Buy");
     private final Button skipButton = new Button("Skip");
     private final Button payRentButton = new Button("Pay Rent");
+    private final Button jailRollButton = new Button("Roll Dice (Jail)");
+    private final Button jailPayButton = new Button("Pay $50");
     private final Label actionLabel = new Label("");
     private final MonopolyController controller;
     private final Color BLANK_COLOR = Color.LIGHTGRAY;
@@ -102,14 +104,20 @@ public class MonopolyGameUI extends JavaFXGameUI {
         buyButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #2196F3; -fx-text-fill: white;");
         skipButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #FF9800; -fx-text-fill: white;");
         payRentButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #E53935; -fx-text-fill: white;");
+        jailRollButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #4CAF50; -fx-text-fill: white;");
+        jailPayButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #FFD600; -fx-text-fill: black;");
         buyButton.setOnAction(e -> handleBuyProperty());
         skipButton.setOnAction(e -> handleSkipAction());
         payRentButton.setOnAction(e -> handlePayRent());
+        jailRollButton.setOnAction(e -> handleJailRoll());
+        jailPayButton.setOnAction(e -> handleJailPay());
         actionLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;");
-        gameControls.getChildren().addAll(diceLabel, rollDiceButton, actionLabel, buyButton, skipButton, payRentButton);
+        gameControls.getChildren().addAll(diceLabel, rollDiceButton, actionLabel, buyButton, skipButton, payRentButton, jailRollButton, jailPayButton);
         buyButton.setVisible(false);
         skipButton.setVisible(false);
         payRentButton.setVisible(false);
+        jailRollButton.setVisible(false);
+        jailPayButton.setVisible(false);
         actionLabel.setVisible(false);
     }
 
@@ -240,10 +248,13 @@ public class MonopolyGameUI extends JavaFXGameUI {
         boolean isGameOver = getBoardGame().isGameOver();
         boolean awaitingBuy = controller.isAwaitingPlayerAction();
         boolean awaitingRent = controller.isAwaitingRentAction();
-        rollDiceButton.setDisable(current == null || isGameOver || awaitingBuy || awaitingRent);
-        buyButton.setDisable(isGameOver || awaitingRent);
-        skipButton.setDisable(isGameOver || awaitingRent);
-        payRentButton.setDisable(isGameOver || awaitingBuy);
+        boolean inJail = controller.isCurrentPlayerInJail();
+        rollDiceButton.setDisable(current == null || isGameOver || awaitingBuy || awaitingRent || inJail);
+        buyButton.setDisable(isGameOver || awaitingRent || inJail);
+        skipButton.setDisable(isGameOver || awaitingRent || inJail);
+        payRentButton.setDisable(isGameOver || awaitingBuy || inJail);
+        jailRollButton.setDisable(isGameOver || !inJail);
+        jailPayButton.setDisable(isGameOver || !inJail);
     }
 
     private void handleRollDice() {
@@ -273,25 +284,44 @@ public class MonopolyGameUI extends JavaFXGameUI {
         updateUI();
     }
 
+    private void handleJailRoll() {
+        controller.handleJailRollDice();
+        updateUI();
+    }
+
+    private void handleJailPay() {
+        controller.handleJailPay();
+        updateUI();
+    }
+
     private void updateUI() {
         Platform.runLater(() -> {
             updatePlayerInfoPanel();
             updatePlayerTokens();
             updateRollDiceButtonState();
-            // Update dice label for current player
             int[] diceValues = getBoardGame().getCurrentDiceValues();
             if (diceValues != null && diceValues.length > 0) {
                 diceLabel.setText("Dice: " + Arrays.toString(diceValues));
             } else {
                 diceLabel.setText("Dice: -");
             }
-            if (controller.isAwaitingPlayerAction()) {
+            if (controller.isCurrentPlayerInJail()) {
+                actionLabel.setText("You are in jail! Roll a 6 or pay $50 to get out.");
+                actionLabel.setVisible(true);
+                jailRollButton.setVisible(true);
+                jailPayButton.setVisible(true);
+                buyButton.setVisible(false);
+                skipButton.setVisible(false);
+                payRentButton.setVisible(false);
+            } else if (controller.isAwaitingPlayerAction()) {
                 PropertyTile prop = controller.getPendingPropertyTile();
                 actionLabel.setText("Buy property for $" + (prop != null ? prop.getPrice() : "?") + "?");
                 actionLabel.setVisible(true);
                 buyButton.setVisible(true);
                 skipButton.setVisible(true);
                 payRentButton.setVisible(false);
+                jailRollButton.setVisible(false);
+                jailPayButton.setVisible(false);
             } else if (controller.isAwaitingRentAction()) {
                 PropertyTile prop = controller.getPendingRentPropertyTile();
                 int rent = prop != null ? prop.getRent() : 0;
@@ -300,11 +330,15 @@ public class MonopolyGameUI extends JavaFXGameUI {
                 buyButton.setVisible(false);
                 skipButton.setVisible(false);
                 payRentButton.setVisible(true);
+                jailRollButton.setVisible(false);
+                jailPayButton.setVisible(false);
             } else {
                 actionLabel.setVisible(false);
                 buyButton.setVisible(false);
                 skipButton.setVisible(false);
                 payRentButton.setVisible(false);
+                jailRollButton.setVisible(false);
+                jailPayButton.setVisible(false);
             }
         });
     }
