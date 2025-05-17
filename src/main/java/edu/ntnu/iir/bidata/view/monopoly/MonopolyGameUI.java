@@ -34,6 +34,10 @@ public class MonopolyGameUI extends JavaFXGameUI {
     private final Map<Integer, StackPane> tilePanes = new HashMap<>();
     private final Map<Player, Circle> playerTokens = new HashMap<>();
     private final Button rollDiceButton = new Button("Roll Dice");
+    private final Button buyButton = new Button("Buy");
+    private final Button skipButton = new Button("Skip");
+    private final Button payRentButton = new Button("Pay Rent");
+    private final Label actionLabel = new Label("");
     private final MonopolyController controller;
     private final Color BLANK_COLOR = Color.LIGHTGRAY;
     private final Color[] GROUP_COLORS = { Color.SADDLEBROWN, Color.LIGHTBLUE, Color.HOTPINK, Color.ORANGE };
@@ -95,7 +99,18 @@ public class MonopolyGameUI extends JavaFXGameUI {
         // Add dice label and roll button to game controls
         rollDiceButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #4CAF50; -fx-text-fill: white;");
         rollDiceButton.setOnAction(e -> handleRollDice());
-        gameControls.getChildren().addAll(diceLabel, rollDiceButton);
+        buyButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #2196F3; -fx-text-fill: white;");
+        skipButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #FF9800; -fx-text-fill: white;");
+        payRentButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #E53935; -fx-text-fill: white;");
+        buyButton.setOnAction(e -> handleBuyProperty());
+        skipButton.setOnAction(e -> handleSkipAction());
+        payRentButton.setOnAction(e -> handlePayRent());
+        actionLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;");
+        gameControls.getChildren().addAll(diceLabel, rollDiceButton, actionLabel, buyButton, skipButton, payRentButton);
+        buyButton.setVisible(false);
+        skipButton.setVisible(false);
+        payRentButton.setVisible(false);
+        actionLabel.setVisible(false);
     }
 
     private void initializeBoard() {
@@ -223,7 +238,12 @@ public class MonopolyGameUI extends JavaFXGameUI {
     private void updateRollDiceButtonState() {
         Player current = getBoardGame().getCurrentPlayer();
         boolean isGameOver = getBoardGame().isGameOver();
-        rollDiceButton.setDisable(current == null || isGameOver);
+        boolean awaitingBuy = controller.isAwaitingPlayerAction();
+        boolean awaitingRent = controller.isAwaitingRentAction();
+        rollDiceButton.setDisable(current == null || isGameOver || awaitingBuy || awaitingRent);
+        buyButton.setDisable(isGameOver || awaitingRent);
+        skipButton.setDisable(isGameOver || awaitingRent);
+        payRentButton.setDisable(isGameOver || awaitingBuy);
     }
 
     private void handleRollDice() {
@@ -238,6 +258,21 @@ public class MonopolyGameUI extends JavaFXGameUI {
         updateUI();
     }
 
+    private void handleBuyProperty() {
+        controller.buyPropertyForCurrentPlayer();
+        updateUI();
+    }
+
+    private void handleSkipAction() {
+        controller.skipActionForCurrentPlayer();
+        updateUI();
+    }
+
+    private void handlePayRent() {
+        controller.payRentForCurrentPlayer();
+        updateUI();
+    }
+
     private void updateUI() {
         Platform.runLater(() -> {
             updatePlayerInfoPanel();
@@ -249,6 +284,27 @@ public class MonopolyGameUI extends JavaFXGameUI {
                 diceLabel.setText("Dice: " + Arrays.toString(diceValues));
             } else {
                 diceLabel.setText("Dice: -");
+            }
+            if (controller.isAwaitingPlayerAction()) {
+                PropertyTile prop = controller.getPendingPropertyTile();
+                actionLabel.setText("Buy property for $" + (prop != null ? prop.getPrice() : "?") + "?");
+                actionLabel.setVisible(true);
+                buyButton.setVisible(true);
+                skipButton.setVisible(true);
+                payRentButton.setVisible(false);
+            } else if (controller.isAwaitingRentAction()) {
+                PropertyTile prop = controller.getPendingRentPropertyTile();
+                int rent = prop != null ? prop.getRent() : 0;
+                actionLabel.setText("Pay rent: $" + rent);
+                actionLabel.setVisible(true);
+                buyButton.setVisible(false);
+                skipButton.setVisible(false);
+                payRentButton.setVisible(true);
+            } else {
+                actionLabel.setVisible(false);
+                buyButton.setVisible(false);
+                skipButton.setVisible(false);
+                payRentButton.setVisible(false);
             }
         });
     }

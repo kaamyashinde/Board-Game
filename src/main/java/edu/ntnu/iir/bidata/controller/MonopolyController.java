@@ -20,6 +20,10 @@ public class MonopolyController extends BaseGameController {
     private final GameStateFileWriter gameStateWriter;
     private final GameStateFileReader gameStateReader;
     private boolean gameStarted = false;
+    private boolean awaitingPlayerAction = false;
+    private PropertyTile pendingPropertyTile = null;
+    private boolean awaitingRentAction = false;
+    private PropertyTile pendingRentPropertyTile = null;
 
     public MonopolyController(BoardGame boardGame) {
         super(boardGame);
@@ -76,21 +80,21 @@ public class MonopolyController extends BaseGameController {
             gameStarted = true;
             LOGGER.info("First turn started");
         }
-
+        if (awaitingPlayerAction || awaitingRentAction) {
+            LOGGER.warning("Still awaiting player action. Turn cannot proceed.");
+            return;
+        }
         // Roll the dice before moving
         boardGame.getDice().rollAllDice();
-
         SimpleMonopolyPlayer currentPlayer = (SimpleMonopolyPlayer) boardGame.getCurrentPlayer();
         int[] diceValues = boardGame.getCurrentDiceValues();
         int steps = 0;
         for (int value : diceValues) {
             steps += value;
         }
-
         // Move the player
         currentPlayer.move(steps);
         LOGGER.info(currentPlayer.getName() + " moved " + steps + " steps");
-
         // Handle the tile the player landed on
         Tile currentTile = currentPlayer.getCurrentTile();
         if (currentTile instanceof PropertyTile) {
@@ -98,13 +102,59 @@ public class MonopolyController extends BaseGameController {
             if (propertyTile.getOwner() == null) {
                 // Property is available for purchase
                 LOGGER.info("Property at position " + propertyTile.getId() + " is available for purchase");
+                awaitingPlayerAction = true;
+                pendingPropertyTile = propertyTile;
+                return;
             } else if (propertyTile.getOwner() != currentPlayer) {
                 // Player needs to pay rent
-                payRent(currentPlayer, propertyTile);
+                LOGGER.info(currentPlayer.getName() + " must pay rent for property at position " + propertyTile.getId());
+                awaitingRentAction = true;
+                pendingRentPropertyTile = propertyTile;
+                return;
             }
         }
+        // No action needed, move to next player
+        nextPlayer();
+    }
 
-        // Move to next player
+    public boolean isAwaitingPlayerAction() {
+        return awaitingPlayerAction;
+    }
+
+    public PropertyTile getPendingPropertyTile() {
+        return pendingPropertyTile;
+    }
+
+    public void buyPropertyForCurrentPlayer() {
+        if (!awaitingPlayerAction || pendingPropertyTile == null) return;
+        SimpleMonopolyPlayer currentPlayer = (SimpleMonopolyPlayer) boardGame.getCurrentPlayer();
+        buyProperty(currentPlayer, pendingPropertyTile);
+        awaitingPlayerAction = false;
+        pendingPropertyTile = null;
+        nextPlayer();
+    }
+
+    public void skipActionForCurrentPlayer() {
+        if (!awaitingPlayerAction) return;
+        awaitingPlayerAction = false;
+        pendingPropertyTile = null;
+        nextPlayer();
+    }
+
+    public boolean isAwaitingRentAction() {
+        return awaitingRentAction;
+    }
+
+    public PropertyTile getPendingRentPropertyTile() {
+        return pendingRentPropertyTile;
+    }
+
+    public void payRentForCurrentPlayer() {
+        if (!awaitingRentAction || pendingRentPropertyTile == null) return;
+        SimpleMonopolyPlayer currentPlayer = (SimpleMonopolyPlayer) boardGame.getCurrentPlayer();
+        payRent(currentPlayer, pendingRentPropertyTile);
+        awaitingRentAction = false;
+        pendingRentPropertyTile = null;
         nextPlayer();
     }
 } 
