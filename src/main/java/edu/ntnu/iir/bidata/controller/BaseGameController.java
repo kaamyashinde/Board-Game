@@ -56,6 +56,7 @@ public abstract class BaseGameController {
      */
     protected void nextPlayer() {
         currentPlayerIndex = (currentPlayerIndex + 1) % playerNames.size();
+        boardGame.setCurrentPlayerIndex(currentPlayerIndex);
         diceRolled = false;
     }
 
