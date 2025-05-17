@@ -51,7 +51,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
     private final Button loadButton = new Button("Load Game");
     private final Button backButton = new Button("Back to Main Menu");
     private final Label actionLabel = new Label("");
-    private final MonopolyController controller;
+    private MonopolyController controller;
     private final Color BLANK_COLOR = Color.LIGHTGRAY;
     private final Color[] GROUP_COLORS = { Color.SADDLEBROWN, Color.LIGHTBLUE, Color.HOTPINK, Color.ORANGE };
     private final Color GO_COLOR = Color.LIMEGREEN;
@@ -198,12 +198,6 @@ public class MonopolyGameUI extends JavaFXGameUI {
         gameControls.getChildren().add(backButton);
         gameControls.getChildren().addAll(rollDiceButton, buyButton, skipButton, payRentButton, 
             jailRollButton, jailPayButton, saveButton, loadButton, diceLabel);
-        buyButton.setVisible(false);
-        skipButton.setVisible(false);
-        payRentButton.setVisible(false);
-        jailRollButton.setVisible(false);
-        jailPayButton.setVisible(false);
-        actionLabel.setVisible(false);
     }
 
     private void initializeBoard() {
@@ -293,23 +287,22 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
     private void updatePlayerInfoPanel() {
         playerInfoPanel.getChildren().clear();
-        for (Player player : getBoardGame().getPlayers()) {
-            VBox card = new VBox(5);
-            card.setPadding(new Insets(10));
-            card.setStyle("-fx-background-color: #f8f8f8; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-background-radius: 5;");
-            Label nameLabel = new Label(player.getName());
-            nameLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-            if (player == getBoardGame().getCurrentPlayer()) {
-                nameLabel.setTextFill(Color.DARKBLUE);
-                card.setStyle("-fx-background-color: #e0f0ff; -fx-border-color: #0077cc; -fx-border-width: 2; -fx-border-radius: 5; -fx-background-radius: 5;");
+        for (Player player : boardGame.getPlayers()) {
+            if (player instanceof SimpleMonopolyPlayer) {
+                SimpleMonopolyPlayer monopolyPlayer = (SimpleMonopolyPlayer) player;
+                VBox playerBox = new VBox(5);
+                playerBox.setPadding(new Insets(10));
+                playerBox.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1;");
+
+                Label nameLabel = new Label(monopolyPlayer.getName());
+                nameLabel.setStyle("-fx-font-weight: bold;");
+                Label moneyLabel = new Label("Money: $" + monopolyPlayer.getMoney());
+                Label positionLabel = new Label("Position: Tile #" + monopolyPlayer.getCurrentTile().getId());
+                Label propertiesLabel = new Label("Properties: " + monopolyPlayer.getOwnedProperties().size());
+
+                playerBox.getChildren().addAll(nameLabel, moneyLabel, positionLabel, propertiesLabel);
+                playerInfoPanel.getChildren().add(playerBox);
             }
-            int money = ((SimpleMonopolyPlayer) player).getMoney();
-            Label moneyLabel = new Label("Money: $" + money);
-            List<PropertyTile> props = ((SimpleMonopolyPlayer) player).getOwnedProperties();
-            String propList = props.isEmpty() ? "None" : String.join(", ", props.stream().map(p -> "#" + p.getId()).toList());
-            Label propLabel = new Label("Properties: " + propList);
-            card.getChildren().addAll(nameLabel, moneyLabel, propLabel);
-            playerInfoPanel.getChildren().add(card);
         }
     }
 
@@ -408,53 +401,10 @@ public class MonopolyGameUI extends JavaFXGameUI {
         }
     }
 
-    private void updateUI() {
-        Platform.runLater(() -> {
-            updatePlayerInfoPanel();
-            updatePlayerTokens();
-            updateRollDiceButtonState();
-            int[] diceValues = getBoardGame().getCurrentDiceValues();
-            if (diceValues != null && diceValues.length > 0) {
-                diceLabel.setText("Dice: " + Arrays.toString(diceValues));
-            } else {
-                diceLabel.setText("Dice: -");
-            }
-            if (controller.isCurrentPlayerInJail()) {
-                actionLabel.setText("You are in jail! Roll a 6 or pay $50 to get out.");
-                actionLabel.setVisible(true);
-                jailRollButton.setVisible(true);
-                jailPayButton.setVisible(true);
-                buyButton.setVisible(false);
-                skipButton.setVisible(false);
-                payRentButton.setVisible(false);
-            } else if (controller.isAwaitingPlayerAction()) {
-                PropertyTile prop = controller.getPendingPropertyTile();
-                actionLabel.setText("Buy property for $" + (prop != null ? prop.getPrice() : "?") + "?");
-                actionLabel.setVisible(true);
-                buyButton.setVisible(true);
-                skipButton.setVisible(true);
-                payRentButton.setVisible(false);
-                jailRollButton.setVisible(false);
-                jailPayButton.setVisible(false);
-            } else if (controller.isAwaitingRentAction()) {
-                PropertyTile prop = controller.getPendingRentPropertyTile();
-                int rent = prop != null ? prop.getRent() : 0;
-                actionLabel.setText("Pay rent: $" + rent);
-                actionLabel.setVisible(true);
-                buyButton.setVisible(false);
-                skipButton.setVisible(false);
-                payRentButton.setVisible(true);
-                jailRollButton.setVisible(false);
-                jailPayButton.setVisible(false);
-            } else {
-                actionLabel.setVisible(false);
-                buyButton.setVisible(false);
-                skipButton.setVisible(false);
-                payRentButton.setVisible(false);
-                jailRollButton.setVisible(false);
-                jailPayButton.setVisible(false);
-            }
-        });
+    public void updateUI() {
+        updatePlayerInfoPanel();
+        updatePlayerTokens();
+        updateRollDiceButtonState();
     }
 
     @Override
@@ -472,5 +422,9 @@ public class MonopolyGameUI extends JavaFXGameUI {
         this.boardGame = boardGame;
         initializeBoard();
         updateUI();
+    }
+
+    public void setController(MonopolyController controller) {
+        this.controller = controller;
     }
 } 

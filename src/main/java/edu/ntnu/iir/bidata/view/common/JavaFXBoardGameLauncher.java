@@ -257,6 +257,20 @@ public class JavaFXBoardGameLauncher extends Application {
 
       // Create view
       edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI gameUI = new edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI(boardGame, stage);
+      
+      // Create controller and connect it with the view
+      edu.ntnu.iir.bidata.controller.MonopolyController controller = new edu.ntnu.iir.bidata.controller.MonopolyController(boardGame);
+      gameUI.setController(controller);
+      
+      // Register the UI as an observer
+      boardGame.addObserver(gameUI);
+      
+      // Load the game state into the controller
+      controller.loadGame(gameName, gameUI);
+      
+      // Start the game
+      controller.startGame();
+      
       stage.setScene(gameUI.getScene());
       stage.show();
       LOGGER.info("Monopoly game loaded successfully");

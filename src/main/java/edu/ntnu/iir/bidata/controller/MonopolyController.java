@@ -164,12 +164,14 @@ public class MonopolyController extends BaseGameController {
                 LOGGER.info("Property at position " + propertyTile.getId() + " is available for purchase");
                 awaitingPlayerAction = true;
                 pendingPropertyTile = propertyTile;
+                boardGame.notifyObservers();
                 return;
             } else if (propertyTile.getOwner() != currentPlayer) {
                 // Player needs to pay rent
                 LOGGER.info(currentPlayer.getName() + " must pay rent for property at position " + propertyTile.getId());
                 awaitingRentAction = true;
                 pendingRentPropertyTile = propertyTile;
+                boardGame.notifyObservers();
                 return;
             }
         } else if (currentTile.getAction() != null) {
@@ -263,6 +265,7 @@ public class MonopolyController extends BaseGameController {
             this.gameStarted = true;
             if (ui != null) {
                 ui.refreshUIFromBoardGame();
+                ui.updateUI();  // Add explicit UI update
             }
             LOGGER.info("Game loaded: " + gameName);
         } catch (IOException e) {
