@@ -31,12 +31,7 @@ public class MonopolyController extends BaseGameController {
     @Override
     public void setPlayerNames(List<String> playerNames) {
         super.setPlayerNames(playerNames);
-        // Initialize players with Monopoly-specific properties
-        for (String playerName : playerNames) {
-            SimpleMonopolyPlayer player = new SimpleMonopolyPlayer(playerName);
-            boardGame.getPlayers().add(player);
-            player.setCurrentTile(boardGame.getBoard().getTile(0));
-        }
+        // Do not add players here; they are already added in the launcher
         LOGGER.info("Setting player names: " + playerNames);
     }
 

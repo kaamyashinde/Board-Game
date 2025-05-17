@@ -44,6 +44,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
     private final GridPane boardPane;
     private final VBox playerInfoPanel;
     private final HBox gameControls;
+    private final Label diceLabel = new Label("Dice: -");
 
     public MonopolyGameUI(BoardGame boardGame) {
         super(boardGame);
@@ -52,6 +53,10 @@ public class MonopolyGameUI extends JavaFXGameUI {
         this.boardPane = new GridPane();
         this.playerInfoPanel = new VBox(10);
         this.gameControls = new HBox(10);
+        this.diceLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-padding: 0 10 0 0;");
+        // Set player names in controller to avoid NullPointerException
+        List<String> playerNames = boardGame.getPlayers().stream().map(Player::getName).toList();
+        controller.setPlayerNames(playerNames);
         setupUI();
     }
 
@@ -86,6 +91,11 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
         // Initialize the board
         initializeBoard();
+
+        // Add dice label and roll button to game controls
+        rollDiceButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #4CAF50; -fx-text-fill: white;");
+        rollDiceButton.setOnAction(e -> handleRollDice());
+        gameControls.getChildren().addAll(diceLabel, rollDiceButton);
     }
 
     private void initializeBoard() {
@@ -180,6 +190,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
             nameLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
             if (player == getBoardGame().getCurrentPlayer()) {
                 nameLabel.setTextFill(Color.DARKBLUE);
+                card.setStyle("-fx-background-color: #e0f0ff; -fx-border-color: #0077cc; -fx-border-width: 2; -fx-border-radius: 5; -fx-background-radius: 5;");
             }
             int money = ((SimpleMonopolyPlayer) player).getMoney();
             Label moneyLabel = new Label("Money: $" + money);
@@ -211,11 +222,19 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
     private void updateRollDiceButtonState() {
         Player current = getBoardGame().getCurrentPlayer();
-        rollDiceButton.setDisable(current == null || getBoardGame().isGameOver());
+        boolean isGameOver = getBoardGame().isGameOver();
+        rollDiceButton.setDisable(current == null || isGameOver);
     }
 
     private void handleRollDice() {
         controller.handlePlayerMove();
+        // Show dice value
+        int[] diceValues = getBoardGame().getCurrentDiceValues();
+        if (diceValues != null && diceValues.length > 0) {
+            diceLabel.setText("Dice: " + Arrays.toString(diceValues));
+        } else {
+            diceLabel.setText("Dice: -");
+        }
         updateUI();
     }
 
@@ -224,6 +243,13 @@ public class MonopolyGameUI extends JavaFXGameUI {
             updatePlayerInfoPanel();
             updatePlayerTokens();
             updateRollDiceButtonState();
+            // Update dice label for current player
+            int[] diceValues = getBoardGame().getCurrentDiceValues();
+            if (diceValues != null && diceValues.length > 0) {
+                diceLabel.setText("Dice: " + Arrays.toString(diceValues));
+            } else {
+                diceLabel.setText("Dice: -");
+            }
         });
     }
 
