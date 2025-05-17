@@ -77,6 +77,9 @@ public class MonopolyController extends BaseGameController {
             LOGGER.info("First turn started");
         }
 
+        // Roll the dice before moving
+        boardGame.getDice().rollAllDice();
+
         SimpleMonopolyPlayer currentPlayer = (SimpleMonopolyPlayer) boardGame.getCurrentPlayer();
         int[] diceValues = boardGame.getCurrentDiceValues();
         int steps = 0;
