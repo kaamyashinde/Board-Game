@@ -1,0 +1,59 @@
+/* SnakesAndLaddersGameUI Styles */
+.snl-game-root {
+  -fx-background-color: #f5fff5;
+}
+
+.snl-game-status-label {
+  -fx-font-weight: bold;
+  -fx-font-size: 14px;
+  -fx-wrap-text: true;
+}
+
+.snl-player-info-box {
+  -fx-padding: 5px;
+}
+
+.snl-player-name-label {
+  -fx-font-size: 14px;
+  -fx-font-weight: bold;
+}
+
+.snl-player-panel {
+  -fx-background-color: #e6fff2;
+  -fx-background-radius: 20;
+  -fx-padding: 20;
+}
+
+/* SnakesAndLaddersMenuUI Styles */
+.snl-menu-root {
+  -fx-background-color: #f5fff5;
+}
+
+.snl-back-button {
+  -fx-background-color: #bdebc8;
+  -fx-font-weight: bold;
+}
+
+.snl-title-pane {
+  -fx-background-color: #bdebc8;
+  -fx-background-radius: 20;
+}
+
+.snl-title-label {
+  -fx-font-size: 30px;
+  -fx-font-family: serif;
+  -fx-font-weight: bold;
+}
+
+.snl-menu-button {
+  -fx-background-color: #BDEBC8;
+  -fx-text-fill: black;
+  -fx-font-size: 16px;
+  -fx-background-radius: 25;
+  -fx-padding: 10;
+}
+
+.snl-player-count-label {
+  -fx-font-size: 14px;
+  -fx-text-fill: #006400;
+}
