@@ -68,4 +68,11 @@ public class SimpleMonopolyPlayer extends Player {
         }
     }
 
+    /**
+     * Collects money.
+     */
+
+    public void collectMoney(int amount) {
+        money += amount;
+    }
 }
