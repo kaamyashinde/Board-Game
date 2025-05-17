@@ -11,6 +11,7 @@ import edu.ntnu.iir.bidata.view.ludo.LudoMenuUI;
 import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI;
 import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersMenuUI;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson;
+import edu.ntnu.iir.bidata.view.common.PlayerSelectionUI;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -19,6 +20,9 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import java.util.ArrayList;
 
 /**
  * JavaFX application launcher for the board games UI. This class only handles UI navigation between
@@ -106,18 +110,29 @@ public class JavaFXBoardGameLauncher extends Application {
    */
   public void showMonopolyMenu(Stage stage) {
     LOGGER.info("Showing Monopoly game");
-    // For now, create a default Monopoly game with 2 players
+    // Show player selection popup
+    PlayerSelectionUI playerSelection = new PlayerSelectionUI(stage);
+    List<String> playerNames = playerSelection.showAndWait();
+    if (playerNames == null || playerNames.size() < 2) {
+        // Show a warning dialog if not enough players
+        Alert alert = new Alert(Alert.AlertType.WARNING, "Please select at least 2 players for Monopoly!", ButtonType.OK);
+        alert.initOwner(stage);
+        alert.showAndWait();
+        return;
+    }
     try {
-      Board board = edu.ntnu.iir.bidata.filehandling.board.MonopolyBoardFactory.createBoard();
-      BoardGame boardGame = new BoardGame(board, 1);
-      boardGame.addPlayer("Player 1");
-      boardGame.addPlayer("Player 2");
-      edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI gameUI = new edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI(boardGame);
-      // Show the Monopoly game UI (assumes MonopolyGameUI sets up and shows its own scene)
-      stage.setScene(gameUI.getScene());
-      stage.show();
+        Board board = edu.ntnu.iir.bidata.filehandling.board.MonopolyBoardFactory.createBoard();
+        BoardGame boardGame = new BoardGame(board, 1);
+        List<Player> players = new ArrayList<>();
+        for (String name : playerNames) {
+            players.add(new edu.ntnu.iir.bidata.model.player.SimpleMonopolyPlayer(name));
+        }
+        boardGame.setPlayers(players);
+        edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI gameUI = new edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI(boardGame);
+        stage.setScene(gameUI.getScene());
+        stage.show();
     } catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Error initializing Monopoly game", e);
+        LOGGER.log(Level.SEVERE, "Error initializing Monopoly game", e);
     }
   }
 

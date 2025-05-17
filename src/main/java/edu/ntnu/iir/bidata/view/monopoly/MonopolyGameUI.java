@@ -2,25 +2,26 @@ package edu.ntnu.iir.bidata.view.monopoly;
 
 import edu.ntnu.iir.bidata.controller.MonopolyController;
 import edu.ntnu.iir.bidata.model.BoardGame;
+import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.model.player.SimpleMonopolyPlayer;
 import edu.ntnu.iir.bidata.model.tile.core.Tile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.PropertyTile;
+import edu.ntnu.iir.bidata.model.tile.core.monopoly.GoTile;
+import edu.ntnu.iir.bidata.model.tile.core.monopoly.JailTile;
+import edu.ntnu.iir.bidata.model.tile.core.monopoly.FreeParkingTile;
 import edu.ntnu.iir.bidata.view.common.JavaFXGameUI;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -28,209 +29,211 @@ import java.util.logging.Logger;
  */
 public class MonopolyGameUI extends JavaFXGameUI {
     private static final Logger LOGGER = Logger.getLogger(MonopolyGameUI.class.getName());
-    private MonopolyController controller;
-    private VBox propertyInfoPane;
-    private Label moneyLabel;
-    private Label propertiesLabel;
-    private Button buyPropertyButton;
-    private Button buildHouseButton;
-    private Button mortgageButton;
-    private Scene scene;
-    private VBox playerInfoPane;
-    private HBox gameControls;
-    private Map<Integer, StackPane> tilePanes;
+    private static final int GRID_DIM = 6; // 6x6 grid for 20-tile Monopoly
+    private static final int TILE_SIZE = 60;
+    private final Map<Integer, StackPane> tilePanes = new HashMap<>();
+    private final Map<Player, Circle> playerTokens = new HashMap<>();
+    private final Button rollDiceButton = new Button("Roll Dice");
+    private final MonopolyController controller;
+    private final Color BLANK_COLOR = Color.LIGHTGRAY;
+    private final Color[] GROUP_COLORS = { Color.SADDLEBROWN, Color.LIGHTBLUE, Color.HOTPINK, Color.ORANGE };
+    private final Color GO_COLOR = Color.LIMEGREEN;
+    private final Color JAIL_COLOR = Color.DARKGRAY;
+    private final Color FREE_PARKING_COLOR = Color.GOLD;
+    private final BorderPane mainLayout;
+    private final GridPane boardPane;
+    private final VBox playerInfoPanel;
+    private final HBox gameControls;
 
     public MonopolyGameUI(BoardGame boardGame) {
         super(boardGame);
         this.controller = new MonopolyController(boardGame);
-        initializeMonopolyUI();
+        this.mainLayout = new BorderPane();
+        this.boardPane = new GridPane();
+        this.playerInfoPanel = new VBox(10);
+        this.gameControls = new HBox(10);
+        setupUI();
     }
 
-    private void initializeMonopolyUI() {
-        // Add Monopoly-specific UI elements
-        setupPropertyInfoPanel();
-        setupMonopolyControls();
+    private void setupUI() {
+        // Configure main layout
+        mainLayout.setStyle("-fx-background-color: #f0f0f0;");
+        mainLayout.setPadding(new Insets(20));
+
+        // Configure board pane
+        boardPane.setHgap(2);
+        boardPane.setVgap(2);
+        boardPane.setPadding(new Insets(10));
+        boardPane.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1;");
+
+        // Configure player info panel
+        playerInfoPanel.setPadding(new Insets(10));
+        playerInfoPanel.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1;");
+        playerInfoPanel.setPrefWidth(200);
+
+        // Configure game controls
+        gameControls.setPadding(new Insets(10));
+        gameControls.setAlignment(Pos.CENTER);
+        gameControls.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1;");
+
+        // Add components to main layout
+        mainLayout.setCenter(boardPane);
+        mainLayout.setRight(playerInfoPanel);
+        mainLayout.setBottom(gameControls);
+
+        // Set the root of the existing scene
+        getScene().setRoot(mainLayout);
+
+        // Initialize the board
+        initializeBoard();
     }
 
-    private void setupPropertyInfoPanel() {
-        propertyInfoPane = new VBox(10);
-        propertyInfoPane.setPadding(new Insets(20));
-        propertyInfoPane.getStyleClass().add("property-info-panel");
-        propertyInfoPane.setVisible(false);
-
-        Label title = new Label("Property Information");
-        title.getStyleClass().add("title-label");
-
-        moneyLabel = new Label("Money: $1500");
-        moneyLabel.getStyleClass().add("money-label");
-
-        propertiesLabel = new Label("Properties: None");
-        propertiesLabel.getStyleClass().add("properties-label");
-
-        propertyInfoPane.getChildren().addAll(title, moneyLabel, propertiesLabel);
-        
-        // Add the property info panel to the right side of the board
-        BorderPane root = (BorderPane) getScene().getRoot();
-        HBox rightPanel = new HBox(10);
-        rightPanel.getChildren().addAll(getPlayerInfoPane(), propertyInfoPane);
-        root.setRight(rightPanel);
-    }
-
-    private void setupMonopolyControls() {
-        HBox monopolyControls = new HBox(10);
-        monopolyControls.setAlignment(javafx.geometry.Pos.CENTER);
-        monopolyControls.setPadding(new Insets(10));
-
-        buyPropertyButton = new Button("Buy Property");
-        buildHouseButton = new Button("Build House");
-        mortgageButton = new Button("Mortgage");
-
-        buyPropertyButton.getStyleClass().add("monopoly-control-button");
-        buildHouseButton.getStyleClass().add("monopoly-control-button");
-        mortgageButton.getStyleClass().add("monopoly-control-button");
-
-        monopolyControls.getChildren().addAll(buyPropertyButton, buildHouseButton, mortgageButton);
-
-        // Add the controls to the bottom of the board
-        BorderPane root = (BorderPane) getScene().getRoot();
-        VBox bottomPanel = new VBox(10);
-        bottomPanel.getChildren().addAll(getGameControls(), monopolyControls);
-        root.setBottom(bottomPanel);
-    }
-
-    @Override
-    protected void setupBoard() {
-        super.setupBoard();
-        // Customize the board for Monopoly
-        customizeMonopolyBoard();
-    }
-
-    private void customizeMonopolyBoard() {
-        // Add Monopoly-specific board styling
-        for (int i = 0; i < getBoardGame().getBoard().getSizeOfBoard(); i++) {
-            Tile tile = getBoardGame().getBoard().getPositionOnBoard(i);
-            StackPane tilePane = getTilePanes().get(i);
-            
-            // Add property-specific styling
-            if (tile.getAction() != null) {
-                Rectangle tileRect = (Rectangle) tilePane.getChildren().get(0);
-                tileRect.getStyleClass().add("monopoly-tile");
-                
-                // Add property color indicator if applicable
-                if (tile.getAction().getDescription().contains("Property")) {
-                    Rectangle colorIndicator = new Rectangle(70, 5);
-                    colorIndicator.setFill(getPropertyColor(i));
-                    tilePane.getChildren().add(colorIndicator);
-                }
+    private void initializeBoard() {
+        boardPane.getChildren().clear();
+        tilePanes.clear();
+        int tileIndex = 0;
+        // Top row (left to right)
+        for (int col = 0; col < GRID_DIM; col++) {
+            if (tileIndex >= 20) break;
+            Tile tile = getBoardGame().getBoard().getTile(tileIndex);
+            StackPane tilePane = createTilePane(tile);
+            boardPane.add(tilePane, col, 0);
+            tilePanes.put(tileIndex, tilePane);
+            tileIndex++;
+        }
+        // Right column (top to bottom, excluding top)
+        for (int row = 1; row < GRID_DIM - 1; row++) {
+            if (tileIndex >= 20) break;
+            Tile tile = getBoardGame().getBoard().getTile(tileIndex);
+            StackPane tilePane = createTilePane(tile);
+            boardPane.add(tilePane, GRID_DIM - 1, row);
+            tilePanes.put(tileIndex, tilePane);
+            tileIndex++;
+        }
+        // Bottom row (right to left)
+        for (int col = GRID_DIM - 1; col >= 0; col--) {
+            if (tileIndex >= 20) break;
+            Tile tile = getBoardGame().getBoard().getTile(tileIndex);
+            StackPane tilePane = createTilePane(tile);
+            boardPane.add(tilePane, col, GRID_DIM - 1);
+            tilePanes.put(tileIndex, tilePane);
+            tileIndex++;
+        }
+        // Left column (bottom to top, excluding top and bottom)
+        for (int row = GRID_DIM - 2; row > 0; row--) {
+            if (tileIndex >= 20) break;
+            Tile tile = getBoardGame().getBoard().getTile(tileIndex);
+            StackPane tilePane = createTilePane(tile);
+            boardPane.add(tilePane, 0, row);
+            tilePanes.put(tileIndex, tilePane);
+            tileIndex++;
+        }
+        // Fill the center with blank tiles
+        for (int row = 1; row < GRID_DIM - 1; row++) {
+            for (int col = 1; col < GRID_DIM - 1; col++) {
+                Rectangle blank = new Rectangle(70, 70, BLANK_COLOR);
+                StackPane blankPane = new StackPane(blank);
+                boardPane.add(blankPane, col, row);
             }
         }
+        updatePlayerInfoPanel();
+        updatePlayerTokens();
+        updateRollDiceButtonState();
     }
 
-    private Color getPropertyColor(int position) {
-        // Define property colors based on position
-        // This is a simplified version - you'll need to implement the actual color logic
-        switch (position) {
-            case 1: return Color.BROWN;
-            case 3: return Color.BROWN;
-            case 6: return Color.LIGHTBLUE;
-            case 8: return Color.LIGHTBLUE;
-            case 9: return Color.LIGHTBLUE;
-            // Add more cases for other property groups
-            default: return Color.WHITE;
+    private StackPane createTilePane(Tile tile) {
+        Rectangle rect = new Rectangle(70, 70);
+        rect.setArcWidth(10);
+        rect.setArcHeight(10);
+        Label label = new Label();
+        label.setWrapText(true);
+        label.setStyle("-fx-font-size: 12px; -fx-font-weight: bold;");
+        if (tile instanceof PropertyTile) {
+            PropertyTile pt = (PropertyTile) tile;
+            rect.setFill(GROUP_COLORS[pt.getGroup() % GROUP_COLORS.length]);
+            label.setText("Property\n$" + pt.getPrice());
+        } else if (tile instanceof GoTile) {
+            rect.setFill(GO_COLOR);
+            label.setText("GO");
+        } else if (tile instanceof JailTile) {
+            rect.setFill(JAIL_COLOR);
+            label.setText("JAIL");
+        } else if (tile instanceof FreeParkingTile) {
+            rect.setFill(FREE_PARKING_COLOR);
+            label.setText("FREE\nPARKING");
+        } else {
+            rect.setFill(BLANK_COLOR);
+            label.setText("");
         }
+        StackPane pane = new StackPane(rect, label);
+        pane.setPrefSize(70, 70);
+        return pane;
     }
 
-    public void updateMoneyLabel(SimpleMonopolyPlayer player) {
-        moneyLabel.setText(String.format("Money: $%d", player.getMoney()));
-    }
-
-    public void updatePropertiesLabel(SimpleMonopolyPlayer player) {
-        propertiesLabel.setText(String.format("Properties: %d", player.getOwnedProperties().size()));
-    }
-
-    public void setBuyPropertyAction(Runnable action) {
-        buyPropertyButton.setOnAction(e -> action.run());
-    }
-
-    public void setBuildHouseAction(Runnable action) {
-        buildHouseButton.setOnAction(e -> action.run());
-    }
-
-    public void setMortgageAction(Runnable action) {
-        mortgageButton.setOnAction(e -> action.run());
-    }
-
-    private void handleBuyProperty() {
-        SimpleMonopolyPlayer currentPlayer = (SimpleMonopolyPlayer) getBoardGame().getCurrentPlayer();
-        Tile currentTile = currentPlayer.getCurrentTile();
-        if (currentTile instanceof PropertyTile) {
-            PropertyTile propertyTile = (PropertyTile) currentTile;
-            if (!propertyTile.isOwned()) {
-                controller.buyProperty(currentPlayer, propertyTile);
-                refreshUIFromBoardGame();
+    private void updatePlayerInfoPanel() {
+        playerInfoPanel.getChildren().clear();
+        for (Player player : getBoardGame().getPlayers()) {
+            VBox card = new VBox(5);
+            card.setPadding(new Insets(10));
+            card.setStyle("-fx-background-color: #f8f8f8; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-background-radius: 5;");
+            Label nameLabel = new Label(player.getName());
+            nameLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+            if (player == getBoardGame().getCurrentPlayer()) {
+                nameLabel.setTextFill(Color.DARKBLUE);
             }
+            int money = ((SimpleMonopolyPlayer) player).getMoney();
+            Label moneyLabel = new Label("Money: $" + money);
+            List<PropertyTile> props = ((SimpleMonopolyPlayer) player).getOwnedProperties();
+            String propList = props.isEmpty() ? "None" : String.join(", ", props.stream().map(p -> "#" + p.getId()).toList());
+            Label propLabel = new Label("Properties: " + propList);
+            card.getChildren().addAll(nameLabel, moneyLabel, propLabel);
+            playerInfoPanel.getChildren().add(card);
         }
     }
 
-    private void handleBuildHouse() {
-        SimpleMonopolyPlayer currentPlayer = (SimpleMonopolyPlayer) getBoardGame().getCurrentPlayer();
-        Tile currentTile = currentPlayer.getCurrentTile();
-        if (currentTile instanceof PropertyTile) {
-            PropertyTile propertyTile = (PropertyTile) currentTile;
-            if (propertyTile.getOwner() == currentPlayer) {
-                controller.buildHouse(currentPlayer, propertyTile);
-                refreshUIFromBoardGame();
-            }
+    private void updatePlayerTokens() {
+        // Remove all tokens
+        for (StackPane pane : tilePanes.values()) {
+            pane.getChildren().removeIf(n -> n instanceof Circle);
+        }
+        // Add tokens for each player
+        int colorIdx = 0;
+        Color[] tokenColors = { Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.PURPLE };
+        for (Player player : getBoardGame().getPlayers()) {
+            int pos = player.getCurrentTile() != null ? player.getCurrentTile().getId() : 0;
+            StackPane tilePane = tilePanes.get(pos);
+            Circle token = new Circle(12, tokenColors[colorIdx % tokenColors.length]);
+            token.setStroke(Color.BLACK);
+            tilePane.getChildren().add(token);
+            colorIdx++;
         }
     }
 
-    private void handleMortgage() {
-        SimpleMonopolyPlayer currentPlayer = (SimpleMonopolyPlayer) getBoardGame().getCurrentPlayer();
-        Tile currentTile = currentPlayer.getCurrentTile();
-        if (currentTile instanceof PropertyTile) {
-            PropertyTile propertyTile = (PropertyTile) currentTile;
-            if (propertyTile.getOwner() == currentPlayer) {
-                controller.mortgageProperty(currentPlayer, propertyTile);
-                refreshUIFromBoardGame();
-            }
-        }
+    private void updateRollDiceButtonState() {
+        Player current = getBoardGame().getCurrentPlayer();
+        rollDiceButton.setDisable(current == null || getBoardGame().isGameOver());
+    }
+
+    private void handleRollDice() {
+        controller.handlePlayerMove();
+        updateUI();
+    }
+
+    private void updateUI() {
+        Platform.runLater(() -> {
+            updatePlayerInfoPanel();
+            updatePlayerTokens();
+            updateRollDiceButtonState();
+        });
     }
 
     @Override
     public void refreshUIFromBoardGame() {
         super.refreshUIFromBoardGame();
-        // Update property info panel
-        SimpleMonopolyPlayer currentPlayer = (SimpleMonopolyPlayer) getBoardGame().getCurrentPlayer();
-        Tile currentTile = currentPlayer.getCurrentTile();
-        
-        if (currentTile instanceof PropertyTile) {
-            PropertyTile propertyTile = (PropertyTile) currentTile;
-            propertyInfoPane.setVisible(true);
-            
-            // Update button states
-            buyPropertyButton.setDisable(propertyTile.isOwned());
-            buildHouseButton.setDisable(propertyTile.getOwner() != currentPlayer);
-            mortgageButton.setDisable(propertyTile.getOwner() != currentPlayer);
-            
-            // Update property information
-            Label priceLabel = new Label("Price: $" + propertyTile.getPrice());
-            Label rentLabel = new Label("Rent: $" + propertyTile.getRent());
-            Label ownerLabel = new Label("Owner: " + (propertyTile.getOwner() != null ? propertyTile.getOwner().getName() : "None"));
-            
-            propertyInfoPane.getChildren().setAll(
-                new Label("Property Information"),
-                priceLabel,
-                rentLabel,
-                ownerLabel,
-                buyPropertyButton,
-                buildHouseButton,
-                mortgageButton
-            );
-        } else {
-            propertyInfoPane.setVisible(false);
-        }
+        updateUI();
     }
 
+    @Override
     public Scene getScene() {
         return super.getScene();
     }
