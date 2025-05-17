@@ -41,7 +41,13 @@ public class Board {
     tiles.put(id, new Tile(id, action));
     return true;
   }
-
+  public void addTile(Tile tile) {
+    ParameterValidation.validateTileId(tile.getId());
+    if (tiles.containsKey(tile.getId())) {
+      throw new GameException("Tile already exists");
+    }
+    tiles.put(tile.getId(), tile);
+  }
   /**
    * A method that connects the tiles in the board.
    *
