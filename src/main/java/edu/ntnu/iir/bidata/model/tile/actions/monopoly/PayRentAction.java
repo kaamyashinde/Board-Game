@@ -18,13 +18,17 @@ public class PayRentAction implements TileAction{
      */
     @Override
     public void executeAction(Player player, Tile currentTile) {
-        SimpleMonopolyPlayer monopolyPlayer = (SimpleMonopolyPlayer) player;
-        PropertyTile propertyTile = (PropertyTile) currentTile;
-        try {
-            monopolyPlayer.payRent(propertyTile.getRent());
-        } catch (LowMoneyException e) {
-            Logger.getLogger(PayRentAction.class.getName()).log(Level.SEVERE, null, e);
+        if (player instanceof SimpleMonopolyPlayer){
+            PropertyTile propertyTile = (PropertyTile) currentTile;
+            try {
+                ((SimpleMonopolyPlayer) player).payRent(propertyTile.getRent());
+            } catch (LowMoneyException e) {
+                Logger.getLogger(PayRentAction.class.getName()).log(Level.SEVERE, null, e);
+            }
+        } else {
+            Logger.getLogger(PayRentAction.class.getName()).log(Level.SEVERE, "Player is not a SimpleMonopolyPlayer");
         }
+
     }
     /**
      * Returns the description of the action.

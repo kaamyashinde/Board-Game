@@ -20,8 +20,9 @@ public class CollectMoneyAction implements TileAction {
      */
     @Override
     public void executeAction(Player player, Tile currentTile) {
-        SimpleMonopolyPlayer monopolyPlayer = (SimpleMonopolyPlayer) player;
-        monopolyPlayer.collectMoney(200);
+        if (player instanceof SimpleMonopolyPlayer){
+            ((SimpleMonopolyPlayer) player).collectMoney(200);
+        }
     }
 
     /**

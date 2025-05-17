@@ -8,33 +8,36 @@ import edu.ntnu.iir.bidata.model.tile.core.monopoly.PropertyTile;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import edu.ntnu.iir.bidata.model.exception.LowMoneyException;
+
 /**
  * A class that represents the action of buying a property.
  * 
  * @author Kaamya Shinde
  * @version 1.0
  */
-public class BuyPropertyAction implements TileAction{
+public class BuyPropertyAction implements TileAction {
     /**
      * Executes the action of buying a property.
      * 
-     * @param player The player who is buying the property.
+     * @param player      The player who is buying the property.
      * @param currentTile The current tile.
      */
     @Override
     public void executeAction(Player player, Tile currentTile) {
-        try {
+     if (player instanceof SimpleMonopolyPlayer){
+       try {
             SimpleMonopolyPlayer monopolyPlayer = (SimpleMonopolyPlayer) player;
             PropertyTile propertyTile = (PropertyTile) currentTile;
             if (propertyTile.isOwned()) {
-            monopolyPlayer.payRent(propertyTile.getRent());
-        } else {
-            monopolyPlayer.buyProperty(propertyTile);
-        }
+                monopolyPlayer.payRent(propertyTile.getRent());
+            } else {
+                monopolyPlayer.buyProperty(propertyTile);
+            }
         } catch (LowMoneyException e) {
             Logger.getLogger(BuyPropertyAction.class.getName()).log(Level.SEVERE, null, e);
-        }
-    }
+        } 
+    }}
+
 
     /**
      * Returns the description of the action.
