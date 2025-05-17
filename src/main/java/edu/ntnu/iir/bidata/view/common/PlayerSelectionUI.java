@@ -67,8 +67,8 @@ public class PlayerSelectionUI {
 
     StackPane maxPlayersPane = new StackPane();
     maxPlayersPane.setPrefSize(200, 50);
-    maxPlayersPane.getStyleClass().add("player-selection-title-pane");
-    maxPlayersPane.setStyle("-fx-border-color: red; -fx-border-radius: 15; -fx-border-width: 2;");
+    maxPlayersPane.getStyleClass().addAll("player-selection-title-pane","player-selection-limit-warning");
+
     Label maxPlayersLabel = new Label("MAX 5 PLAYERS");
     maxPlayersLabel.getStyleClass().add("player-selection-title-label");
     maxPlayersPane.getChildren().add(maxPlayersLabel);
@@ -212,7 +212,7 @@ public class PlayerSelectionUI {
     Circle marker = new Circle(10, Color.DARKGREEN);
 
     Label nameLabel = new Label("NAME:");
-    nameLabel.setStyle("-fx-font-weight: bold;");
+    nameLabel.getStyleClass().add("bold-label");
 
     TextField nameField = new TextField();
     nameField.setPrefWidth(200);
@@ -325,7 +325,7 @@ public class PlayerSelectionUI {
 
         Circle playerMarker = new Circle(10, Color.DARKGREEN);
         Label nameLabel = new Label(item);
-        nameLabel.setStyle("-fx-font-weight: bold;");
+        nameLabel.getStyleClass().add("bold-label");
 
         container.getChildren().addAll(playerMarker, nameLabel);
         setGraphic(container);
