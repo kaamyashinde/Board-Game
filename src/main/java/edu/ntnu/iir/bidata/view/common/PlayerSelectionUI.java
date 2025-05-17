@@ -48,7 +48,7 @@ public class PlayerSelectionUI {
   private void setupUI() {
     BorderPane root = new BorderPane();
     root.setPadding(new Insets(20));
-    root.setStyle("-fx-background-color: #f5fff5; -fx-background-radius: 20;");
+    root.getStyleClass().add("player-selection-root");
 
     // Main player list
     VBox centerContent = new VBox(15);
@@ -67,16 +67,17 @@ public class PlayerSelectionUI {
 
     StackPane maxPlayersPane = new StackPane();
     maxPlayersPane.setPrefSize(200, 50);
-    maxPlayersPane.setStyle("-fx-background-color: #BDEBC8; -fx-background-radius: 15; -fx-border-color: red; -fx-border-radius: 15; -fx-border-width: 2;");
+    maxPlayersPane.getStyleClass().addAll("player-selection-title-pane","player-selection-limit-warning");
+
     Label maxPlayersLabel = new Label("MAX 5 PLAYERS");
-    maxPlayersLabel.setStyle("-fx-font-weight: bold;");
+    maxPlayersLabel.getStyleClass().add("player-selection-title-label");
     maxPlayersPane.getChildren().add(maxPlayersLabel);
 
     StackPane minPlayersPane = new StackPane();
     minPlayersPane.setPrefSize(200, 50);
-    minPlayersPane.setStyle("-fx-background-color: #BDEBC8; -fx-background-radius: 15;");
+    minPlayersPane.getStyleClass().add("player-selection-title-pane");
     Label minPlayersLabel = new Label("MIN 1 PLAYER");
-    minPlayersLabel.setStyle("-fx-font-weight: bold;");
+    minPlayersLabel.getStyleClass().add("player-selection-title-label");
     minPlayersPane.getChildren().add(minPlayersLabel);
 
     limitLabels.getChildren().addAll(maxPlayersPane, minPlayersPane);
@@ -92,7 +93,7 @@ public class PlayerSelectionUI {
 
     // Status label for messages
     statusLabel = new Label();
-    statusLabel.setStyle("-fx-text-fill: #006400; -fx-font-size: 14px;");
+    statusLabel.getStyleClass().add("player-selection-status-label");
 
     // Add everything to the center content
     centerContent.getChildren().addAll(csvLoadButton, csvSaveButton, playersListView, limitLabels, playerControls, statusLabel);
@@ -115,6 +116,7 @@ public class PlayerSelectionUI {
     root.setBottom(bottomBox);
 
     Scene scene = new Scene(root, 500, 600);
+    scene.getStylesheets().add(getClass().getResource("/common.css").toExternalForm());
     stage.setScene(scene);
   }
 
@@ -194,14 +196,14 @@ public class PlayerSelectionUI {
     VBox layout = new VBox(20);
     layout.setPadding(new Insets(20));
     layout.setAlignment(Pos.CENTER);
-    layout.setStyle("-fx-background-color: #f5fff5;");
+    layout.getStyleClass().add("player-selection-root");
 
     // Layout similar to the wireframe
     StackPane titlePane = new StackPane();
     titlePane.setPrefSize(250, 50);
-    titlePane.setStyle("-fx-background-color: #BDEBC8; -fx-background-radius: 15;");
+    titlePane.getStyleClass().add("player-selection-title-pane");
     Label titleLabel = new Label("Add New Player");
-    titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+    titleLabel.getStyleClass().add("player-selection-title-label");
     titlePane.getChildren().add(titleLabel);
 
     HBox nameBox = new HBox(10);
@@ -210,7 +212,7 @@ public class PlayerSelectionUI {
     Circle marker = new Circle(10, Color.DARKGREEN);
 
     Label nameLabel = new Label("NAME:");
-    nameLabel.setStyle("-fx-font-weight: bold;");
+    nameLabel.getStyleClass().add("bold-label");
 
     TextField nameField = new TextField();
     nameField.setPrefWidth(200);
@@ -235,6 +237,7 @@ public class PlayerSelectionUI {
     });
 
     Scene scene = new Scene(layout, 350, 200);
+    scene.getStylesheets().add(getClass().getResource("/common.css").toExternalForm());
     addDialog.setScene(scene);
     addDialog.showAndWait();
   }
@@ -253,14 +256,14 @@ public class PlayerSelectionUI {
     VBox layout = new VBox(20);
     layout.setPadding(new Insets(20));
     layout.setAlignment(Pos.CENTER);
-    layout.setStyle("-fx-background-color: #f5fff5;");
+    layout.getStyleClass().add("player-selection-root");
 
     // Layout similar to the wireframe
     StackPane titlePane = new StackPane();
     titlePane.setPrefSize(250, 50);
-    titlePane.setStyle("-fx-background-color: #BDEBC8; -fx-background-radius: 15;");
+    titlePane.getStyleClass().add("player-selection-title-pane");
     Label titleLabel = new Label("Remove Player");
-    titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+    titleLabel.getStyleClass().add("player-selection-title-label");
     titlePane.getChildren().add(titleLabel);
 
     Label questionLabel = new Label("Which Player would you like to remove?");
@@ -292,6 +295,7 @@ public class PlayerSelectionUI {
     });
 
     Scene scene = new Scene(layout, 350, 250);
+    scene.getStylesheets().add(getClass().getResource("/common.css").toExternalForm());
     removeDialog.setScene(scene);
     removeDialog.showAndWait();
   }
@@ -300,13 +304,7 @@ public class PlayerSelectionUI {
     Button button = new Button(text);
     button.setPrefWidth(width);
     button.setPrefHeight(height);
-    button.setStyle(
-        "-fx-background-color: #BDEBC8; " +
-            "-fx-text-fill: black; " +
-            "-fx-font-size: 16px; " +
-            "-fx-background-radius: 25; " +
-            "-fx-padding: 10;"
-    );
+    button.getStyleClass().add("player-selection-button");
     return button;
   }
 
@@ -327,7 +325,7 @@ public class PlayerSelectionUI {
 
         Circle playerMarker = new Circle(10, Color.DARKGREEN);
         Label nameLabel = new Label(item);
-        nameLabel.setStyle("-fx-font-weight: bold;");
+        nameLabel.getStyleClass().add("bold-label");
 
         container.getChildren().addAll(playerMarker, nameLabel);
         setGraphic(container);
