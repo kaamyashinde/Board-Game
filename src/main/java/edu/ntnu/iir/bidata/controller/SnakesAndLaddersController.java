@@ -165,19 +165,19 @@ public class SnakesAndLaddersController extends BaseGameController {
         return new MoveResult(0, 0, "normal");
     }
 
-    public void saveGame(String gameName) {
+    public void saveGame(String savePath) {
         if (!gameStarted) {
             LOGGER.warning("Cannot save game: Game has not started");
             return;
         }
-        Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
-        boardGameWriter.writeBoardGame(boardGame, savePath);
-        LOGGER.info("Game saved: " + gameName);
+        Path path = Paths.get(savePath);
+        boardGameWriter.writeBoardGame(boardGame, path);
+        LOGGER.info("Game saved to: " + savePath);
     }
 
-    public void loadGame(String gameName, edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI ui) {
-        Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
-        BoardGame loadedGame = boardGameReader.readBoardGame(savePath);
+    public void loadGame(String savePath, edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI ui) {
+        Path path = Paths.get(savePath);
+        BoardGame loadedGame = boardGameReader.readBoardGame(path);
         
         // Update the current controller's state
         this.boardGame = loadedGame;
@@ -195,7 +195,7 @@ public class SnakesAndLaddersController extends BaseGameController {
             ui.setBoardGame(loadedGame);
             ui.refreshUIFromBoardGame();
         }
-        LOGGER.info("Game loaded: " + gameName);
+        LOGGER.info("Game loaded from: " + savePath);
     }
 
     @Override
