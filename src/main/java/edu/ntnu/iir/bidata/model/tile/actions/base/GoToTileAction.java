@@ -1,7 +1,7 @@
 package edu.ntnu.iir.bidata.model.tile.actions.base;
 
-import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.exception.GameException;
+import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.model.tile.core.Tile;
 import edu.ntnu.iir.bidata.model.tile.core.TileAction;
 

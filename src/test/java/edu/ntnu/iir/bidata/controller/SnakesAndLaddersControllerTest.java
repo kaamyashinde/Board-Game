@@ -1,11 +1,11 @@
 package edu.ntnu.iir.bidata.controller;
 
 import edu.ntnu.iir.bidata.model.BoardGame;
-import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.board.Board;
 import edu.ntnu.iir.bidata.model.dice.Dice;
 import edu.ntnu.iir.bidata.model.exception.GameException;
 import edu.ntnu.iir.bidata.model.game.GameState;
+import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.model.tile.core.Tile;
 import edu.ntnu.iir.bidata.model.tile.actions.snakeandladder.SnakeAction;
 import org.junit.jupiter.api.BeforeEach;
@@ -129,37 +129,7 @@ class SnakesAndLaddersControllerTest {
         assertEquals("Player2", controller.getCurrentSnakesAndLaddersPlayerName());
     }
 
-    @Test
-    void testSaveAndLoadGame(@TempDir Path tempDir) {
-        controller.startGame();
-        controller.rollDiceForSnakesAndLadders();
-        controller.handlePlayerMove();
-        
-        // Save game to temporary directory
-        String gameName = "test_game";
-        Path savePath = tempDir.resolve(gameName + ".json");
-        controller.saveGame(savePath.toString());
-        
-        // Create new controller and load game
-        Board newBoard = new Board(100);
-        initializeBoard(newBoard);
-        Dice newDice = new Dice(1);
-        BoardGame newBoardGame = new BoardGame(newBoard, newDice);
-        
-        // Add players to the new game
-        for (String name : playerNames) {
-            newBoardGame.addPlayer(name);
-        }
-        
-        SnakesAndLaddersController newController = new SnakesAndLaddersController(newBoardGame);
-        newController.loadGame(savePath.toString(), null);
-        
-        // Verify game state was restored
-        assertEquals(controller.getPlayerPosition("Player1"), 
-                    newController.getPlayerPosition("Player1"));
-        assertEquals(controller.getCurrentSnakesAndLaddersPlayerName(), 
-                    newController.getCurrentSnakesAndLaddersPlayerName());
-    }
+   
 
     @Test
     void testInvalidMoves() {

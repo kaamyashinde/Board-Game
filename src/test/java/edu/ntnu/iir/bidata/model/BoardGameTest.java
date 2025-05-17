@@ -3,6 +3,7 @@ package edu.ntnu.iir.bidata.model;
 import edu.ntnu.iir.bidata.model.board.Board;
 import edu.ntnu.iir.bidata.model.dice.Dice;
 import edu.ntnu.iir.bidata.model.exception.GameException;
+import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.model.tile.core.Tile;
 import edu.ntnu.iir.bidata.model.tile.core.TileAction;
 import org.junit.jupiter.api.BeforeEach;

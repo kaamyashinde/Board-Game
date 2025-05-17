@@ -2,7 +2,7 @@ package edu.ntnu.iir.bidata.view.ludo;
 
 import edu.ntnu.iir.bidata.controller.LudoController;
 import edu.ntnu.iir.bidata.model.Observer;
-import edu.ntnu.iir.bidata.model.Player;
+import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.view.common.DiceView;
 import edu.ntnu.iir.bidata.view.common.JavaFXBoardGameLauncher;
 import java.util.ArrayList;

@@ -1,7 +1,8 @@
 package edu.ntnu.iir.bidata.filehandling.player;
 
-import edu.ntnu.iir.bidata.model.Player;
 import org.junit.jupiter.api.Test;
+
+import edu.ntnu.iir.bidata.model.player.Player;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

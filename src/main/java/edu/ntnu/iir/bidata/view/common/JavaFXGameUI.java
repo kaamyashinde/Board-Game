@@ -3,7 +3,7 @@ package edu.ntnu.iir.bidata.view.common;
 import edu.ntnu.iir.bidata.controller.GameController;
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.Observer;
-import edu.ntnu.iir.bidata.model.Player;
+import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.model.tile.core.Tile;
 import edu.ntnu.iir.bidata.model.tile.core.TileAction;
 import java.util.HashMap;
@@ -115,7 +115,7 @@ public class JavaFXGameUI implements Observer {
     primaryStage.setScene(scene);
   }
 
-  private void setupBoard() {
+  protected void setupBoard() {
     boardPane.setPadding(new Insets(20));
     boardPane.setHgap(2);
     boardPane.setVgap(2);
@@ -490,5 +490,28 @@ public class JavaFXGameUI implements Observer {
         }
       }
     });
+  }
+
+  protected Scene getScene() {
+    return primaryStage.getScene();
+  }
+
+  protected VBox getPlayerInfoPane() {
+    return playerInfoPane;
+  }
+
+  protected HBox getGameControls() {
+    HBox gameControls = new HBox(10);
+    gameControls.setAlignment(Pos.CENTER);
+    gameControls.getChildren().addAll(pauseButton, saveButton, loadButton);
+    return gameControls;
+  }
+
+  protected BoardGame getBoardGame() {
+    return boardGame;
+  }
+
+  protected Map<Integer, StackPane> getTilePanes() {
+    return tilePanes;
   }
 } 

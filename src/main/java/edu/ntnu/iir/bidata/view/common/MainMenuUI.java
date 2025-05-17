@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
@@ -20,7 +21,8 @@ public class MainMenuUI {
 
   public enum GameType {
     LUDO,
-    SNAKES_AND_LADDERS
+    SNAKES_AND_LADDERS,
+    MONOPOLY
   }
 
   private final Stage primaryStage;
@@ -82,6 +84,15 @@ public class MainMenuUI {
         () -> gameTypeCallback.accept(GameType.SNAKES_AND_LADDERS)
     );
 
+    // Monopoly game box
+    StackPane monopolyPane = createGamePane(
+        "#f7e6c7",
+        "#3b3b6d",
+        "Monopoly",
+        createMonopolyGrid(),
+        () -> gameTypeCallback.accept(GameType.MONOPOLY)
+    );
+
     // Ludo game box
     StackPane ludoPane = createGamePane(
         "#c2c2fa",
@@ -91,8 +102,8 @@ public class MainMenuUI {
         () -> gameTypeCallback.accept(GameType.LUDO)
     );
 
-    menuRow.getChildren().addAll(snakesAndLaddersPane, ludoPane);
-    centerBox.getChildren().addAll(welcomePane, menuRow);
+    menuRow.getChildren().setAll(snakesAndLaddersPane, monopolyPane);
+    centerBox.getChildren().setAll(welcomePane, menuRow);
     root.setCenter(centerBox);
 
     // --- BOTTOM-RIGHT: credits ---
@@ -271,5 +282,27 @@ public class MainMenuUI {
         (int)(c.getGreen() * 255),
         (int)(c.getBlue() * 255)
     );
+  }
+
+  /**
+   * Creates a Monopoly grid for visualization
+   */
+  private Region createMonopolyGrid() {
+    GridPane grid = new GridPane();
+    grid.setPrefSize(60, 60);
+    for (int i = 0; i < 5; i++) {
+      for (int j = 0; j < 5; j++) {
+        Rectangle rect = new Rectangle(12, 12);
+        if (i == 0 || i == 4 || j == 0 || j == 4) {
+          rect.setFill(Color.web("#3b3b6d"));
+        } else {
+          rect.setFill(Color.web("#f7e6c7"));
+        }
+        rect.setArcWidth(2);
+        rect.setArcHeight(2);
+        grid.add(rect, j, i);
+      }
+    }
+    return grid;
   }
 }

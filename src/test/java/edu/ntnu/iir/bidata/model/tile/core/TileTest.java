@@ -2,8 +2,10 @@ package edu.ntnu.iir.bidata.model.tile.core;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import edu.ntnu.iir.bidata.model.Player;
+
 import edu.ntnu.iir.bidata.model.exception.GameException;
+import edu.ntnu.iir.bidata.model.player.Player;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

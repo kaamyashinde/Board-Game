@@ -1,7 +1,8 @@
 package edu.ntnu.iir.bidata.controller;
 
 import edu.ntnu.iir.bidata.model.BoardGame;
-import edu.ntnu.iir.bidata.model.Player;
+import edu.ntnu.iir.bidata.model.player.Player;
+
 import java.util.List;
 import java.util.logging.Logger;
 import lombok.Getter;
@@ -55,6 +56,7 @@ public abstract class BaseGameController {
      */
     protected void nextPlayer() {
         currentPlayerIndex = (currentPlayerIndex + 1) % playerNames.size();
+        boardGame.setCurrentPlayerIndex(currentPlayerIndex);
         diceRolled = false;
     }
 

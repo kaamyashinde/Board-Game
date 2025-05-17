@@ -2,7 +2,7 @@ package edu.ntnu.iir.bidata.filehandling.player;
 
 import java.nio.file.Path;
 
-import edu.ntnu.iir.bidata.model.Player;
+import edu.ntnu.iir.bidata.model.player.Player;
 
 public interface PlayerFileReader {
     public Player readPlayer(Path filePath);

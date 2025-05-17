@@ -1,9 +1,9 @@
 package edu.ntnu.iir.bidata.controller;
 
 import edu.ntnu.iir.bidata.model.BoardGame;
-import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.tile.core.TileAction;
 import edu.ntnu.iir.bidata.model.game.GameState;
+import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.model.Observable;
 import edu.ntnu.iir.bidata.filehandling.game.GameStateFileWriter;
 import edu.ntnu.iir.bidata.filehandling.game.GameStateFileReader;
