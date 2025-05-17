@@ -3,6 +3,7 @@ package edu.ntnu.iir.bidata.model.board;
 import edu.ntnu.iir.bidata.model.exception.GameException;
 import edu.ntnu.iir.bidata.model.tile.core.Tile;
 import edu.ntnu.iir.bidata.model.tile.core.TileAction;
+import edu.ntnu.iir.bidata.model.tile.core.monopoly.GoTile;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -130,4 +131,18 @@ class BoardTest {
     void getTile_WithInvalidId_ShouldReturnNull() {
         assertNull(board.getTile(999));
     }
+
+    @Test
+    void testAddTileWithTileObject() {
+        // Test adding a valid tile
+        Tile goTile = new GoTile(0);
+        assertDoesNotThrow(() -> board.addTile(goTile));
+        assertEquals(goTile, board.getTile(0));
+
+        // Test adding a tile to an occupied position
+        Tile anotherTile = new GoTile(0);
+        assertThrows(GameException.class, () -> board.addTile(anotherTile));
+    }
+
+
 } 
