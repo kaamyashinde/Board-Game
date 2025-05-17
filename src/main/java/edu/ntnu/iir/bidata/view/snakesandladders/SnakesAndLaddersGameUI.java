@@ -98,7 +98,7 @@ public class SnakesAndLaddersGameUI implements Observer {
 
   /**
    * Sets whether this is a loaded game and its name
-   * 
+   *
    * @param isLoaded Whether this is a loaded game
    * @param gameName The name of the loaded game
    */
@@ -127,7 +127,7 @@ public class SnakesAndLaddersGameUI implements Observer {
     HBox topBar = new HBox(20);
     topBar.setPadding(new Insets(10));
     topBar.setAlignment(Pos.CENTER_LEFT);
-    
+
     backButton = new Button("← Back to Menu");
     backButton.getStyleClass().add("game-control-button");
     backButton.setOnAction(e -> {
@@ -279,7 +279,7 @@ public class SnakesAndLaddersGameUI implements Observer {
     bottomBox.getChildren().add(diceBox);
     root.setBottom(bottomBox);
 
-    Scene scene = new Scene(root, 1100, 700);
+    Scene scene = new Scene(root, 1200, 800);
     scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
     primaryStage.setScene(scene);
     primaryStage.show();
@@ -451,12 +451,14 @@ public class SnakesAndLaddersGameUI implements Observer {
 
     // Add a small offset based on player index to prevent complete overlap
     int playerIndex = playerNames.indexOf(playerName);
-    int offsetX = playerIndex * 5 - 5;
-    int offsetY = playerIndex * 5 - 5;
+    int offsetX = playerIndex * 4 - 1;
+    int offsetY = playerIndex * 6 - 5;
 
-    // Move the token
+    // Move the token - adjust Y coordinate to move down by 2mm
+    // Assuming 1mm is approximately 3-4 pixels on screen
+    int downwardAdjustment = 25;
     token.setTranslateX(coordinates[0] + offsetX);
-    token.setTranslateY(coordinates[1] + offsetY);
+    token.setTranslateY(coordinates[1] + offsetY + downwardAdjustment); // Add to move down
   }
 
   /**

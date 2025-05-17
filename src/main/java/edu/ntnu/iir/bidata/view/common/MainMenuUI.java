@@ -118,7 +118,7 @@ public class MainMenuUI {
     creditPane.setAlignment(Pos.BOTTOM_RIGHT);
     root.setBottom(creditPane);
 
-    Scene scene = new Scene(root, 900, 700);
+    Scene scene = new Scene(root, 1000, 700);
     primaryStage.setScene(scene);
     primaryStage.show();
   }
