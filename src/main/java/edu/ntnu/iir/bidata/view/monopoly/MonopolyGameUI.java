@@ -31,6 +31,7 @@ import java.io.File;
 import java.util.*;
 import java.util.logging.Logger;
 import javafx.stage.Stage;
+import lombok.Setter;
 
 /**
  * JavaFX UI implementation for the Monopoly game.
@@ -51,6 +52,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
     private final Button loadButton = new Button("Load Game");
     private final Button backButton = new Button("Back to Main Menu");
     private final Label actionLabel = new Label("");
+    @Setter
     private MonopolyController controller;
     private final Color BLANK_COLOR = Color.LIGHTGRAY;
     private final Color[] GROUP_COLORS = { Color.SADDLEBROWN, Color.LIGHTBLUE, Color.HOTPINK, Color.ORANGE };
@@ -75,7 +77,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
         this.boardPane = new GridPane();
         this.playerInfoPanel = new VBox(10);
         this.gameControls = new HBox(10);
-        this.diceLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-padding: 0 10 0 0;");
+
         // Set player names in controller to avoid NullPointerException
         List<String> playerNames = boardGame.getPlayers().stream().map(Player::getName).toList();
         controller.setPlayerNames(playerNames);
@@ -84,9 +86,8 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
     private void setupUI() {
         // Configure main layout
-        mainLayout.setStyle("-fx-background-color: #f0f0f0;");
+        mainLayout.getStyleClass().add("monopoly-main-layout");
         mainLayout.setPadding(new Insets(20));
-
         mainLayout.setPrefWidth(1000);
         mainLayout.setPrefHeight(700);
 
@@ -94,17 +95,17 @@ public class MonopolyGameUI extends JavaFXGameUI {
         boardPane.setHgap(2);
         boardPane.setVgap(2);
         boardPane.setPadding(new Insets(10));
-        boardPane.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1;");
+        boardPane.getStyleClass().add("monopoly-board-pane");
 
         // Configure player info panel
         playerInfoPanel.setPadding(new Insets(10));
-        playerInfoPanel.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1;");
+        playerInfoPanel.getStyleClass().add("monopoly-player-info-panel");
         playerInfoPanel.setPrefWidth(200);
 
         // Configure game controls
         gameControls.setPadding(new Insets(10));
         gameControls.setAlignment(Pos.CENTER);
-        gameControls.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1;");
+        gameControls.getStyleClass().add("monopoly-game-controls");
 
         // Add components to main layout
         mainLayout.setCenter(boardPane);
@@ -123,24 +124,34 @@ public class MonopolyGameUI extends JavaFXGameUI {
         initializeBoard();
 
         // Add dice label and roll button to game controls
-        rollDiceButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #4CAF50; -fx-text-fill: white;");
+        diceLabel.getStyleClass().add("monopoly-dice-label");
+
+        rollDiceButton.getStyleClass().add("monopoly-roll-dice-button");
         rollDiceButton.setOnAction(e -> handleRollDice());
-        buyButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #2196F3; -fx-text-fill: white;");
-        skipButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #FF9800; -fx-text-fill: white;");
-        payRentButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #E53935; -fx-text-fill: white;");
-        jailRollButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #4CAF50; -fx-text-fill: white;");
-        jailPayButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #FFD600; -fx-text-fill: black;");
-        backButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #f7e6c7; -fx-text-fill: #3b3b6d;");
+
+        buyButton.getStyleClass().add("monopoly-buy-button");
         buyButton.setOnAction(e -> handleBuyProperty());
+
+        skipButton.getStyleClass().add("monopoly-skip-button");
         skipButton.setOnAction(e -> handleSkipAction());
+
+        payRentButton.getStyleClass().add("monopoly-pay-rent-button");
         payRentButton.setOnAction(e -> handlePayRent());
+
+        jailRollButton.getStyleClass().add("monopoly-jail-roll-button");
         jailRollButton.setOnAction(e -> handleJailRoll());
+
+        jailPayButton.getStyleClass().add("monopoly-jail-pay-button");
         jailPayButton.setOnAction(e -> handleJailPay());
+
+        backButton.getStyleClass().add("monopoly-back-button");
         backButton.setOnAction(e -> handleBackToMainMenu());
-        actionLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;");
+
+        actionLabel.getStyleClass().add("monopoly-action-label");
+
         saveButton.getStyleClass().add("game-control-button");
         loadButton.getStyleClass().add("game-control-button");
-        
+
         saveButton.setOnAction(e -> {
             if (controller != null) {
                 TextInputDialog dialog = new TextInputDialog();
@@ -168,7 +179,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
                 ComboBox<String> gameList = new ComboBox<>();
                 gameList.setPromptText("Select a game");
-                
+
                 File savedGamesDir = new File("src/main/resources/saved_games");
                 if (savedGamesDir.exists() && savedGamesDir.isDirectory()) {
                     File[] savedGames = savedGamesDir.listFiles((dir, name) -> name.endsWith(".json"));
@@ -204,8 +215,12 @@ public class MonopolyGameUI extends JavaFXGameUI {
         });
 
         gameControls.getChildren().add(backButton);
-        gameControls.getChildren().addAll(rollDiceButton, buyButton, skipButton, payRentButton, 
+        gameControls.getChildren().addAll(rollDiceButton, buyButton, skipButton, payRentButton,
             jailRollButton, jailPayButton, saveButton, loadButton, diceLabel);
+
+        // Add stylesheets
+        getScene().getStylesheets().add(getClass().getResource("/monopoly.css").toExternalForm());
+        getScene().getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
     }
 
     private void initializeBoard() {
@@ -263,11 +278,10 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
     private StackPane createTilePane(Tile tile) {
         Rectangle rect = new Rectangle(70, 70);
-        rect.setArcWidth(10);
-        rect.setArcHeight(10);
+        rect.getStyleClass().add("monopoly-tile");
         Label label = new Label();
-        label.setWrapText(true);
-        label.setStyle("-fx-font-size: 12px; -fx-font-weight: bold;");
+        label.getStyleClass().add("monopoly-tile-label");
+
         if (tile instanceof PropertyTile) {
             PropertyTile pt = (PropertyTile) tile;
             rect.setFill(GROUP_COLORS[pt.getGroup() % GROUP_COLORS.length]);
@@ -300,10 +314,10 @@ public class MonopolyGameUI extends JavaFXGameUI {
                 SimpleMonopolyPlayer monopolyPlayer = (SimpleMonopolyPlayer) player;
                 VBox playerBox = new VBox(5);
                 playerBox.setPadding(new Insets(20));
-                playerBox.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1;");
+                playerBox.getStyleClass().add("monopoly-player-box");
 
                 Label nameLabel = new Label(monopolyPlayer.getName());
-                nameLabel.setStyle("-fx-font-weight: bold;");
+                nameLabel.getStyleClass().add("monopoly-player-name");
                 Label moneyLabel = new Label("Money: $" + monopolyPlayer.getMoney());
                 Label positionLabel = new Label("Position: Tile #" + monopolyPlayer.getCurrentTile().getId());
                 Label propertiesLabel = new Label("Properties: " + monopolyPlayer.getOwnedProperties().size());
@@ -432,7 +446,4 @@ public class MonopolyGameUI extends JavaFXGameUI {
         updateUI();
     }
 
-    public void setController(MonopolyController controller) {
-        this.controller = controller;
-    }
-} 
+}

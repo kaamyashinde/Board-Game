@@ -36,14 +36,14 @@ public class MonopolyMenuUI {
 
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(20));
-        root.setStyle("-fx-background-color: #f7f7f0;");
+        root.getStyleClass().add("monopoly-menu-root");
 
         // Top bar with back button
         HBox topBar = new HBox(10);
         topBar.setPadding(new Insets(10));
         topBar.setAlignment(Pos.CENTER_LEFT);
         Button backButton = new Button("← Back to Main Menu");
-        backButton.setStyle("-fx-background-color: #f7e6c7; -fx-font-weight: bold;");
+        backButton.getStyleClass().add("monopoly-back-button");
         backButton.setOnAction(e -> JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage));
         topBar.getChildren().add(backButton);
         root.setTop(topBar);
@@ -57,9 +57,9 @@ public class MonopolyMenuUI {
 
         StackPane titlePane = new StackPane();
         titlePane.setPrefSize(400, 60);
-        titlePane.setStyle("-fx-background-color: #f7e6c7; -fx-background-radius: 20;");
+        titlePane.getStyleClass().add("monopoly-title-pane");
         Label titleLabel = new Label("MONOPOLY");
-        titleLabel.setStyle("-fx-font-size: 30px; -fx-font-family: serif; -fx-font-weight: bold;");
+        titleLabel.getStyleClass().add("monopoly-title-label");
         titlePane.getChildren().add(titleLabel);
         centerBox.getChildren().add(titlePane);
 
@@ -75,7 +75,7 @@ public class MonopolyMenuUI {
         centerBox.getChildren().add(choosePlayersBtn);
 
         playerCountLabel = new Label("No players selected");
-        playerCountLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #3b3b6d;");
+        playerCountLabel.getStyleClass().add("monopoly-player-count-label");
         centerBox.getChildren().add(playerCountLabel);
 
         Button startGameBtn = createMenuButton("START");
@@ -84,7 +84,7 @@ public class MonopolyMenuUI {
                 if (onStartGame != null) onStartGame.accept(selectedPlayers);
             } else {
                 playerCountLabel.setText("Please select at least two players!");
-                playerCountLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: red;");
+                playerCountLabel.setStyle("-fx-text-fill: red;");
             }
         });
         centerBox.getChildren().add(startGameBtn);
@@ -92,6 +92,8 @@ public class MonopolyMenuUI {
         root.setCenter(centerBox);
 
         Scene scene = new Scene(root, 1200, 800);
+        scene.getStylesheets().add(getClass().getResource("/monopoly.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -116,7 +118,7 @@ public class MonopolyMenuUI {
 
     private Button createMenuButton(String text) {
         Button btn = new Button(text);
-        btn.setStyle("-fx-background-color: #f7e6c7; -fx-font-size: 18px; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 10 40; -fx-text-fill: #3b3b6d;");
+        btn.getStyleClass().add("monopoly-menu-button");
         return btn;
     }
 
@@ -126,10 +128,10 @@ public class MonopolyMenuUI {
         if (playerNames != null && !playerNames.isEmpty()) {
             selectedPlayers = playerNames;
             playerCountLabel.setText(selectedPlayers.size() + " players selected");
-            playerCountLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #3b3b6d;");
+            playerCountLabel.getStyleClass().add("monopoly-player-count-label");
         } else {
             playerCountLabel.setText("No players selected");
-            playerCountLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #3b3b6d;");
+            playerCountLabel.getStyleClass().add("monopoly-player-count-label");
         }
     }
 
@@ -193,4 +195,4 @@ public class MonopolyMenuUI {
             }
         });
     }
-} 
+}
