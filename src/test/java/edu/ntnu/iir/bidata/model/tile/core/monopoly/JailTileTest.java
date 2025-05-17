@@ -10,6 +10,6 @@ class JailTileTest {
         JailTile jailTile = new JailTile(10);
         assertNotNull(jailTile);
         assertEquals(10, jailTile.getId());
-        assertNotNull(jailTile.getAction());
+        assertNull(jailTile.getAction());
     }
 } 

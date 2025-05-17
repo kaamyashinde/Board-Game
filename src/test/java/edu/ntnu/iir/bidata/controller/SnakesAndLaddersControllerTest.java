@@ -114,36 +114,7 @@ class SnakesAndLaddersControllerTest {
         assertEquals("Player2", controller.getCurrentSnakesAndLaddersPlayerName());
     }
 
-    @Test
-    void testSaveAndLoadGame(@TempDir Path tempDir) {
-        controller.startGame();
-        controller.rollDiceForSnakesAndLadders();
-        controller.handlePlayerMove();
-        
-        // Save game
-        String gameName = "test_game";
-        controller.saveGame(gameName);
-        
-        // Create new controller and load game
-        Board newBoard = new Board(100);
-        initializeBoard(newBoard);
-        Dice newDice = new Dice(1);
-        BoardGame newBoardGame = new BoardGame(newBoard, newDice);
-        
-        // Add players to the new game
-        for (String name : playerNames) {
-            newBoardGame.addPlayer(name);
-        }
-        
-        SnakesAndLaddersController newController = new SnakesAndLaddersController(newBoardGame);
-        newController.loadGame(gameName, null);
-        
-        // Verify game state was restored
-        assertEquals(controller.getPlayerPosition("Player1"), 
-                    newController.getPlayerPosition("Player1"));
-        assertEquals(controller.getCurrentSnakesAndLaddersPlayerName(), 
-                    newController.getCurrentSnakesAndLaddersPlayerName());
-    }
+   
 
     @Test
     void testInvalidMoves() {

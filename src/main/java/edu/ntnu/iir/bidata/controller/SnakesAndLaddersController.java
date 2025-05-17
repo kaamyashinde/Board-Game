@@ -228,4 +228,35 @@ public class SnakesAndLaddersController extends BaseGameController {
         
         nextSnakesAndLaddersPlayer();
     }
+
+    public void saveGameToPath(Path savePath) {
+        if (!gameStarted) {
+            LOGGER.warning("Cannot save game: Game has not started");
+            return;
+        }
+        try {
+            boardGameWriter.writeBoardGame(boardGame, savePath);
+            LOGGER.info("Game saved to: " + savePath);
+        } catch (IOException e) {
+            LOGGER.severe("Failed to save game: " + e.getMessage());
+        }
+    }
+
+    public void loadGameFromPath(Path savePath, edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI ui) {
+        try {
+            BoardGame loadedGame = boardGameReader.readBoardGame(savePath);
+            this.boardGame = loadedGame;
+            this.gameStarted = true;
+            for (Player player : loadedGame.getPlayers()) {
+                updateSnakesAndLaddersPosition(player.getName(), player.getCurrentPosition());
+            }
+            boardGame.setCurrentPlayerIndex(loadedGame.getCurrentPlayerIndex());
+            if (ui != null) {
+                ui.refreshUIFromBoardGame();
+            }
+            LOGGER.info("Game loaded from: " + savePath);
+        } catch (IOException e) {
+            LOGGER.severe("Failed to load game: " + e.getMessage());
+        }
+    }
 } 

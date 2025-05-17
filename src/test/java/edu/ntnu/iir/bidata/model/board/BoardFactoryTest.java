@@ -32,8 +32,8 @@ class BoardFactoryTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         players = new ArrayList<>();
-        players.add(mockPlayer1);
-        players.add(mockPlayer2);
+        players.add(new Player("Player1"));
+        players.add(new Player("Player2"));
     }
 
     @Test
