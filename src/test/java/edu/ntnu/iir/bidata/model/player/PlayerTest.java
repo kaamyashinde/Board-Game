@@ -1,7 +1,9 @@
-package edu.ntnu.iir.bidata.model;
+package edu.ntnu.iir.bidata.model.player;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
+import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.model.tile.core.Tile;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

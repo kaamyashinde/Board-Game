@@ -1,7 +1,8 @@
 package edu.ntnu.iir.bidata.view.cli;
 
 import edu.ntnu.iir.bidata.model.BoardGame;
-import edu.ntnu.iir.bidata.model.Player;
+import edu.ntnu.iir.bidata.model.player.Player;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;

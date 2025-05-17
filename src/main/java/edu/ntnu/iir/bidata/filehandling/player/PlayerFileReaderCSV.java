@@ -5,7 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import edu.ntnu.iir.bidata.model.Player;
+import edu.ntnu.iir.bidata.model.player.Player;
 
 public class PlayerFileReaderCSV implements PlayerFileReader {
     @Override

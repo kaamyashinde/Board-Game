@@ -1,7 +1,8 @@
 package edu.ntnu.iir.bidata.model.game;
 
 import edu.ntnu.iir.bidata.model.board.Board;
-import edu.ntnu.iir.bidata.model.Player;
+import edu.ntnu.iir.bidata.model.player.Player;
+
 import java.time.LocalDateTime;
 import java.util.List;
 

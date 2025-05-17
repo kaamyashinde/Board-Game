@@ -1,9 +1,11 @@
 package edu.ntnu.iir.bidata.filehandling.player;
 
-import edu.ntnu.iir.bidata.model.Player;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import edu.ntnu.iir.bidata.model.player.Player;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

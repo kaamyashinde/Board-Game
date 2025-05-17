@@ -138,10 +138,10 @@ public class PlayerSelectionUI {
     File file = fileChooser.showOpenDialog(stage);
     if (file != null) {
       try {
-        java.util.List<edu.ntnu.iir.bidata.model.Player> loadedPlayers =
+        java.util.List<edu.ntnu.iir.bidata.model.player.Player> loadedPlayers =
             new edu.ntnu.iir.bidata.filehandling.player.PlayerFileReaderCSV().readPlayers(file.toPath());
         int count = 0;
-        for (edu.ntnu.iir.bidata.model.Player player : loadedPlayers) {
+        for (edu.ntnu.iir.bidata.model.player.Player player : loadedPlayers) {
           String name = player.getName();
           if (!name.isEmpty() && !playersList.contains(name) && count < 5) {
             playersList.add(name);
@@ -168,9 +168,9 @@ public class PlayerSelectionUI {
     File file = fileChooser.showSaveDialog(stage);
     if (file != null) {
       try {
-        java.util.List<edu.ntnu.iir.bidata.model.Player> playersToSave = new java.util.ArrayList<>();
+        java.util.List<edu.ntnu.iir.bidata.model.player.Player> playersToSave = new java.util.ArrayList<>();
         for (String name : playersList) {
-          playersToSave.add(new edu.ntnu.iir.bidata.model.Player(name));
+          playersToSave.add(new edu.ntnu.iir.bidata.model.player.Player(name));
         }
         new edu.ntnu.iir.bidata.filehandling.player.PlayerFileWriterCSV().writePlayers(playersToSave, file.toPath());
         statusLabel.setText("Saved " + playersList.size() + " players to CSV");

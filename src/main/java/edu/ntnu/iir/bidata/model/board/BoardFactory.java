@@ -1,7 +1,7 @@
 package edu.ntnu.iir.bidata.model.board;
 
-import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.exception.GameException;
+import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.model.tile.actions.base.GoToTileAction;
 import edu.ntnu.iir.bidata.model.tile.actions.base.SafeSpotAction;
 import edu.ntnu.iir.bidata.model.tile.actions.game.LoseTurnAction;

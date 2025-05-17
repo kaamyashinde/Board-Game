@@ -1,4 +1,4 @@
-package edu.ntnu.iir.bidata.model;
+package edu.ntnu.iir.bidata.model.player;
 
 import edu.ntnu.iir.bidata.model.tile.core.Tile;
 import lombok.Getter;

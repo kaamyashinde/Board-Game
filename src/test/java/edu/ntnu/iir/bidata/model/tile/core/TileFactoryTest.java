@@ -1,7 +1,7 @@
 package edu.ntnu.iir.bidata.model.tile.core;
 
-import edu.ntnu.iir.bidata.model.Player;
 import edu.ntnu.iir.bidata.model.tile.config.TileConfiguration;
+import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.model.tile.actions.snakeandladder.LadderAction;
 import edu.ntnu.iir.bidata.model.tile.actions.snakeandladder.SnakeAction;
 import org.junit.jupiter.api.BeforeEach;
