@@ -75,8 +75,9 @@ class SnakesAndLaddersControllerTest {
     @Test
     void testNormalMove() {
         controller.startGame();
+        // Force a specific dice roll value of 2 to avoid landing on ladder at position 3
         controller.rollDiceForSnakesAndLadders();
-        int roll = controller.getLastDiceRoll();
+        int roll = 2;  // Use a fixed value instead of the random roll
         SnakesAndLaddersController.MoveResult result = controller.movePlayer("Player1", roll);
         
         assertEquals(0, result.start);
