@@ -27,6 +27,9 @@ public class SimpleMonopolyPlayer extends Player {
     @Getter
     @Setter
     private boolean paidToLeaveJail = false;
+    @Getter
+    @Setter
+    private boolean canLeaveJailNextTurn = false;
 
     /**
      * Constructor for the SimpleMonopolyPlayer class.
@@ -85,11 +88,13 @@ public class SimpleMonopolyPlayer extends Player {
     public void goToJail() {
         this.inJail = true;
         this.paidToLeaveJail = false;
+        this.canLeaveJailNextTurn = false;
     }
 
     public void leaveJail() {
         this.inJail = false;
         this.paidToLeaveJail = false;
+        this.canLeaveJailNextTurn = false;
     }
 
     public boolean isInJail() {

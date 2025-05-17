@@ -82,47 +82,45 @@ public class MonopolyController extends BaseGameController {
     }
 
     public boolean isCurrentPlayerCanLeaveJail() {
-        return jailRolledSix || ((SimpleMonopolyPlayer) boardGame.getCurrentPlayer()).isPaidToLeaveJail();
+        return ((SimpleMonopolyPlayer) boardGame.getCurrentPlayer()).isCanLeaveJailNextTurn();
     }
 
     public void handleJailRollDice() {
         SimpleMonopolyPlayer currentPlayer = (SimpleMonopolyPlayer) boardGame.getCurrentPlayer();
         boardGame.getDice().rollAllDice();
         int[] diceValues = boardGame.getCurrentDiceValues();
-        jailRolledSix = false;
+        boolean rolledSix = false;
         for (int value : diceValues) {
             if (value == 6) {
-                jailRolledSix = true;
+                rolledSix = true;
                 break;
             }
         }
+        if (rolledSix) {
+            currentPlayer.setInJail(false);
+        }
         awaitingJailAction = false;
+        nextPlayer();
     }
 
     public void handleJailPay() {
         SimpleMonopolyPlayer currentPlayer = (SimpleMonopolyPlayer) boardGame.getCurrentPlayer();
         try {
             currentPlayer.payRent(50);
-            currentPlayer.setPaidToLeaveJail(true);
+            currentPlayer.setInJail(false);
         } catch (Exception e) {
             // Not enough money, do nothing
         }
         awaitingJailAction = false;
+        nextPlayer();
     }
 
     @Override
     public void handlePlayerMove() {
         SimpleMonopolyPlayer currentPlayer = (SimpleMonopolyPlayer) boardGame.getCurrentPlayer();
         if (currentPlayer.isInJail()) {
-            if (isCurrentPlayerCanLeaveJail()) {
-                currentPlayer.leaveJail();
-                jailRolledSix = false;
-                currentPlayer.setPaidToLeaveJail(false);
-                // Now allow normal move
-            } else {
-                awaitingJailAction = true;
-                return;
-            }
+            awaitingJailAction = true;
+            return;
         }
         if (!gameStarted) {
             gameStarted = true;
