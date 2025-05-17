@@ -121,7 +121,7 @@ public class SnakesAndLaddersGameUI implements Observer {
 
     BorderPane root = new BorderPane();
     root.setPadding(new Insets(20));
-    root.setStyle("-fx-background-color: #f5fff5;");
+    root.getStyleClass().add("snl-game-root");
 
     // Create top bar with back button and game controls
     HBox topBar = new HBox(20);
@@ -216,13 +216,13 @@ public class SnakesAndLaddersGameUI implements Observer {
     // --- Right: Player info panel ---
     playerPanel = new VBox(15);
     playerPanel.setPadding(new Insets(20));
-    playerPanel.setStyle("-fx-background-color: #e6fff2; -fx-background-radius: 20;");
+    playerPanel.getStyleClass().add("snl-player-panel");
     playerPanel.setPrefWidth(250);
     playerPanel.setAlignment(Pos.TOP_LEFT);
 
     // Add status label at the top of the player panel
     statusLabel = new Label("Game Started!");
-    statusLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+    statusLabel.getStyleClass().add("snl-game-status-label");
     statusLabel.setWrapText(true);
 
     playerPanel.getChildren().add(statusLabel);
@@ -234,10 +234,10 @@ public class SnakesAndLaddersGameUI implements Observer {
 
       // Create player info section
       VBox playerBox = new VBox(5);
-      playerBox.setStyle("-fx-padding: 5px;");
+      playerBox.getStyleClass().add("snl-player-info-box");
 
       Label playerLabel = new Label(playerName.toUpperCase() + ":");
-      playerLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
+      playerLabel.getStyleClass().add("snl-player-name-label");
 
       // Position label
       Label posLabel = new Label("at position: 0");
@@ -270,17 +270,19 @@ public class SnakesAndLaddersGameUI implements Observer {
 
     rollDiceBtn = new Button("ROLL DICE");
     rollDiceBtn.getStyleClass().add("game-control-button");
-    rollDiceBtn.setStyle("-fx-font-size: 18px;");
+    rollDiceBtn.setOnAction(e -> rollDiceAndMove());
 
     diceView = new DiceView();
     diceBox.getChildren().addAll(rollDiceBtn, diceView);
-    rollDiceBtn.setOnAction(e -> rollDiceAndMove());
 
     bottomBox.getChildren().add(diceBox);
     root.setBottom(bottomBox);
 
     Scene scene = new Scene(root, 1200, 800);
-    scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+    scene.getStylesheets().addAll(
+        getClass().getResource("/styles.css").toExternalForm(),
+        getClass().getResource("/snakesandladders.css").toExternalForm()
+    );
     primaryStage.setScene(scene);
     primaryStage.show();
   }
@@ -300,9 +302,9 @@ public class SnakesAndLaddersGameUI implements Observer {
    * Roll the dice and move the current player
    */
   private void rollDiceAndMove() {
-      if (controller == null) {
-          return;
-      }
+    if (controller == null) {
+      return;
+    }
 
     rollDiceBtn.setDisable(true);
 
@@ -408,9 +410,9 @@ public class SnakesAndLaddersGameUI implements Observer {
    * @param playerName the player's name
    */
   private void updatePlayerPosition(String playerName) {
-      if (controller == null) {
-          return;
-      }
+    if (controller == null) {
+      return;
+    }
 
     // Get current position from controller
     int position = controller.getPlayerPosition(playerName);

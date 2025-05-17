@@ -27,7 +27,6 @@ public class SnakesAndLaddersMenuUI {
      * -- GETTER --
      *  Get the list of selected players
      *
-     * @return List of player names
      */
     @Getter
     private List<String> selectedPlayers = new ArrayList<>();
@@ -51,19 +50,19 @@ public class SnakesAndLaddersMenuUI {
 
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(20));
-        root.setStyle("-fx-background-color: #f5fff5;");
+        root.getStyleClass().add("snl-menu-root");
 
         // Create top bar with back button
         HBox topBar = new HBox(10);
         topBar.setPadding(new Insets(10));
         topBar.setAlignment(Pos.CENTER_LEFT);
-        
+
         Button backButton = new Button("← Back to Main Menu");
-        backButton.setStyle("-fx-background-color: #bdebc8; -fx-font-weight: bold;");
+        backButton.getStyleClass().add("snl-back-button");
         backButton.setOnAction(e -> {
-          JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
+            JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
         });
-        
+
         topBar.getChildren().add(backButton);
         root.setTop(topBar);
 
@@ -76,9 +75,9 @@ public class SnakesAndLaddersMenuUI {
 
         StackPane titlePane = new StackPane();
         titlePane.setPrefSize(400, 60);
-        titlePane.setStyle("-fx-background-color: #bdebc8; -fx-background-radius: 20;");
+        titlePane.getStyleClass().add("snl-title-pane");
         Label titleLabel = new Label("SNAKES & LADDERS");
-        titleLabel.setStyle("-fx-font-size: 30px; -fx-font-family: serif; -fx-font-weight: bold;");
+        titleLabel.getStyleClass().add("snl-title-label");
         titlePane.getChildren().add(titleLabel);
         centerBox.getChildren().add(titlePane);
 
@@ -98,7 +97,7 @@ public class SnakesAndLaddersMenuUI {
 
         // Player count label
         playerCountLabel = new Label("No players selected");
-        playerCountLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #006400;");
+        playerCountLabel.getStyleClass().add("snl-player-count-label");
         centerBox.getChildren().add(playerCountLabel);
 
         // START button
@@ -108,7 +107,7 @@ public class SnakesAndLaddersMenuUI {
                 if (onStartGame != null) onStartGame.accept(selectedPlayers);
             } else {
                 playerCountLabel.setText("Please select at least one player!");
-                playerCountLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: red;");
+                playerCountLabel.setStyle("-fx-text-fill: red;");
             }
         });
         centerBox.getChildren().add(startGameBtn);
@@ -116,6 +115,10 @@ public class SnakesAndLaddersMenuUI {
         root.setCenter(centerBox);
 
         Scene scene = new Scene(root, 1200, 800);
+        scene.getStylesheets().addAll(
+            getClass().getResource("/styles.css").toExternalForm(),
+            getClass().getResource("/snakesandladders.css").toExternalForm()
+        );
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -153,7 +156,7 @@ public class SnakesAndLaddersMenuUI {
             playerCountLabel.setText("No players selected");
         } else {
             playerCountLabel.setText(selectedPlayers.size() + " player(s) selected");
-            playerCountLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #006400;");
+            playerCountLabel.getStyleClass().add("snl-player-count-label");
         }
     }
 
@@ -168,11 +171,7 @@ public class SnakesAndLaddersMenuUI {
         Button button = new Button(text);
         button.setPrefWidth(200);
         button.setPrefHeight(50);
-        button.setStyle("-fx-background-color: #BDEBC8; " +
-            "-fx-text-fill: black; " +
-            "-fx-font-size: 16px; " +
-            "-fx-background-radius: 25; " +
-            "-fx-padding: 10;");
+        button.getStyleClass().add("snl-menu-button");
         return button;
     }
 }
