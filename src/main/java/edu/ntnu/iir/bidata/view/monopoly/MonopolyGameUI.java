@@ -9,6 +9,7 @@ import edu.ntnu.iir.bidata.model.tile.core.monopoly.PropertyTile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.GoTile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.JailTile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.FreeParkingTile;
+import edu.ntnu.iir.bidata.model.tile.actions.monopoly.GoToJailAction;
 import edu.ntnu.iir.bidata.view.common.JavaFXGameUI;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -46,6 +47,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
     private final Color GO_COLOR = Color.LIMEGREEN;
     private final Color JAIL_COLOR = Color.DARKGRAY;
     private final Color FREE_PARKING_COLOR = Color.GOLD;
+    private final Color GO_TO_JAIL_COLOR = Color.ORANGERED;
     private final BorderPane mainLayout;
     private final GridPane boardPane;
     private final VBox playerInfoPanel;
@@ -194,6 +196,9 @@ public class MonopolyGameUI extends JavaFXGameUI {
         } else if (tile instanceof FreeParkingTile) {
             rect.setFill(FREE_PARKING_COLOR);
             label.setText("FREE\nPARKING");
+        } else if (tile.getAction() instanceof GoToJailAction) {
+            rect.setFill(GO_TO_JAIL_COLOR);
+            label.setText("GO TO\nJAIL");
         } else {
             rect.setFill(BLANK_COLOR);
             label.setText("");

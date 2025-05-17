@@ -6,6 +6,7 @@ import edu.ntnu.iir.bidata.model.tile.core.monopoly.JailTile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.FreeParkingTile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.PropertyTile;
 import edu.ntnu.iir.bidata.model.tile.core.Tile;
+import edu.ntnu.iir.bidata.model.tile.actions.monopoly.GoToJailAction;
 
 public class MonopolyBoardFactory {
     private static final int BOARD_SIZE = 20;
@@ -30,26 +31,22 @@ public class MonopolyBoardFactory {
     }
 
     private static void createAndAddTiles(Board board) {
-        // Add Go tile (position 0)
+        // GO (top-left corner)
         board.addTile(new GoTile(0));
-
-        // Add properties
-        addPropertyGroup(board, 1, 2, 0, 100, 20);    // Positions 1-2
-        addPropertyGroup(board, 3, 4, 1, 150, 30);   // Positions 3-4
-        addPropertyGroup(board, 5, 6, 2, 200, 40);  // Positions 5-6
-        addPropertyGroup(board, 7, 8, 3, 250, 50); // Positions 7-8
-
-        // Add Jail (position 10)
-        board.addTile(new JailTile(10));
-
-        // Add Free Parking (position 15)
-        board.addTile(new FreeParkingTile(15));
-
-        // Add remaining properties
-        addPropertyGroup(board, 11, 12, 0, 100, 20);    // Positions 11-12
-        addPropertyGroup(board, 13, 14, 1, 150, 30);   // Positions 13-14
-        addPropertyGroup(board, 16, 17, 2, 200, 40);  // Positions 16-17
-        addPropertyGroup(board, 18, 19, 3, 250, 50); // Positions 18-19
+        // Top row (positions 1-4)
+        addPropertyGroup(board, 1, 4, 0, 100, 20);
+        // GO TO JAIL (top-right corner)
+        board.addTile(new Tile(5, new GoToJailAction(15)));
+        // Right column (positions 6-9)
+        addPropertyGroup(board, 6, 9, 1, 150, 30);
+        // FREE PARKING (bottom-right corner)
+        board.addTile(new FreeParkingTile(10));
+        // Bottom row (positions 11-14)
+        addPropertyGroup(board, 11, 14, 2, 200, 40);
+        // JAIL (bottom-left corner)
+        board.addTile(new JailTile(15));
+        // Left column (positions 16-19)
+        addPropertyGroup(board, 16, 19, 3, 250, 50);
     }
 
     private static void addPropertyGroup(Board board, int startPos, int endPos,

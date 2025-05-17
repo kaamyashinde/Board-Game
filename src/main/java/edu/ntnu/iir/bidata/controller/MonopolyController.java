@@ -159,6 +159,13 @@ public class MonopolyController extends BaseGameController {
                 pendingRentPropertyTile = propertyTile;
                 return;
             }
+        } else if (currentTile.getAction() != null) {
+            currentTile.getAction().executeAction(currentPlayer, currentTile);
+            // If the player is now in jail, end their turn immediately
+            if (currentPlayer.isInJail()) {
+                nextPlayer();
+                return;
+            }
         }
         // No action needed, move to next player
         nextPlayer();
