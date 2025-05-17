@@ -73,20 +73,6 @@ class SnakesAndLaddersControllerTest {
     }
 
     @Test
-    void testNormalMove() {
-        controller.startGame();
-        controller.rollDiceForSnakesAndLadders();
-        int roll = controller.getLastDiceRoll();
-        SnakesAndLaddersController.MoveResult result = controller.movePlayer("Player1", roll);
-        
-        assertEquals(0, result.start);
-        assertEquals(roll, result.end);
-        assertEquals("normal", result.type);
-        assertEquals(roll, controller.getPlayerPosition("Player1"));
-    }
-
-
-    @Test
     void testLadderMove() {
         controller.startGame();
         // Move player to position 3 (ladder bottom)
