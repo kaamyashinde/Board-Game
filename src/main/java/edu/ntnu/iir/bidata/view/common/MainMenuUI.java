@@ -45,7 +45,7 @@ public class MainMenuUI {
 
     BorderPane root = new BorderPane();
     root.setPadding(new Insets(20));
-    root.setStyle("-fx-background-color: #f5fff5;");
+    root.getStyleClass().add("main-menu-root");
 
     // --- LEFT: PURPLE LOGO STRIP (WITHOUT TEXT) ---
     Color[] purples = {
@@ -66,9 +66,9 @@ public class MainMenuUI {
     // WELCOME banner
     StackPane welcomePane = new StackPane();
     welcomePane.setPrefSize(400, 60);
-    welcomePane.setStyle("-fx-background-color: #bfc2fa; -fx-background-radius: 20;");
+    welcomePane.getStyleClass().add("main-menu-welcome-pane");
     Label welcomeLabel = new Label("WELCOME");
-    welcomeLabel.setStyle("-fx-font-size: 30px; -fx-font-family: serif; -fx-font-weight: bold;");
+    welcomeLabel.getStyleClass().add("main-menu-welcome-label");
     welcomePane.getChildren().add(welcomeLabel);
 
     // Game selection boxes
@@ -93,14 +93,14 @@ public class MainMenuUI {
         () -> gameTypeCallback.accept(GameType.MONOPOLY)
     );
 
-    // Ludo game box
-    StackPane ludoPane = createGamePane(
+    // Ludo game box - commented out for now
+    /*StackPane ludoPane = createGamePane(
         "#c2c2fa",
         "#e69a28",
         "Ludo",
         createLudoGrid(),
         () -> gameTypeCallback.accept(GameType.LUDO)
-    );
+    );*/
 
     menuRow.getChildren().setAll(snakesAndLaddersPane, monopolyPane);
     centerBox.getChildren().setAll(welcomePane, menuRow);
@@ -108,17 +108,13 @@ public class MainMenuUI {
 
     // --- BOTTOM-RIGHT: credits ---
     Label credit = new Label("©: Durva Parmar & Kamya Shinde");
-    credit.setStyle(
-        "-fx-font-size: 10px; " +
-            "-fx-background-color: #ecebff; " +
-            "-fx-background-radius: 10; " +
-            "-fx-padding: 2 8 2 8;"
-    );
+    credit.getStyleClass().add("main-menu-credit-label");
     StackPane creditPane = new StackPane(credit);
     creditPane.setAlignment(Pos.BOTTOM_RIGHT);
     root.setBottom(creditPane);
 
     Scene scene = new Scene(root, 1000, 700);
+    scene.getStylesheets().add(getClass().getResource("/common.css").toExternalForm());
     primaryStage.setScene(scene);
     primaryStage.show();
   }
@@ -129,23 +125,15 @@ public class MainMenuUI {
   private StackPane createGamePane(String bgColor, String borderColor, String gameName, Region gameGrid, Runnable onClick) {
     StackPane gamePane = new StackPane();
     gamePane.setPrefSize(220, 200);
+    gamePane.getStyleClass().add("main-menu-game-pane");
+    // The colors need to stay in the style as they are dynamic parameters
     gamePane.setStyle(
         "-fx-background-color: " + bgColor + "; " +
-            "-fx-background-radius: 18; " +
-            "-fx-border-color: " + borderColor + "; " +
-            "-fx-border-width: 3; " +
-            "-fx-border-radius: 18;"
+            "-fx-border-color: " + borderColor + ";"
     );
 
     Label gameLabel = new Label(gameName);
-    gameLabel.setStyle(
-        "-fx-font-size: 18px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-text-fill: white; " +
-            "-fx-background-color: rgba(0, 100, 0, 0.7); " +
-            "-fx-padding: 5 10; " +
-            "-fx-background-radius: 10;"
-    );
+    gameLabel.getStyleClass().add("main-menu-game-label");
 
     StackPane gameContent = new StackPane(gameGrid, gameLabel);
     gamePane.getChildren().add(gameContent);
@@ -236,12 +224,7 @@ public class MainMenuUI {
 
       // Create the title label
       Label titleLabel = new Label(text);
-      titleLabel.setStyle(
-          "-fx-text-fill: white; " +
-              "-fx-font-size: 22px; " +
-              "-fx-font-weight: bold; " +
-              "-fx-effect: dropshadow(gaussian, #000, 2, 0, 1, 1);"
-      );
+      titleLabel.getStyleClass().add("main-menu-logo-title");
       titleContainer.getChildren().add(titleLabel);
 
       // Add title to the top of our stack
