@@ -91,7 +91,7 @@ public class MonopolyMenuUI {
 
         root.setCenter(centerBox);
 
-        Scene scene = new Scene(root, 900, 700);
+        Scene scene = new Scene(root, 1200, 800);
         primaryStage.setScene(scene);
         primaryStage.show();
     }

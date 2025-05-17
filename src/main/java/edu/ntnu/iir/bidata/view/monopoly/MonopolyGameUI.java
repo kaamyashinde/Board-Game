@@ -87,6 +87,9 @@ public class MonopolyGameUI extends JavaFXGameUI {
         mainLayout.setStyle("-fx-background-color: #f0f0f0;");
         mainLayout.setPadding(new Insets(20));
 
+        mainLayout.setPrefWidth(1000);
+        mainLayout.setPrefHeight(700);
+
         // Configure board pane
         boardPane.setHgap(2);
         boardPane.setVgap(2);
@@ -110,6 +113,11 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
         // Set the root of the existing scene
         getScene().setRoot(mainLayout);
+
+        primaryStage.setWidth(1200);
+        primaryStage.setHeight(800);
+        primaryStage.setMinWidth(1200);
+        primaryStage.setMinHeight(800);
 
         // Initialize the board
         initializeBoard();
@@ -291,7 +299,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
             if (player instanceof SimpleMonopolyPlayer) {
                 SimpleMonopolyPlayer monopolyPlayer = (SimpleMonopolyPlayer) player;
                 VBox playerBox = new VBox(5);
-                playerBox.setPadding(new Insets(10));
+                playerBox.setPadding(new Insets(20));
                 playerBox.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1;");
 
                 Label nameLabel = new Label(monopolyPlayer.getName());

@@ -98,7 +98,7 @@ public class SnakesAndLaddersGameUI implements Observer {
 
   /**
    * Sets whether this is a loaded game and its name
-   * 
+   *
    * @param isLoaded Whether this is a loaded game
    * @param gameName The name of the loaded game
    */
@@ -127,7 +127,7 @@ public class SnakesAndLaddersGameUI implements Observer {
     HBox topBar = new HBox(20);
     topBar.setPadding(new Insets(10));
     topBar.setAlignment(Pos.CENTER_LEFT);
-    
+
     backButton = new Button("← Back to Menu");
     backButton.getStyleClass().add("game-control-button");
     backButton.setOnAction(e -> {
@@ -279,7 +279,7 @@ public class SnakesAndLaddersGameUI implements Observer {
     bottomBox.getChildren().add(diceBox);
     root.setBottom(bottomBox);
 
-    Scene scene = new Scene(root, 1100, 700);
+    Scene scene = new Scene(root, 1200, 800);
     scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
     primaryStage.setScene(scene);
     primaryStage.show();
