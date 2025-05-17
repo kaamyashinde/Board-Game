@@ -65,6 +65,7 @@ public class JavaFXBoardGameLauncher extends Application {
             switch (gameType) {
                 case LUDO -> showLudoMenu(stage);
                 case SNAKES_AND_LADDERS -> showSnakesAndLaddersMenu(stage);
+                case MONOPOLY -> showMonopolyMenu(stage);
             }
         });
   }
@@ -96,6 +97,28 @@ public class JavaFXBoardGameLauncher extends Application {
             List<Player> players = selectedPlayerNames.stream().map(Player::new).toList();
             showLudoGameBoard(stage, players);
         });
+  }
+
+  /**
+   * Displays the Monopoly game menu or board. For now, launches a default Monopoly game.
+   *
+   * @param stage The primary stage to show the menu on
+   */
+  public void showMonopolyMenu(Stage stage) {
+    LOGGER.info("Showing Monopoly game");
+    // For now, create a default Monopoly game with 2 players
+    try {
+      Board board = edu.ntnu.iir.bidata.filehandling.board.MonopolyBoardFactory.createBoard();
+      BoardGame boardGame = new BoardGame(board, 1);
+      boardGame.addPlayer("Player 1");
+      boardGame.addPlayer("Player 2");
+      edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI gameUI = new edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI(boardGame);
+      // Show the Monopoly game UI (assumes MonopolyGameUI sets up and shows its own scene)
+      stage.setScene(gameUI.getScene());
+      stage.show();
+    } catch (Exception e) {
+      LOGGER.log(Level.SEVERE, "Error initializing Monopoly game", e);
+    }
   }
 
   /**

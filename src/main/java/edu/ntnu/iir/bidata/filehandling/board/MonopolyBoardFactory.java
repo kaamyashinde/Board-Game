@@ -5,6 +5,7 @@ import edu.ntnu.iir.bidata.model.tile.core.monopoly.GoTile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.JailTile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.FreeParkingTile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.PropertyTile;
+import edu.ntnu.iir.bidata.model.tile.core.Tile;
 
 public class MonopolyBoardFactory {
     private static final int BOARD_SIZE = 20;
@@ -14,6 +15,13 @@ public class MonopolyBoardFactory {
 
         // Create and add all tiles
         createAndAddTiles(board);
+
+        // Fill empty positions with BlankTile
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            if (board.getTile(i) == null) {
+                board.addTile(new BlankTile(i));
+            }
+        }
 
         // Connect tiles in a circle
         connectTilesCircular(board);
@@ -58,5 +66,15 @@ public class MonopolyBoardFactory {
         }
         // Connect last tile back to first tile
         board.connectTiles(BOARD_SIZE - 1, board.getTile(0));
+    }
+}
+
+class BlankTile extends Tile {
+    public BlankTile(int id) {
+        super(id);
+    }
+    @Override
+    public String toString() {
+        return "BlankTile(" + getId() + ")";
     }
 }
