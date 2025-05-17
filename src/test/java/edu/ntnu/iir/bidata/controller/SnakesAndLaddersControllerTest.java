@@ -134,9 +134,10 @@ class SnakesAndLaddersControllerTest {
         controller.rollDiceForSnakesAndLadders();
         controller.handlePlayerMove();
         
-        // Save game
+        // Save game to temporary directory
         String gameName = "test_game";
-        controller.saveGame(gameName);
+        Path savePath = tempDir.resolve(gameName + ".json");
+        controller.saveGame(savePath.toString());
         
         // Create new controller and load game
         Board newBoard = new Board(100);
@@ -150,7 +151,7 @@ class SnakesAndLaddersControllerTest {
         }
         
         SnakesAndLaddersController newController = new SnakesAndLaddersController(newBoardGame);
-        newController.loadGame(gameName, null);
+        newController.loadGame(savePath.toString(), null);
         
         // Verify game state was restored
         assertEquals(controller.getPlayerPosition("Player1"), 
