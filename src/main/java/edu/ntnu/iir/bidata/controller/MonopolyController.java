@@ -11,7 +11,6 @@ import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReader;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson;
 import edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI;
-import edu.ntnu.iir.bidata.model.gamestate.MonopolyGameState;
 import java.util.List;
 import java.util.logging.Logger;
 import java.nio.file.Path;
@@ -220,55 +219,6 @@ public class MonopolyController extends BaseGameController {
         nextPlayer();
     }
 
-    public void saveGame(String gameName) {
-        if (!gameStarted) {
-            LOGGER.warning("Cannot save game: Game has not started");
-            return;
-        }
-        try {
-            // Ensure the saved_games/monopoly directory exists
-            File savedGamesDir = new File("src/main/resources/saved_games/monopoly");
-            if (!savedGamesDir.exists()) {
-                savedGamesDir.mkdirs();
-            }
-            
-            MonopolyGameState gameState = MonopolyGameState.fromBoardGame(boardGame);
-            Path savePath = Paths.get("src/main/resources/saved_games/monopoly", gameName + ".json");
-            // Serialize MonopolyGameState directly
-            if (boardGameWriter instanceof edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson) {
-                ((edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson) boardGameWriter).writeMonopolyGameState(gameState, savePath);
-            } else {
-                throw new IOException("BoardGameWriter does not support MonopolyGameState");
-            }
-            LOGGER.info("Game saved to: " + savePath);
-        } catch (IOException e) {
-            LOGGER.severe("Failed to save game: " + e.getMessage());
-        }
-    }
+   
 
-    public void loadGame(String gameName, MonopolyGameUI ui) {
-        try {
-            Path savePath = Paths.get("src/main/resources/saved_games/monopoly", gameName + ".json");
-            MonopolyGameState gameState;
-            if (boardGameReader instanceof edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson) {
-                gameState = ((edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson) boardGameReader).readMonopolyGameState(savePath);
-                // Verify this is a Monopoly game
-                if (!"MONOPOLY".equals(gameState.getGameType())) {
-                    LOGGER.severe("Cannot load game: Not a Monopoly save file");
-                    return;
-                }
-            } else {
-                throw new IOException("BoardGameReader does not support MonopolyGameState");
-            }
-            this.boardGame = gameState.toBoardGame();
-            this.gameStarted = true;
-            if (ui != null) {
-                ui.refreshUIFromBoardGame();
-                ui.updateUI();  // Add explicit UI update
-            }
-            LOGGER.info("Game loaded: " + gameName);
-        } catch (IOException e) {
-            LOGGER.severe("Failed to load game: " + e.getMessage());
-        }
-    }
-} 
+  } 

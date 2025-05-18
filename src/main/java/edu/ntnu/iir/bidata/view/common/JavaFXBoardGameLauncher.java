@@ -7,7 +7,6 @@ import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.board.Board;
 import edu.ntnu.iir.bidata.model.board.BoardFactory;
 import edu.ntnu.iir.bidata.model.board.MonopolyBoardFactory;
-import edu.ntnu.iir.bidata.model.gamestate.MonopolyGameState;
 import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.view.ludo.LudoGameUI;
 import edu.ntnu.iir.bidata.view.ludo.LudoMenuUI;
@@ -227,43 +226,4 @@ public class JavaFXBoardGameLauncher extends Application {
       LOGGER.log(Level.SEVERE, "Error loading Snakes and Ladders game", e);
     }
   }
-
-  /**
-   * Displays the Monopoly game board UI with a loaded game state.
-   *
-   * @param stage The primary stage to show the game on
-   * @param gameName The name of the saved game to load
-   */
-  public void showMonopolyGameBoardWithLoad(Stage stage, String gameName) {
-    LOGGER.info("Loading Monopoly game: " + gameName);
-    try {
-      // Create controller and load game
-      BoardGameFileReaderGson reader = new BoardGameFileReaderGson();
-      MonopolyGameState gameState = reader.readMonopolyGameState(Paths.get("src/main/resources/saved_games/monopoly", gameName + ".json"));
-      BoardGame boardGame = gameState.toBoardGame();
-      
-      // Create view and controller
-      MonopolyGameUI gameUI = new MonopolyGameUI(boardGame, stage);
-      MonopolyController controller = new MonopolyController(boardGame);
-      gameUI.setController(controller);
-      
-      // Register UI as observer
-      boardGame.addObserver(gameUI);
-      
-      // Load game state and start
-      controller.loadGame(gameName, gameUI);
-      controller.startGame();
-      
-      // Create and set the scene
-      Scene scene = new Scene(gameUI.getRoot(), 1200, 800);
-      scene.getStylesheets().addAll(
-        getClass().getResource("/styles.css").toExternalForm(),
-        getClass().getResource("/monopoly.css").toExternalForm()
-      );
-      stage.setScene(scene);
-      stage.show();
-    } catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Error loading Monopoly game", e);
-    }
-  }
-}
+ }

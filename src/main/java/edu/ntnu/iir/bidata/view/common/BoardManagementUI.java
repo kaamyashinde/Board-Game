@@ -139,7 +139,7 @@ public class BoardManagementUI {
     java.util.Optional<String> result = dialog.showAndWait();
     result.ifPresent(gameName -> {
       if (gameName != null) {
-        loadGame(gameName);
+        //TODO: Load the game
       }
     });
   }
@@ -170,27 +170,5 @@ public class BoardManagementUI {
     alert.setHeaderText(null);
     alert.setContentText(message);
     alert.showAndWait();
-  }
-
-  
-
-  
-
-  private void loadGame(String gameName) {
-    if (gameName != null && !gameName.isEmpty()) {
-      try {
-        // Get the game type from the file path
-        String gameType = gameName.contains("monopoly") ? "monopoly" : "snakesandladders";
-        
-        // Use the appropriate launcher method based on game type
-        if (gameType.equals("monopoly")) {
-          JavaFXBoardGameLauncher.getInstance().showMonopolyGameBoardWithLoad(ownerStage, gameName);
-        } else {
-          JavaFXBoardGameLauncher.getInstance().showSnakesAndLaddersGameBoardWithLoad(ownerStage, gameName);
-        }
-      } catch (Exception e) {
-        LOGGER.log(Level.SEVERE, "Error loading game", e);
-      }
-    }
   }
 }

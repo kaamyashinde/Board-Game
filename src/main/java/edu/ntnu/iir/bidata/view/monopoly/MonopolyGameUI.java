@@ -162,7 +162,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
                 Optional<String> result = dialog.showAndWait();
                 result.ifPresent(gameName -> {
                     try {
-                        controller.saveGame(gameName);
+                        //TODO: Save the game
                         actionLabel.setText("Game saved as: " + gameName);
                     } catch (Exception ex) {
                         actionLabel.setText("Error saving game: " + ex.getMessage());
@@ -205,7 +205,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
                 Optional<String> result = dialog.showAndWait();
                 result.ifPresent(gameName -> {
                     try {
-                        controller.loadGame(gameName, this);
+                        //TODO: Load the game
                         actionLabel.setText("Game loaded: " + gameName);
                     } catch (Exception ex) {
                         actionLabel.setText("Error loading game: " + ex.getMessage());
@@ -413,7 +413,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
                 dialog.setHeaderText("Enter a name for your saved game:");
                 java.util.Optional<String> saveName = dialog.showAndWait();
                 saveName.ifPresent(name -> {
-                    controller.saveGame(name);
+                    //TODO: Save the game
                     edu.ntnu.iir.bidata.view.common.JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
                 });
             } else if (result.get() == exitWithoutSaving) {

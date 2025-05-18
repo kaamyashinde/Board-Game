@@ -16,7 +16,6 @@ import edu.ntnu.iir.bidata.view.common.PlayerSelectionUI;
 import edu.ntnu.iir.bidata.view.common.JavaFXBoardGameLauncher;
 import edu.ntnu.iir.bidata.controller.MonopolyController;
 import edu.ntnu.iir.bidata.model.BoardGame;
-import edu.ntnu.iir.bidata.model.gamestate.MonopolyGameState;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson;
 import lombok.Getter;
 import java.nio.file.Paths;
@@ -194,8 +193,7 @@ public class MonopolyMenuUI {
                 try {
                     // Create controller and load game
                     BoardGameFileReaderGson reader = new BoardGameFileReaderGson();
-                    MonopolyGameState gameState = reader.readMonopolyGameState(Paths.get("src/main/resources/saved_games/monopoly", gameName + ".json"));
-                    BoardGame boardGame = gameState.toBoardGame();
+                    BoardGame boardGame = reader.readBoardGame(Paths.get("src/main/resources/saved_games/monopoly", gameName + ".json"));
                     
                     // Create view and controller
                     MonopolyGameUI gameUI = new MonopolyGameUI(boardGame, primaryStage);
@@ -206,7 +204,7 @@ public class MonopolyMenuUI {
                     boardGame.addObserver(gameUI);
                     
                     // Load game state and start
-                    controller.loadGame(gameName, gameUI);
+                    //TODO: Load the game
                     controller.startGame();
                     
                     // Create and set the scene
