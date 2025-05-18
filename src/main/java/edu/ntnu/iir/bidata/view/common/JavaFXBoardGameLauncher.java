@@ -8,6 +8,7 @@ import edu.ntnu.iir.bidata.model.board.Board;
 import edu.ntnu.iir.bidata.model.board.BoardFactory;
 import edu.ntnu.iir.bidata.model.board.MonopolyBoardFactory;
 import edu.ntnu.iir.bidata.model.player.Player;
+import edu.ntnu.iir.bidata.model.player.SimpleMonopolyPlayer;
 import edu.ntnu.iir.bidata.view.ludo.LudoGameUI;
 import edu.ntnu.iir.bidata.view.ludo.LudoMenuUI;
 import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI;
@@ -98,10 +99,19 @@ public class JavaFXBoardGameLauncher extends Application {
    * @param gameType The type of game to show (LUDO or SNAKES_AND_LADDERS)
    */
   private void handlePlayerSelection(Stage stage, List<String> selectedPlayerNames, GameType gameType) {
-    List<Player> players = selectedPlayerNames.stream().map(Player::new).toList();
     switch (gameType) {
-      case SNAKES_AND_LADDERS -> showSnakesAndLaddersGameBoard(stage, players);
-      case MONOPOLY -> showMonopolyGameBoard(stage, players);
+      case SNAKES_AND_LADDERS -> {
+        // For Snakes and Ladders, use generic Player
+        List<Player> players = selectedPlayerNames.stream().map(Player::new).toList();
+        showSnakesAndLaddersGameBoard(stage, players);
+      }
+      case MONOPOLY -> {
+        // For Monopoly, use SimpleMonopolyPlayer
+        List<SimpleMonopolyPlayer> players = selectedPlayerNames.stream()
+            .map(SimpleMonopolyPlayer::new)
+            .toList();
+        showMonopolyGameBoard(stage, players);
+      }
     }
   }
 
@@ -135,14 +145,13 @@ public class JavaFXBoardGameLauncher extends Application {
    * @param stage   The primary stage to show the game on
    * @param players The list of player names to use in the game
    */
-  private void showMonopolyGameBoard(Stage stage, List<Player> players) {
+  private void showMonopolyGameBoard(Stage stage, List<SimpleMonopolyPlayer> players) {
     LOGGER.info("Initializing Monopoly game with players: " + players);
     try {
       Board board = MonopolyBoardFactory.createBoard();
       BoardGame boardGame = new BoardGame(board, 1);
       players.forEach(player -> boardGame.addPlayer(player.getName()));
-
-      boardGame.setPlayers(players);
+      boardGame.setPlayers(new ArrayList<>(players)); // Cast to List<Player> if needed
       MonopolyGameUI monopolyGameUI = new MonopolyGameUI(boardGame, stage);
       stage.setScene(monopolyGameUI.getScene());
       stage.show();
