@@ -234,7 +234,7 @@ public class MonopolyController extends BaseGameController {
         }
         try {
             MonopolyGameState gameState = MonopolyGameState.fromBoardGame(boardGame);
-            Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
+            Path savePath = Paths.get("src/main/resources/saved_games/monopoly", gameName + ".json");
             // Serialize MonopolyGameState directly
             if (boardGameWriter instanceof edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson) {
                 ((edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson) boardGameWriter).writeMonopolyGameState(gameState, savePath);
@@ -249,7 +249,7 @@ public class MonopolyController extends BaseGameController {
 
     public void loadGame(String gameName, MonopolyGameUI ui) {
         try {
-            Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
+            Path savePath = Paths.get("src/main/resources/saved_games/monopoly", gameName + ".json");
             MonopolyGameState gameState;
             if (boardGameReader instanceof edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson) {
                 gameState = ((edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson) boardGameReader).readMonopolyGameState(savePath);

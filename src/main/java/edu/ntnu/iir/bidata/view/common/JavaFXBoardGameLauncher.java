@@ -1,10 +1,12 @@
 package edu.ntnu.iir.bidata.view.common;
 
 import edu.ntnu.iir.bidata.controller.LudoController;
+import edu.ntnu.iir.bidata.controller.MonopolyController;
 import edu.ntnu.iir.bidata.controller.SnakesAndLaddersController;
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.board.Board;
 import edu.ntnu.iir.bidata.model.board.BoardFactory;
+import edu.ntnu.iir.bidata.model.gamestate.MonopolyGameState;
 import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.view.ludo.LudoGameUI;
 import edu.ntnu.iir.bidata.view.ludo.LudoMenuUI;
@@ -26,6 +28,7 @@ import java.nio.file.Paths;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import java.util.ArrayList;
+import javafx.scene.Scene;
 
 /**
  * JavaFX application launcher for the board games UI. This class only handles UI navigation between
@@ -126,7 +129,8 @@ public class JavaFXBoardGameLauncher extends Application {
     MonopolyMenuUI menuUI = new MonopolyMenuUI(stage,
         selectedPlayerNames -> handlePlayerSelection(stage, selectedPlayerNames, GameType.MONOPOLY));
   }
-/**
+
+  /**
    * Displays the Monopoly game board UI.
    *
    * @param stage   The primary stage to show the game on
@@ -185,76 +189,79 @@ public class JavaFXBoardGameLauncher extends Application {
   }
 
   /**
-   * Displays the Snakes and Ladders game board UI with a loaded game.
+   * Displays the Snakes and Ladders game board UI with a loaded game state.
    *
-   * @param stage   The primary stage to show the game on
-   * @param gameName The name of the loaded game
+   * @param stage The primary stage to show the game on
+   * @param gameName The name of the saved game to load
    */
   public void showSnakesAndLaddersGameBoardWithLoad(Stage stage, String gameName) {
     LOGGER.info("Loading Snakes and Ladders game: " + gameName);
     try {
-      // Load the game state
+      // Create controller and load game
       BoardGameFileReaderGson reader = new BoardGameFileReaderGson();
-      Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
-      BoardGame boardGame = reader.readBoardGame(savePath);
+      BoardGame boardGame = reader.readBoardGame(Paths.get("src/main/resources/saved_games/snakesandladders", gameName + ".json"));
       List<Player> players = boardGame.getPlayers();
-
-      // Create view
+      
+      // Create view and controller
       SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(stage, players);
-      gameUI.setLoadedGame(true, gameName);
-
-      // Create controller and connect it with the view
       SnakesAndLaddersController controller = new SnakesAndLaddersController(boardGame);
       gameUI.setController(controller);
-
-      // Load the game state into the controller
-      controller.loadGame(gameName, gameUI);
-
-      // Register the UI as an observer
+      gameUI.setBoardGame(boardGame);
+      
+      // Register UI as observer
       boardGame.addObserver(gameUI);
-
-      // Start the game
+      
+      // Load game state and start
+      controller.loadGame(gameName, gameUI);
       controller.startGame();
-      LOGGER.info("Snakes and Ladders game loaded successfully");
+      
+      // Create and set the scene
+      Scene scene = new Scene(gameUI.getRoot(), 1200, 800);
+      scene.getStylesheets().addAll(
+        getClass().getResource("/styles.css").toExternalForm(),
+        getClass().getResource("/snakesandladders.css").toExternalForm()
+      );
+      stage.setScene(scene);
+      stage.show();
     } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Error loading Snakes and Ladders game", e);
     }
   }
 
   /**
-   * Displays the Monopoly game board UI with a loaded game.
+   * Displays the Monopoly game board UI with a loaded game state.
    *
-   * @param stage   The primary stage to show the game on
-   * @param gameName The name of the loaded game
+   * @param stage The primary stage to show the game on
+   * @param gameName The name of the saved game to load
    */
   public void showMonopolyGameBoardWithLoad(Stage stage, String gameName) {
     LOGGER.info("Loading Monopoly game: " + gameName);
     try {
-      // Load the game state
-      edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson reader = new edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson();
-      java.nio.file.Path savePath = java.nio.file.Paths.get("src/main/resources/saved_games", gameName + ".json");
-      edu.ntnu.iir.bidata.model.gamestate.MonopolyGameState gameState = reader.readMonopolyGameState(savePath);
-      edu.ntnu.iir.bidata.model.BoardGame boardGame = gameState.toBoardGame();
-
-      // Create view
-      edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI gameUI = new edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI(boardGame, stage);
+      // Create controller and load game
+      BoardGameFileReaderGson reader = new BoardGameFileReaderGson();
+      MonopolyGameState gameState = reader.readMonopolyGameState(Paths.get("src/main/resources/saved_games/monopoly", gameName + ".json"));
+      BoardGame boardGame = gameState.toBoardGame();
       
-      // Create controller and connect it with the view
-      edu.ntnu.iir.bidata.controller.MonopolyController controller = new edu.ntnu.iir.bidata.controller.MonopolyController(boardGame);
+      // Create view and controller
+      MonopolyGameUI gameUI = new MonopolyGameUI(boardGame, stage);
+      MonopolyController controller = new MonopolyController(boardGame);
       gameUI.setController(controller);
       
-      // Register the UI as an observer
+      // Register UI as observer
       boardGame.addObserver(gameUI);
       
-      // Load the game state into the controller
+      // Load game state and start
       controller.loadGame(gameName, gameUI);
-      
-      // Start the game
       controller.startGame();
       
-      stage.setScene(gameUI.getScene());
+      // Create and set the scene
+      Scene scene = new Scene(gameUI.getRoot(), 1200, 800);
+      scene.getStylesheets().addAll(
+        getClass().getResource("/styles.css").toExternalForm(),
+        getClass().getResource("/monopoly.css").toExternalForm()
+      );
+      stage.setScene(scene);
       stage.show();
-      LOGGER.info("Monopoly game loaded successfully");
     } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Error loading Monopoly game", e);
     }

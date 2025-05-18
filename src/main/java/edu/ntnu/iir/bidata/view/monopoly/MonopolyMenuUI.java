@@ -14,7 +14,14 @@ import java.util.function.Consumer;
 import edu.ntnu.iir.bidata.view.common.BoardManagementUI;
 import edu.ntnu.iir.bidata.view.common.PlayerSelectionUI;
 import edu.ntnu.iir.bidata.view.common.JavaFXBoardGameLauncher;
+import edu.ntnu.iir.bidata.controller.MonopolyController;
+import edu.ntnu.iir.bidata.model.BoardGame;
+import edu.ntnu.iir.bidata.model.gamestate.MonopolyGameState;
+import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson;
 import lombok.Getter;
+import java.nio.file.Paths;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MonopolyMenuUI {
     private final Stage primaryStage;
@@ -23,6 +30,7 @@ public class MonopolyMenuUI {
     @Getter
     private List<String> selectedPlayers = new ArrayList<>();
     private Label playerCountLabel;
+    private static final Logger LOGGER = Logger.getLogger(MonopolyMenuUI.class.getName());
 
     public MonopolyMenuUI(Stage primaryStage, Consumer<List<String>> onStartGame) {
         this.primaryStage = primaryStage;
@@ -150,7 +158,7 @@ public class MonopolyMenuUI {
 
         javafx.scene.control.ComboBox<String> gameList = new javafx.scene.control.ComboBox<>();
         gameList.setPromptText("Select a game");
-        java.io.File savedGamesDir = new java.io.File("src/main/resources/saved_games");
+        java.io.File savedGamesDir = new java.io.File("src/main/resources/saved_games/monopoly");
         final long MAX_SIZE = 1024 * 1024; // 1MB
         if (savedGamesDir.exists() && savedGamesDir.isDirectory()) {
             java.io.File[] files = savedGamesDir.listFiles((dir, name) -> name.endsWith(".json"));
@@ -158,17 +166,9 @@ public class MonopolyMenuUI {
                 for (java.io.File file : files) {
                     try {
                         if (file.length() > MAX_SIZE) continue; // Skip large files
-                        String json = java.nio.file.Files.readString(file.toPath());
-                        com.google.gson.Gson gson = new com.google.gson.Gson();
-                        edu.ntnu.iir.bidata.model.gamestate.MonopolyGameState gameState = gson.fromJson(json, edu.ntnu.iir.bidata.model.gamestate.MonopolyGameState.class);
-                        if ("MONOPOLY".equals(gameState.getGameType())) {
-                            gameList.getItems().add(file.getName().replace(".json", ""));
-                        }
-                    } catch (OutOfMemoryError oom) {
-                        // Skip files that are too large or cause OOM
-                        continue;
+                        gameList.getItems().add(file.getName().replace(".json", ""));
                     } catch (Exception e) {
-                        // Skip files that can't be read or aren't valid Monopoly saves
+                        // Skip files that can't be read
                         continue;
                     }
                 }
@@ -191,7 +191,35 @@ public class MonopolyMenuUI {
 
         dialog.showAndWait().ifPresent(gameName -> {
             if (gameName != null && !gameName.isEmpty()) {
-                JavaFXBoardGameLauncher.getInstance().showMonopolyGameBoardWithLoad(primaryStage, gameName);
+                try {
+                    // Create controller and load game
+                    BoardGameFileReaderGson reader = new BoardGameFileReaderGson();
+                    MonopolyGameState gameState = reader.readMonopolyGameState(Paths.get("src/main/resources/saved_games/monopoly", gameName + ".json"));
+                    BoardGame boardGame = gameState.toBoardGame();
+                    
+                    // Create view and controller
+                    MonopolyGameUI gameUI = new MonopolyGameUI(boardGame, primaryStage);
+                    MonopolyController controller = new MonopolyController(boardGame);
+                    gameUI.setController(controller);
+                    
+                    // Register UI as observer
+                    boardGame.addObserver(gameUI);
+                    
+                    // Load game state and start
+                    controller.loadGame(gameName, gameUI);
+                    controller.startGame();
+                    
+                    // Create and set the scene
+                    Scene scene = new Scene(gameUI.getRoot(), 1200, 800);
+                    scene.getStylesheets().addAll(
+                        getClass().getResource("/styles.css").toExternalForm(),
+                        getClass().getResource("/monopoly.css").toExternalForm()
+                    );
+                    primaryStage.setScene(scene);
+                    primaryStage.show();
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Error loading Monopoly game", e);
+                }
             }
         });
     }

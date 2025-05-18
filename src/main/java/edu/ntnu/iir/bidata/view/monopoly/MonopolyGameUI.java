@@ -67,6 +67,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
     private final Label diceLabel = new Label("Dice: -");
     protected BoardGame boardGame;
     private final Stage primaryStage;
+    private BorderPane root;
 
     public MonopolyGameUI(BoardGame boardGame, Stage primaryStage) {
         super(boardGame);
@@ -85,11 +86,10 @@ public class MonopolyGameUI extends JavaFXGameUI {
     }
 
     private void setupUI() {
-        // Configure main layout
-        mainLayout.getStyleClass().add("monopoly-main-layout");
-        mainLayout.setPadding(new Insets(20));
-        mainLayout.setPrefWidth(1000);
-        mainLayout.setPrefHeight(700);
+        root = new BorderPane();
+        root.setPadding(new Insets(20));
+        root.setPrefWidth(1000);
+        root.setPrefHeight(700);
 
         // Configure board pane
         boardPane.setHgap(2);
@@ -446,4 +446,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
         updateUI();
     }
 
+    public BorderPane getRoot() {
+        return root;
+    }
 }

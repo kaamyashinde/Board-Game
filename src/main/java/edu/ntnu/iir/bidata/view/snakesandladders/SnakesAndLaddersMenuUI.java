@@ -17,7 +17,14 @@ import edu.ntnu.iir.bidata.view.common.BoardManagementUI;
 import edu.ntnu.iir.bidata.view.common.PlayerSelectionUI;
 import edu.ntnu.iir.bidata.view.common.MainMenuUI;
 import edu.ntnu.iir.bidata.view.common.JavaFXBoardGameLauncher;
+import edu.ntnu.iir.bidata.controller.SnakesAndLaddersController;
+import edu.ntnu.iir.bidata.model.BoardGame;
+import edu.ntnu.iir.bidata.model.player.Player;
+import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson;
 import lombok.Getter;
+import java.nio.file.Paths;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SnakesAndLaddersMenuUI {
     private final Stage primaryStage;
@@ -31,6 +38,7 @@ public class SnakesAndLaddersMenuUI {
     @Getter
     private List<String> selectedPlayers = new ArrayList<>();
     private Label playerCountLabel;
+    private static final Logger LOGGER = Logger.getLogger(SnakesAndLaddersMenuUI.class.getName());
 
     /**
      * Creates a new Snakes and Ladders Menu UI
@@ -84,9 +92,7 @@ public class SnakesAndLaddersMenuUI {
         HBox boardButtons = new HBox(30);
         boardButtons.setAlignment(Pos.CENTER);
         Button loadBoardBtn = createMenuButton("LOAD BOARD");
-
-        loadBoardBtn.setOnAction(e -> boardManagementUI.showLoadBoardDialog());
-
+        loadBoardBtn.setOnAction(e -> showLoadBoardDialog());
         boardButtons.getChildren().add(loadBoardBtn);
         centerBox.getChildren().add(boardButtons);
 
@@ -173,5 +179,79 @@ public class SnakesAndLaddersMenuUI {
         button.setPrefHeight(50);
         button.getStyleClass().add("snl-menu-button");
         return button;
+    }
+
+    private void showLoadBoardDialog() {
+        javafx.scene.control.Dialog<String> dialog = new javafx.scene.control.Dialog<>();
+        dialog.setTitle("Load Snakes and Ladders Game");
+        dialog.setHeaderText("Select a saved game to load");
+
+        javafx.scene.control.ComboBox<String> gameList = new javafx.scene.control.ComboBox<>();
+        gameList.setPromptText("Select a game");
+        java.io.File savedGamesDir = new java.io.File("src/main/resources/saved_games/snakesandladders");
+        final long MAX_SIZE = 1024 * 1024; // 1MB
+        if (savedGamesDir.exists() && savedGamesDir.isDirectory()) {
+            java.io.File[] files = savedGamesDir.listFiles((dir, name) -> name.endsWith(".json"));
+            if (files != null) {
+                for (java.io.File file : files) {
+                    try {
+                        if (file.length() > MAX_SIZE) continue; // Skip large files
+                        gameList.getItems().add(file.getName().replace(".json", ""));
+                    } catch (Exception e) {
+                        // Skip files that can't be read
+                        continue;
+                    }
+                }
+            }
+        }
+
+        javafx.scene.layout.VBox content = new javafx.scene.layout.VBox(10);
+        content.getChildren().addAll(new javafx.scene.control.Label("Select a saved game:"), gameList);
+        dialog.getDialogPane().setContent(content);
+
+        javafx.scene.control.ButtonType loadButtonType = new javafx.scene.control.ButtonType("Load", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(loadButtonType, javafx.scene.control.ButtonType.CANCEL);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == loadButtonType) {
+                return gameList.getValue();
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(gameName -> {
+            if (gameName != null && !gameName.isEmpty()) {
+                try {
+                    // Create controller and load game
+                    BoardGameFileReaderGson reader = new BoardGameFileReaderGson();
+                    BoardGame boardGame = reader.readBoardGame(Paths.get("src/main/resources/saved_games/snakesandladders", gameName + ".json"));
+                    List<Player> players = boardGame.getPlayers();
+                    
+                    // Create view and controller
+                    SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(primaryStage, players);
+                    SnakesAndLaddersController controller = new SnakesAndLaddersController(boardGame);
+                    gameUI.setController(controller);
+                    gameUI.setBoardGame(boardGame);
+                    
+                    // Register UI as observer
+                    boardGame.addObserver(gameUI);
+                    
+                    // Load game state and start
+                    controller.loadGame(gameName, gameUI);
+                    controller.startGame();
+                    
+                    // Create and set the scene
+                    Scene scene = new Scene(gameUI.getRoot(), 1200, 800);
+                    scene.getStylesheets().addAll(
+                        getClass().getResource("/styles.css").toExternalForm(),
+                        getClass().getResource("/snakesandladders.css").toExternalForm()
+                    );
+                    primaryStage.setScene(scene);
+                    primaryStage.show();
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Error loading Snakes and Ladders game", e);
+                }
+            }
+        });
     }
 }

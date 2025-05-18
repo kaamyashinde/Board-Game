@@ -60,6 +60,7 @@ public class SnakesAndLaddersGameUI implements Observer {
   private BoardGame boardGame;
   private boolean isLoadedGame = false;
   private String loadedGameName = null;
+  private BorderPane root;
 
   /**
    * Constructor that receives the selected players from the menu
@@ -119,7 +120,7 @@ public class SnakesAndLaddersGameUI implements Observer {
     LOGGER.info("Setting up game page");
     primaryStage.setTitle("Snakes & Ladders - Game");
 
-    BorderPane root = new BorderPane();
+    root = new BorderPane();
     root.setPadding(new Insets(20));
     root.getStyleClass().add("snl-game-root");
 
@@ -520,5 +521,9 @@ public class SnakesAndLaddersGameUI implements Observer {
     // Update current player indicator
     String currentPlayer = controller.getCurrentSnakesAndLaddersPlayerName();
     updateCurrentPlayerIndicator(currentPlayer);
+  }
+
+  public BorderPane getRoot() {
+    return root;
   }
 }
