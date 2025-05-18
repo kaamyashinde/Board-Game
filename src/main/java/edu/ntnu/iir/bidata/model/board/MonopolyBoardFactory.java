@@ -1,6 +1,5 @@
-package edu.ntnu.iir.bidata.filehandling.board;
+package edu.ntnu.iir.bidata.model.board;
 
-import edu.ntnu.iir.bidata.model.board.Board;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.GoTile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.JailTile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.FreeParkingTile;

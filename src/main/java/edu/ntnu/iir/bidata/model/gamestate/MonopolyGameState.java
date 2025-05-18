@@ -2,12 +2,13 @@ package edu.ntnu.iir.bidata.model.gamestate;
 
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.board.Board;
+import edu.ntnu.iir.bidata.model.board.MonopolyBoardFactory;
 import edu.ntnu.iir.bidata.model.dice.Dice;
 import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.model.player.SimpleMonopolyPlayer;
 import edu.ntnu.iir.bidata.model.tile.core.Tile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.PropertyTile;
-import edu.ntnu.iir.bidata.filehandling.board.MonopolyBoardFactory;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
