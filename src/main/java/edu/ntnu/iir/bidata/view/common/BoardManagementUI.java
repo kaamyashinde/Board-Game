@@ -172,43 +172,9 @@ public class BoardManagementUI {
     alert.showAndWait();
   }
 
-  private void loadBoardFromJson() {
-    FileChooser fileChooser = new FileChooser();
-    fileChooser.setTitle("Load Board from JSON");
-    fileChooser.getExtensionFilters().add(
-        new FileChooser.ExtensionFilter("JSON Files", "*.json")
-    );
-    File file = fileChooser.showOpenDialog(ownerStage);
-    if (file != null) {
-      try {
-        currentBoard = new edu.ntnu.iir.bidata.filehandling.board.BoardFileReaderGson().readBoard(file.toPath());
-        showAlert("Board loaded from JSON file!");
-      } catch (Exception e) {
-        showAlert("Error loading board: " + e.getMessage());
-      }
-    }
-  }
+  
 
-  private void saveBoardToJson() {
-    // For demo: create a standard board if none loaded
-    if (currentBoard == null) {
-      currentBoard = edu.ntnu.iir.bidata.model.board.BoardFactory.createStandardBoard(16, new java.util.ArrayList<>());
-    }
-    FileChooser fileChooser = new FileChooser();
-    fileChooser.setTitle("Save Board to JSON");
-    fileChooser.getExtensionFilters().add(
-        new FileChooser.ExtensionFilter("JSON Files", "*.json")
-    );
-    File file = fileChooser.showSaveDialog(ownerStage);
-    if (file != null) {
-      try {
-        new edu.ntnu.iir.bidata.filehandling.board.BoardFileWriterGson().writeBoard(currentBoard, file.toPath());
-        showAlert("Board saved to JSON file!");
-      } catch (Exception e) {
-        showAlert("Error saving board: " + e.getMessage());
-      }
-    }
-  }
+  
 
   private void loadGame(String gameName) {
     if (gameName != null && !gameName.isEmpty()) {
