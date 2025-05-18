@@ -291,7 +291,7 @@ public class LudoGameUI implements Observer {
     backButton = new Button("← Back to Menu");
     backButton.setStyle("-fx-background-color: #e8c9ad; -fx-font-weight: bold;");
     backButton.setOnAction(e -> {
-      JavaFXBoardGameLauncher.getInstance().showLudoMenu(primaryStage);
+     // JavaFXBoardGameLauncher.getInstance().showLudoMenu(primaryStage);
     });
 
     topBar.getChildren().addAll(backButton, currentPlayerLabel, statusLabel);

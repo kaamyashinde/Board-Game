@@ -10,8 +10,10 @@ import edu.ntnu.iir.bidata.view.ludo.LudoGameUI;
 import edu.ntnu.iir.bidata.view.ludo.LudoMenuUI;
 import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI;
 import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersMenuUI;
+import edu.ntnu.iir.bidata.filehandling.board.MonopolyBoardFactory;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson;
 import edu.ntnu.iir.bidata.view.common.PlayerSelectionUI;
+import edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI;
 import edu.ntnu.iir.bidata.view.monopoly.MonopolyMenuUI;
 
 import java.util.List;
@@ -35,15 +37,16 @@ public class JavaFXBoardGameLauncher extends Application {
   private static JavaFXBoardGameLauncher instance;
 
   /**
-   * Main method - entry point for the application.
-   *
-   * @param args Command line arguments (not used)
+   * Enum representing the different types of games available
    */
-  public static void main(String[] args) {
-    LOGGER.info("Launching JavaFX application");
-    launch(args);
+  private enum GameType {
+    SNAKES_AND_LADDERS,
+    MONOPOLY
   }
 
+  /**
+   * Start the application and show the main menu
+   */
   @Override
   public void start(Stage primaryStage) {
     LOGGER.info("Starting JavaFX Board Game Launcher");
@@ -59,6 +62,16 @@ public class JavaFXBoardGameLauncher extends Application {
   }
 
   /**
+   * Main method - entry point for the application.
+   *
+   * @param args Command line arguments (not used)
+   */
+  public static void main(String[] args) {
+    LOGGER.info("Launching JavaFX application");
+    launch(args);
+  }
+
+  /**
    * Displays the main menu UI.
    *
    * @param stage The primary stage to show the menu on
@@ -68,13 +81,29 @@ public class JavaFXBoardGameLauncher extends Application {
     MainMenuUI menuUI = new MainMenuUI(stage,
         gameType -> {
             switch (gameType) {
-                case LUDO -> showLudoMenu(stage);
                 case SNAKES_AND_LADDERS -> showSnakesAndLaddersMenu(stage);
                 case MONOPOLY -> showMonopolyMenu(stage);
             }
         });
   }
 
+  /**
+   * Handles the player selection callback for game menus.
+   * Converts selected player names to Player objects and shows the appropriate game board.
+   *
+   * @param stage The primary stage to show the game on
+   * @param selectedPlayerNames List of selected player names
+   * @param gameType The type of game to show (LUDO or SNAKES_AND_LADDERS)
+   */
+  private void handlePlayerSelection(Stage stage, List<String> selectedPlayerNames, GameType gameType) {
+    List<Player> players = selectedPlayerNames.stream().map(Player::new).toList();
+    switch (gameType) {
+      case SNAKES_AND_LADDERS -> showSnakesAndLaddersGameBoard(stage, players);
+      case MONOPOLY -> showMonopolyGameBoard(stage, players);
+    }
+  }
+
+  //TODO: Make this into a more generic method
   /**
    * Displays the Snakes and Ladders game menu. This screen allows player selection and
    * configuration.
@@ -84,24 +113,7 @@ public class JavaFXBoardGameLauncher extends Application {
   public void showSnakesAndLaddersMenu(Stage stage) {
     LOGGER.info("Showing Snakes and Ladders menu");
     SnakesAndLaddersMenuUI menuUI = new SnakesAndLaddersMenuUI(stage,
-        selectedPlayerNames -> {
-            List<Player> players = selectedPlayerNames.stream().map(Player::new).toList();
-            showSnakesAndLaddersGameBoard(stage, players);
-        });
-  }
-
-  /**
-   * Displays the Ludo game menu. This screen allows player selection and configuration.
-   *
-   * @param stage The primary stage to show the menu on
-   */
-  public void showLudoMenu(Stage stage) {
-    LOGGER.info("Showing Ludo menu");
-    LudoMenuUI menuUI = new LudoMenuUI(stage,
-        selectedPlayerNames -> {
-            List<Player> players = selectedPlayerNames.stream().map(Player::new).toList();
-            showLudoGameBoard(stage, players);
-        });
+        selectedPlayerNames -> handlePlayerSelection(stage, selectedPlayerNames, GameType.SNAKES_AND_LADDERS));
   }
 
   /**
@@ -111,62 +123,31 @@ public class JavaFXBoardGameLauncher extends Application {
    */
   public void showMonopolyMenu(Stage stage) {
     LOGGER.info("Showing Monopoly menu");
-    MonopolyMenuUI menuUI = new edu.ntnu.iir.bidata.view.monopoly.MonopolyMenuUI(stage,
-        selectedPlayerNames -> {
-            try {
-                Board board = edu.ntnu.iir.bidata.filehandling.board.MonopolyBoardFactory.createBoard();
-                BoardGame boardGame = new BoardGame(board, 1);
-                List<Player> players = new ArrayList<>();
-                for (String name : selectedPlayerNames) {
-                    players.add(new edu.ntnu.iir.bidata.model.player.SimpleMonopolyPlayer(name));
-                }
-                boardGame.setPlayers(players);
-                edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI gameUI = new edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI(boardGame, stage);
-                stage.setScene(gameUI.getScene());
-                stage.show();
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Error initializing Monopoly game", e);
-            }
-        });
+    MonopolyMenuUI menuUI = new MonopolyMenuUI(stage,
+        selectedPlayerNames -> handlePlayerSelection(stage, selectedPlayerNames, GameType.MONOPOLY));
   }
-
-  /**
-   * Displays the Snakes and Ladders game board UI with a loaded game.
+/**
+   * Displays the Monopoly game board UI.
    *
    * @param stage   The primary stage to show the game on
-   * @param gameName The name of the loaded game
+   * @param players The list of player names to use in the game
    */
-  public void showSnakesAndLaddersGameBoardWithLoad(Stage stage, String gameName) {
-    LOGGER.info("Loading Snakes and Ladders game: " + gameName);
+  private void showMonopolyGameBoard(Stage stage, List<Player> players) {
+    LOGGER.info("Initializing Monopoly game with players: " + players);
     try {
-      // Load the game state
-      BoardGameFileReaderGson reader = new BoardGameFileReaderGson();
-      Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
-      BoardGame boardGame = reader.readBoardGame(savePath);
-      List<Player> players = boardGame.getPlayers();
+      Board board = MonopolyBoardFactory.createBoard();
+      BoardGame boardGame = new BoardGame(board, 1);
+      players.forEach(player -> boardGame.addPlayer(player.getName()));
 
-      // Create view
-      SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(stage, players);
-      gameUI.setLoadedGame(true, gameName);
-
-      // Create controller and connect it with the view
-      SnakesAndLaddersController controller = new SnakesAndLaddersController(boardGame);
-      gameUI.setController(controller);
-
-      // Load the game state into the controller
-      controller.loadGame(gameName, gameUI);
-
-      // Register the UI as an observer
-      boardGame.addObserver(gameUI);
-
-      // Start the game
-      controller.startGame();
-      LOGGER.info("Snakes and Ladders game loaded successfully");
+      boardGame.setPlayers(players);
+      MonopolyGameUI monopolyGameUI = new MonopolyGameUI(boardGame, stage);
+      stage.setScene(monopolyGameUI.getScene());
+      stage.show();
     } catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Error loading Snakes and Ladders game", e);
+      LOGGER.log(Level.SEVERE, "Error initializing Monopoly game", e);
     }
   }
-
+  
   /**
    * Displays the Snakes and Ladders game board UI.
    *
@@ -204,39 +185,39 @@ public class JavaFXBoardGameLauncher extends Application {
   }
 
   /**
-   * Displays the Ludo game board UI.
+   * Displays the Snakes and Ladders game board UI with a loaded game.
    *
    * @param stage   The primary stage to show the game on
-   * @param players The list of player names to use in the game
+   * @param gameName The name of the loaded game
    */
-  private void showLudoGameBoard(Stage stage, List<Player> players) {
-    LOGGER.info("Initializing Ludo game with players: " + players);
+  public void showSnakesAndLaddersGameBoardWithLoad(Stage stage, String gameName) {
+    LOGGER.info("Loading Snakes and Ladders game: " + gameName);
     try {
+      // Load the game state
+      BoardGameFileReaderGson reader = new BoardGameFileReaderGson();
+      Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
+      BoardGame boardGame = reader.readBoardGame(savePath);
+      List<Player> players = boardGame.getPlayers();
+
       // Create view
-      LudoGameUI gameUI = new LudoGameUI(stage, players);
+      SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(stage, players);
+      gameUI.setLoadedGame(true, gameName);
 
-      // Create model
-      Board board = BoardFactory.createLudoBoard(players);
-      BoardGame boardGame = new BoardGame(board, 1);
+      // Create controller and connect it with the view
+      SnakesAndLaddersController controller = new SnakesAndLaddersController(boardGame);
+      gameUI.setController(controller);
 
-      // Add players to the model
-      for (Player player : players) {
-        boardGame.addPlayer(player.getName());
-      }
+      // Load the game state into the controller
+      controller.loadGame(gameName, gameUI);
 
       // Register the UI as an observer
       boardGame.addObserver(gameUI);
 
-      // Create controller and connect it with the view
-      LudoController controller = new LudoController(boardGame);
-      gameUI.setController(controller);
-      controller.setPlayerNames(players.stream().map(Player::getName).toList());
-
       // Start the game
       controller.startGame();
-      LOGGER.info("Ludo game started successfully");
+      LOGGER.info("Snakes and Ladders game loaded successfully");
     } catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Error initializing Ludo game", e);
+      LOGGER.log(Level.SEVERE, "Error loading Snakes and Ladders game", e);
     }
   }
 
