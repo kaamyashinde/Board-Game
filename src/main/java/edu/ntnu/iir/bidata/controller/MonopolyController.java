@@ -6,10 +6,6 @@ import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.model.player.SimpleMonopolyPlayer;
 import edu.ntnu.iir.bidata.model.tile.core.Tile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.PropertyTile;
-import edu.ntnu.iir.bidata.filehandling.game.GameStateFileWriter;
-import edu.ntnu.iir.bidata.filehandling.game.GameStateFileReader;
-import edu.ntnu.iir.bidata.filehandling.game.GameStateFileWriterGson;
-import edu.ntnu.iir.bidata.filehandling.game.GameStateFileReaderGson;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriter;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReader;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson;
@@ -29,8 +25,6 @@ import java.io.File;
  */
 public class MonopolyController extends BaseGameController {
     private static final Logger LOGGER = Logger.getLogger(MonopolyController.class.getName());
-    private final GameStateFileWriter gameStateWriter;
-    private final GameStateFileReader gameStateReader;
     private final BoardGameFileWriter boardGameWriter;
     private final BoardGameFileReader boardGameReader;
     private boolean gameStarted = false;
@@ -43,8 +37,6 @@ public class MonopolyController extends BaseGameController {
 
     public MonopolyController(BoardGame boardGame) {
         super(boardGame);
-        this.gameStateWriter = new GameStateFileWriterGson();
-        this.gameStateReader = new GameStateFileReaderGson();
         this.boardGameWriter = new BoardGameFileWriterGson();
         this.boardGameReader = new BoardGameFileReaderGson();
         LOGGER.info("MonopolyController initialized");

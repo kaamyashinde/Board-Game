@@ -350,7 +350,7 @@ public class JavaFXGameUI implements Observer {
       Optional<String> result = dialog.showAndWait();
       result.ifPresent(gameName -> {
         try {
-          controller.saveGame(gameName);
+          //controller.saveGame(gameName);
           statusLabel.setText("Game saved as: " + gameName);
         } catch (Exception ex) {
           statusLabel.setText("Error saving game: " + ex.getMessage());

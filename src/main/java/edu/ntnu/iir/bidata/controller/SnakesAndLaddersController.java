@@ -4,10 +4,6 @@ import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.Observable;
 import edu.ntnu.iir.bidata.model.game.GameState;
 import edu.ntnu.iir.bidata.model.player.Player;
-import edu.ntnu.iir.bidata.filehandling.game.GameStateFileWriter;
-import edu.ntnu.iir.bidata.filehandling.game.GameStateFileReader;
-import edu.ntnu.iir.bidata.filehandling.game.GameStateFileWriterGson;
-import edu.ntnu.iir.bidata.filehandling.game.GameStateFileReaderGson;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriter;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReader;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson;
@@ -35,8 +31,6 @@ public class SnakesAndLaddersController extends BaseGameController {
     private final int[][] ladders = {
         {3, 36}, {8, 12}, {14, 26}, {31, 73}, {59, 80}, {83, 97}, {90, 92}
     };
-    private final GameStateFileWriter gameStateWriter;
-    private final GameStateFileReader gameStateReader;
     private final BoardGameFileWriter boardGameWriter;
     private final BoardGameFileReader boardGameReader;
     private boolean gameStarted = false;
@@ -45,8 +39,6 @@ public class SnakesAndLaddersController extends BaseGameController {
     public SnakesAndLaddersController(BoardGame boardGame) {
         super(boardGame);
         this.boardGame = boardGame;
-        this.gameStateWriter = new GameStateFileWriterGson();
-        this.gameStateReader = new GameStateFileReaderGson();
         this.boardGameWriter = new BoardGameFileWriterGson();
         this.boardGameReader = new BoardGameFileReaderGson();
         LOGGER.info("SnakesAndLaddersController initialized");
