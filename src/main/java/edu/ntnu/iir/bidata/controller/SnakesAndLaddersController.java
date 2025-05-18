@@ -159,27 +159,7 @@ public class SnakesAndLaddersController extends BaseGameController {
         return new MoveResult(0, 0, "normal");
     }
 
-    public void saveGame(String savePath) {
-        if (!gameStarted) {
-            LOGGER.warning("Cannot save game: Game has not started");
-            return;
-        }
-        try {
-            // Ensure the saved_games/snakesandladders directory exists
-            File savedGamesDir = new File("src/main/resources/saved_games/snakesandladders");
-            if (!savedGamesDir.exists()) {
-                savedGamesDir.mkdirs();
-            }
-            
-            // Create the full path including the directory
-            Path path = Paths.get("src/main/resources/saved_games/snakesandladders", savePath + ".json");
-            boardGameWriter.writeBoardGame(boardGame, path);
-            LOGGER.info("Game saved to: " + path);
-        } catch (IOException e) {
-            LOGGER.severe("Failed to save game: " + e.getMessage());
-        }
-    }
-
+  
     public void loadGame(String savePath, edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI ui) {
         try {
             Path path = Paths.get(savePath);
@@ -230,18 +210,6 @@ public class SnakesAndLaddersController extends BaseGameController {
         nextSnakesAndLaddersPlayer();
     }
 
-    public void saveGameToPath(Path savePath) {
-        if (!gameStarted) {
-            LOGGER.warning("Cannot save game: Game has not started");
-            return;
-        }
-        try {
-            boardGameWriter.writeBoardGame(boardGame, savePath);
-            LOGGER.info("Game saved to: " + savePath);
-        } catch (IOException e) {
-            LOGGER.severe("Failed to save game: " + e.getMessage());
-        }
-    }
 
     public void loadGameFromPath(Path savePath, edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI ui) {
         try {

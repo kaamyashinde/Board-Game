@@ -1,8 +1,11 @@
 package edu.ntnu.iir.bidata.controller;
 
+import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson;
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.player.Player;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.logging.Logger;
 import lombok.Getter;
@@ -65,4 +68,17 @@ public abstract class BaseGameController {
      * Must be implemented by specific game controllers
      */
     public abstract void handlePlayerMove();
+
+    /**
+     * Saves a board game to be opened later.
+     */
+    public void saveGame(String gameName) {
+        BoardGameFileWriterGson writer = new BoardGameFileWriterGson();
+        Path savePath = Path.of("src/main/resources/saved_games/" + gameName + ".json");
+        try {
+            writer.writeBoardGame(boardGame, savePath);
+        } catch (IOException e) {
+            LOGGER.severe("Failed to save game: " + e.getMessage());
+        }
+    }
 } 

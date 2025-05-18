@@ -1,5 +1,6 @@
 package edu.ntnu.iir.bidata.view.snakesandladders;
 
+import edu.ntnu.iir.bidata.controller.BaseGameController;
 import edu.ntnu.iir.bidata.controller.SnakesAndLaddersController;
 import edu.ntnu.iir.bidata.model.Observer;
 import edu.ntnu.iir.bidata.model.player.Player;
@@ -44,7 +45,8 @@ public class SnakesAndLaddersGameUI implements Observer {
   private final Map<String, Circle> playerTokenMap = new HashMap<>();
   private final Map<String, Label> playerPositionLabels = new HashMap<>();
   private final int TILE_SIZE = 50;
-  private final int BOARD_SIZE = 10; // 10x10 board
+  private int gridSize;
+  private int boardSize;
   private final Color[] PLAYER_COLORS = {
       Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.PURPLE
   };
@@ -117,6 +119,12 @@ public class SnakesAndLaddersGameUI implements Observer {
     statusLabel.setText(currentPlayer + "'s Turn");
   }
 
+  private void handleSaveGame(){
+
+    LOGGER.info("NEW FEAT: Saving game: " + "new-game");
+    controller.saveGame("new-game");
+    
+  }
   private void setupGamePage() {
     LOGGER.info("Setting up game page");
     primaryStage.setTitle("Snakes & Ladders - Game");
@@ -136,7 +144,7 @@ public class SnakesAndLaddersGameUI implements Observer {
 
     saveButton = new Button("Save Game");
     saveButton.getStyleClass().add("game-control-button");
-    saveButton.setOnAction(e -> handleSaveGame());
+    saveButton.setOnAction(e -> handleSaveGame()); //TODO: Implement the save game logic in controller or use from base game controller
 
     topBar.getChildren().addAll(backButton, saveButton);
     root.setTop(topBar);
@@ -145,12 +153,20 @@ public class SnakesAndLaddersGameUI implements Observer {
     StackPane boardPane = new StackPane();
     boardPane.setAlignment(Pos.CENTER_LEFT);
 
+    if (boardGame != null && boardGame.getBoard() != null) {
+      this.boardSize = boardGame.getBoard().getSizeOfBoard();
+      this.gridSize = (int) Math.ceil(Math.sqrt(boardSize));
+    } else {
+      this.boardSize = 100;
+      this.gridSize = 10;
+    }
+
     // Load custom board image
     Image boardImage = new Image(
         Objects.requireNonNull(getClass().getResourceAsStream("/snakes_and_ladders_board.jpeg")));
     ImageView boardView = new ImageView(boardImage);
-    boardView.setFitWidth(TILE_SIZE * BOARD_SIZE);
-    boardView.setFitHeight(TILE_SIZE * BOARD_SIZE);
+    boardView.setFitWidth(TILE_SIZE * gridSize);
+    boardView.setFitHeight(TILE_SIZE * gridSize);
     boardView.setPreserveRatio(false);
 
     // Add the board image to the pane
@@ -390,11 +406,11 @@ public class SnakesAndLaddersGameUI implements Observer {
     if (position == 0) {
       // Starting position (off board)
       token.setTranslateX(20);
-      token.setTranslateY(TILE_SIZE * BOARD_SIZE + 20);
+      token.setTranslateY(TILE_SIZE * gridSize + 20);
       return;
     }
 
-    if (position < 1 || position > 100) {
+    if (position < 1 || position > boardSize) {
       return;
     }
 
@@ -420,22 +436,22 @@ public class SnakesAndLaddersGameUI implements Observer {
    * @return x, y coordinates for the position on the board
    */
   public int[] getCoordinatesForPosition(int position) {
-    if (position < 1 || position > 100) {
-      throw new IllegalArgumentException("Position must be between 1 and 100");
+    if (position < 1 || position > boardSize) {
+      throw new IllegalArgumentException("Position must be between 1 and " + boardSize);
     }
 
-    int row = (position - 1) / BOARD_SIZE;
+    int row = (position - 1) / gridSize;
     int col;
 
     // Handle snake and ladder board row alternating direction
-    if (row % 2 == 0) { // Even rows (0, 2, 4, 6, 8) go left to right
-      col = (position - 1) % BOARD_SIZE;
-    } else { // Odd rows (1, 3, 5, 7, 9) go right to left
-      col = BOARD_SIZE - 1 - ((position - 1) % BOARD_SIZE);
+    if (row % 2 == 0) { // Even rows (0, 2, 4, ...) go left to right
+      col = (position - 1) % gridSize;
+    } else { // Odd rows go right to left
+      col = gridSize - 1 - ((position - 1) % gridSize);
     }
 
     // Flip row because the board starts from the bottom
-    row = BOARD_SIZE - row;
+    row = gridSize - row;
 
     // Calculate pixel coordinates (adding offset to center token in tile)
     int x = col * TILE_SIZE + TILE_SIZE / 2;
@@ -476,38 +492,12 @@ public class SnakesAndLaddersGameUI implements Observer {
     return root;
   }
 
-  private void handleSaveGame() {
-    if (controller != null) {
-      TextInputDialog dialog = new TextInputDialog();
-      dialog.setTitle("Save Game");
-      dialog.setHeaderText("Enter a name for your saved game");
-      dialog.setContentText("Game name:");
-
-      Optional<String> result = dialog.showAndWait();
-      result.ifPresent(gameName -> {
-        try {
-          // Ensure the saved_games/snakesandladders directory exists
-          File savedGamesDir = new File("src/main/resources/saved_games/snakesandladders");
-          if (!savedGamesDir.exists()) {
-            savedGamesDir.mkdirs();
-          }
-
-          // Save the game using the controller
-          controller.saveGame(gameName);
-          statusLabel.setText("Game saved as: " + gameName);
-        } catch (Exception ex) {
-          LOGGER.log(Level.SEVERE, "Error saving game", ex);
-          statusLabel.setText("Error saving game: " + ex.getMessage());
-        }
-      });
-    }
-  }
-
+ 
   private void handleBackToMainMenu() {
     if (isLoadedGame && loadedGameName != null) {
       // Auto-save loaded games
       try {
-        controller.saveGame(loadedGameName);
+        //controller.saveGame(loadedGameName);
         JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
       } catch (Exception e) {
         LOGGER.log(Level.SEVERE, "Error auto-saving game", e);
@@ -528,7 +518,7 @@ public class SnakesAndLaddersGameUI implements Observer {
 
       dialog.showAndWait().ifPresent(response -> {
         if (response == saveButtonType) {
-          handleSaveGame();
+         // handleSaveGame();
           // Wait a bit for the save to complete before returning to main menu
           PauseTransition pause = new PauseTransition(Duration.millis(500));
           pause.setOnFinished(event -> {
