@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 import lombok.Getter;
 import java.io.IOException;
+import java.io.File;
 
 /**
  * Controller class specifically for Snakes and Ladders game logic.
@@ -172,9 +173,16 @@ public class SnakesAndLaddersController extends BaseGameController {
             return;
         }
         try {
-            Path path = Paths.get(savePath);
+            // Ensure the saved_games/snakesandladders directory exists
+            File savedGamesDir = new File("src/main/resources/saved_games/snakesandladders");
+            if (!savedGamesDir.exists()) {
+                savedGamesDir.mkdirs();
+            }
+            
+            // Create the full path including the directory
+            Path path = Paths.get("src/main/resources/saved_games/snakesandladders", savePath + ".json");
             boardGameWriter.writeBoardGame(boardGame, path);
-            LOGGER.info("Game saved to: " + savePath);
+            LOGGER.info("Game saved to: " + path);
         } catch (IOException e) {
             LOGGER.severe("Failed to save game: " + e.getMessage());
         }

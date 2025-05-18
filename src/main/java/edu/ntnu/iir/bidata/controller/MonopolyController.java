@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
 import java.io.IOException;
+import java.io.File;
 
 /**
  * Controller class specifically for Monopoly game logic.
@@ -233,6 +234,12 @@ public class MonopolyController extends BaseGameController {
             return;
         }
         try {
+            // Ensure the saved_games/monopoly directory exists
+            File savedGamesDir = new File("src/main/resources/saved_games/monopoly");
+            if (!savedGamesDir.exists()) {
+                savedGamesDir.mkdirs();
+            }
+            
             MonopolyGameState gameState = MonopolyGameState.fromBoardGame(boardGame);
             Path savePath = Paths.get("src/main/resources/saved_games/monopoly", gameName + ".json");
             // Serialize MonopolyGameState directly
@@ -241,7 +248,7 @@ public class MonopolyController extends BaseGameController {
             } else {
                 throw new IOException("BoardGameWriter does not support MonopolyGameState");
             }
-            LOGGER.info("Game saved: " + gameName);
+            LOGGER.info("Game saved to: " + savePath);
         } catch (IOException e) {
             LOGGER.severe("Failed to save game: " + e.getMessage());
         }
