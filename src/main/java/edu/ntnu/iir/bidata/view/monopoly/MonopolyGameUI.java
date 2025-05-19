@@ -19,7 +19,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -40,7 +39,6 @@ public class MonopolyGameUI extends JavaFXGameUI {
   private final Button payRentButton = new Button("Pay Rent");
   private final Button jailRollButton = new Button("Roll Dice (Jail)");
   private final Button jailPayButton = new Button("Pay $50");
-  private final Button saveButton = new Button("Save Game");
   private final Label actionLabel = new Label("");
   private final Color BLANK_COLOR = Color.LIGHTGRAY;
   private final Color[] GROUP_COLORS = {
@@ -57,7 +55,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
   private final Label diceLabel = new Label("Dice: -");
   private final Stage primaryStage;
   protected BoardGame boardGame;
-  private Button backButton;
+
   @Setter private MonopolyController controller;
   private BorderPane root;
 
@@ -71,7 +69,6 @@ public class MonopolyGameUI extends JavaFXGameUI {
     this.playerInfoPanel = new VBox(10);
     this.gameControls = new HBox(10);
 
-    this.backButton = CommonButtons.backToMainMenu(primaryStage, true, controller);
     // Set player names in controller to avoid NullPointerException
     List<String> playerNames = boardGame.getPlayers().stream().map(Player::getName).toList();
     controller.setPlayerNames(playerNames);
@@ -79,6 +76,8 @@ public class MonopolyGameUI extends JavaFXGameUI {
   }
 
   private void setupUI() {
+    Button backButton;
+    Button saveButton;
     root = new BorderPane();
     root.setPadding(new Insets(20));
     root.setPrefWidth(1000);
@@ -137,12 +136,13 @@ public class MonopolyGameUI extends JavaFXGameUI {
     jailPayButton.getStyleClass().add("monopoly-jail-pay-button");
     jailPayButton.setOnAction(e -> handleJailPay());
 
+    backButton = CommonButtons.backToMainMenu(primaryStage, true, controller);
     backButton.getStyleClass().add("monopoly-back-button");
 
     actionLabel.getStyleClass().add("monopoly-action-label");
 
+    saveButton = CommonButtons.saveGameBtn(true, controller, actionLabel);
     saveButton.getStyleClass().add("game-control-button");
-    setSaveGameAction();
 
     gameControls.getChildren().add(backButton);
     gameControls
@@ -160,30 +160,6 @@ public class MonopolyGameUI extends JavaFXGameUI {
     // Add stylesheets
     getScene().getStylesheets().add(getClass().getResource("/monopoly.css").toExternalForm());
     getScene().getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
-  }
-
-  private void setSaveGameAction() {
-    saveButton.setOnAction(
-        e -> {
-          if (controller != null) {
-            TextInputDialog dialog = new TextInputDialog();
-            dialog.setTitle("Save Game");
-            dialog.setHeaderText("Enter a name for your saved game");
-            dialog.setContentText("Game name:");
-
-            Optional<String> result = dialog.showAndWait();
-            result.ifPresent(
-                gameName -> {
-                  try {
-                    LOGGER.info("Saving game as: " + gameName);
-                    controller.saveGame(gameName, true);
-                    actionLabel.setText("Game saved as: " + gameName);
-                  } catch (Exception ex) {
-                    actionLabel.setText("Error saving game: " + ex.getMessage());
-                  }
-                });
-          }
-        });
   }
 
   private void handleRollDice() {
