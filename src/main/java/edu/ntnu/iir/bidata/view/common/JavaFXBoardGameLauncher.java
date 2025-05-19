@@ -1,7 +1,5 @@
 package edu.ntnu.iir.bidata.view.common;
 
-import edu.ntnu.iir.bidata.controller.LudoController;
-import edu.ntnu.iir.bidata.controller.MonopolyController;
 import edu.ntnu.iir.bidata.controller.SnakesAndLaddersController;
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.board.Board;
@@ -9,12 +7,9 @@ import edu.ntnu.iir.bidata.model.board.BoardFactory;
 import edu.ntnu.iir.bidata.model.board.MonopolyBoardFactory;
 import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.model.player.SimpleMonopolyPlayer;
-import edu.ntnu.iir.bidata.view.ludo.LudoGameUI;
-import edu.ntnu.iir.bidata.view.ludo.LudoMenuUI;
 import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI;
 import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersMenuUI;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson;
-import edu.ntnu.iir.bidata.view.common.PlayerSelectionUI;
 import edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI;
 import edu.ntnu.iir.bidata.view.monopoly.MonopolyMenuUI;
 
@@ -23,10 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.stage.Stage;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import java.util.ArrayList;
 import javafx.scene.Scene;
 
@@ -207,7 +199,7 @@ public class JavaFXBoardGameLauncher extends Application {
     try {
       // Create controller and load game
       BoardGameFileReaderGson reader = new BoardGameFileReaderGson();
-      BoardGame boardGame = reader.readBoardGame(Paths.get("src/main/resources/saved_games/snakesandladders", gameName + ".json"));
+      BoardGame boardGame = reader.readBoardGame(Paths.get("src/main/resources/saved_games", gameName + ".json"));
       List<Player> players = boardGame.getPlayers();
       
       // Create view and controller
@@ -220,7 +212,7 @@ public class JavaFXBoardGameLauncher extends Application {
       boardGame.addObserver(gameUI);
       
       // Load game state and start
-      controller.loadGame(gameName, gameUI);
+      controller.loadSnakesAndLadderGame(gameName, gameUI);
       controller.startGame();
       
       // Create and set the scene
