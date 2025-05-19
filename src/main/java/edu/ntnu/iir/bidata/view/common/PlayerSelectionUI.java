@@ -1,5 +1,6 @@
 package edu.ntnu.iir.bidata.view.common;
 
+import java.io.InputStream;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -131,29 +132,37 @@ public class PlayerSelectionUI {
   }
 
   private void loadPlayersFromCSV() {
-    FileChooser fileChooser = new FileChooser();
-    fileChooser.setTitle("Select Players CSV File");
-    fileChooser.getExtensionFilters().add(
-        new FileChooser.ExtensionFilter("CSV Files", "*.csv")
-    );
+    try {
+      // Load from the built-in CSV file in resources folder
+      String resourcePath = "/saved_players/saved_players.csv";
+      InputStream inputStream = getClass().getResourceAsStream(resourcePath);
 
-    File file = fileChooser.showOpenDialog(stage);
-    if (file != null) {
-      try {
-        java.util.List<edu.ntnu.iir.bidata.model.player.Player> loadedPlayers =
-            new edu.ntnu.iir.bidata.filehandling.player.PlayerFileReaderCSV().readPlayers(file.toPath());
-        int count = 0;
-        for (edu.ntnu.iir.bidata.model.player.Player player : loadedPlayers) {
-          String name = player.getName();
-          if (!name.isEmpty() && !playersList.contains(name) && count < 5) {
-            playersList.add(name);
-            count++;
-          }
-        }
-        statusLabel.setText("Loaded " + count + " players from CSV");
-      } catch (Exception e) {
-        statusLabel.setText("Error loading CSV: " + e.getMessage());
+      if (inputStream == null) {
+        statusLabel.setText("Error: Built-in players file not found!");
+        return;
       }
+
+      // Use the new method to read directly from InputStream
+      java.util.List<edu.ntnu.iir.bidata.model.player.Player> loadedPlayers =
+          new edu.ntnu.iir.bidata.filehandling.player.PlayerFileReaderCSV().readPlayersFromInputStream(inputStream);
+
+      // Clear existing players first to avoid duplicates
+      playersList.clear();
+
+      int count = 0;
+      for (edu.ntnu.iir.bidata.model.player.Player player : loadedPlayers) {
+        String name = player.getName();
+        if (!name.isEmpty() && count < 5) {
+          playersList.add(name);
+          count++;
+        }
+      }
+
+      inputStream.close();
+      statusLabel.setText("Loaded " + count + " players from built-in CSV");
+
+    } catch (Exception e) {
+      statusLabel.setText("Error loading built-in CSV: " + e.getMessage());
     }
   }
 
