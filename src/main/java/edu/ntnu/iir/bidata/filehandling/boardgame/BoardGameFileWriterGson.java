@@ -66,6 +66,8 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
   private void writeMonopolyGameToJson(BoardGame boardGame, Path path) throws IOException {
     // Create a simplified version of the board game for serialization
     Map<String, Object> simplifiedGame = new HashMap<>();
+    simplifiedGame.put("dice", boardGame.getDice());
+
 
     // Serialize essential tile data
     Map<String, Map<String, Object>> tilesData = new HashMap<>();
