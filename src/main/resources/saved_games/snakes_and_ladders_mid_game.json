@@ -1,0 +1,48 @@
+{
+  "gameType": "SNAKES_AND_LADDERS",
+  "gameName": "Snakes and Ladders Mid-Game Save",
+  "currentPlayerIndex": 1,
+  "roundNumber": 15,
+  "gameOver": false,
+  "players": [
+    {
+      "name": "Player 1",
+      "currentPosition": 45,
+      "skipNextTurn": false,
+      "playerType": "SNAKES_AND_LADDERS"
+    },
+    {
+      "name": "Player 2",
+      "currentPosition": 78,
+      "skipNextTurn": true,
+      "playerType": "SNAKES_AND_LADDERS"
+    },
+    {
+      "name": "Player 3",
+      "currentPosition": 92,
+      "skipNextTurn": false,
+      "playerType": "SNAKES_AND_LADDERS"
+    }
+  ],
+  "board": {
+    "sizeOfBoard": 100,
+    "boardType": "SNAKES_AND_LADDERS",
+    "tiles": [
+      {"id": 0, "type": "START"},
+      {"id": 3, "type": "LADDER", "action": {"type": "LadderAction", "topTileId": 36}},
+      {"id": 8, "type": "LADDER", "action": {"type": "LadderAction", "topTileId": 12}},
+      {"id": 14, "type": "LADDER", "action": {"type": "LadderAction", "topTileId": 26}},
+      {"id": 29, "type": "SNAKE", "action": {"type": "SnakeAction", "tailTileId": 11}},
+      {"id": 31, "type": "LADDER", "action": {"type": "LadderAction", "topTileId": 73}},
+      {"id": 38, "type": "SNAKE", "action": {"type": "SnakeAction", "tailTileId": 2}},
+      {"id": 59, "type": "LADDER", "action": {"type": "LadderAction", "topTileId": 80}},
+      {"id": 78, "type": "SNAKE", "action": {"type": "SnakeAction", "tailTileId": 15}},
+      {"id": 83, "type": "LADDER", "action": {"type": "LadderAction", "topTileId": 97}},
+      {"id": 89, "type": "SNAKE", "action": {"type": "SnakeAction", "tailTileId": 86}},
+      {"id": 90, "type": "LADDER", "action": {"type": "LadderAction", "topTileId": 92}},
+      {"id": 95, "type": "SNAKE", "action": {"type": "SnakeAction", "tailTileId": 75}},
+      {"id": 99, "type": "SNAKE", "action": {"type": "SnakeAction", "tailTileId": 41}},
+      {"id": 100, "type": "END"}
+    ]
+  }
+} 
