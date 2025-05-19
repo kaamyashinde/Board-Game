@@ -115,13 +115,6 @@ public class SnakesAndLaddersGameUI implements Observer {
     topBar.getChildren().addAll(backButton, saveButton);
     root.setTop(topBar);
   }
-
-  private void handleSaveGame() {
-
-    LOGGER.info("NEW FEAT: Saving game: " + "new-game");
-    controller.saveGame("new-game", false);
-  }
-
   /**
    * Sets whether this is a loaded game and its name
    *
