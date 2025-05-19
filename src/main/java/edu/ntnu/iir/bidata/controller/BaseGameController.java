@@ -56,7 +56,8 @@ public abstract class BaseGameController {
   /** Saves a board game to be opened later. */
   public void saveGame(String gameName, boolean isMonopoly) {
     BoardGameFileWriterGson writer = new BoardGameFileWriterGson();
-    Path savePath = Path.of(GAME_PATH + gameName + ".json");
+    String newPath = GAME_PATH + (isMonopoly ? "monopoly/" : "snakesandladder/") + gameName + ".json";
+    Path savePath = Path.of(newPath);
     try {
       writer.writeBoardGame(boardGame, savePath, isMonopoly);
     } catch (IOException e) {
