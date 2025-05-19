@@ -122,7 +122,7 @@ public class SnakesAndLaddersGameUI implements Observer {
   private void handleSaveGame(){
 
     LOGGER.info("NEW FEAT: Saving game: " + "new-game");
-    controller.saveGame("new-game");
+    controller.saveGame("new-game", false);
     
   }
   private void setupGamePage() {

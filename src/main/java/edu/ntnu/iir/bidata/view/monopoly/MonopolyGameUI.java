@@ -162,7 +162,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
                 Optional<String> result = dialog.showAndWait();
                 result.ifPresent(gameName -> {
                     try {
-                        controller.saveGame(gameName);
+                        controller.saveGame(gameName, true);
                         actionLabel.setText("Game saved as: " + gameName);
                     } catch (Exception ex) {
                         actionLabel.setText("Error saving game: " + ex.getMessage());

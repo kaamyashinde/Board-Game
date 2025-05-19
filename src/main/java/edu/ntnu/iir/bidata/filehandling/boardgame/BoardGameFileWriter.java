@@ -5,5 +5,5 @@ import java.nio.file.Path;
 import java.io.IOException;
 
 public interface BoardGameFileWriter {
-    void writeBoardGame(BoardGame boardGame, Path path) throws IOException;
+    void writeBoardGame(BoardGame boardGame, Path path, boolean isMonopoly) throws IOException;
 } 

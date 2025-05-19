@@ -54,11 +54,11 @@ public abstract class BaseGameController {
   public abstract void handlePlayerMove();
 
   /** Saves a board game to be opened later. */
-  public void saveGame(String gameName) {
+  public void saveGame(String gameName, boolean isMonopoly) {
     BoardGameFileWriterGson writer = new BoardGameFileWriterGson();
     Path savePath = Path.of(GAME_PATH + gameName + ".json");
     try {
-      writer.writeBoardGame(boardGame, savePath);
+      writer.writeBoardGame(boardGame, savePath, isMonopoly);
     } catch (IOException e) {
       LOGGER.severe("Failed to save game: " + e.getMessage());
     }
