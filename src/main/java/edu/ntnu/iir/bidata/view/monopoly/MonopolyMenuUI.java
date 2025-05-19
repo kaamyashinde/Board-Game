@@ -192,9 +192,11 @@ public class MonopolyMenuUI {
             if (gameName != null && !gameName.isEmpty()) {
                 try {
                     // Create controller and load game
+                    LOGGER.log(Level.INFO, "Loading Monopoly game {0}", gameName);
                     BoardGameFileReaderGson reader = new BoardGameFileReaderGson();
                     BoardGame boardGame = reader.readBoardGame(Paths.get("src/main/resources/saved_games/monopoly", gameName + ".json"));
-                    
+
+
                     // Create view and controller
                     MonopolyGameUI gameUI = new MonopolyGameUI(boardGame, primaryStage);
                     MonopolyController controller = new MonopolyController(boardGame);

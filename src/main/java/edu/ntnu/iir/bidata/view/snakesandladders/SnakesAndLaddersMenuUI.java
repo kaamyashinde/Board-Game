@@ -17,6 +17,10 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -159,11 +163,11 @@ public class SnakesAndLaddersMenuUI {
   }
 
   private void showLoadBoardDialog() {
-    javafx.scene.control.Dialog<String> dialog = new javafx.scene.control.Dialog<>();
+    Dialog<String> dialog = new Dialog<>();
     dialog.setTitle("Load Snakes and Ladders Game");
     dialog.setHeaderText("Select a saved game to load");
 
-    javafx.scene.control.ComboBox<String> gameList = new javafx.scene.control.ComboBox<>();
+    ComboBox<String> gameList = new ComboBox<>();
     gameList.setPromptText("Select a game");
     java.io.File savedGamesDir = new java.io.File("src/main/resources/saved_games");
     final long MAX_SIZE = 1024 * 1024; // 1MB
@@ -183,16 +187,11 @@ public class SnakesAndLaddersMenuUI {
     }
 
     javafx.scene.layout.VBox content = new javafx.scene.layout.VBox(10);
-    content.getChildren().addAll(new javafx.scene.control.Label("Select a saved game:"), gameList);
+    content.getChildren().addAll(new Label("Select a saved game:"), gameList);
     dialog.getDialogPane().setContent(content);
 
-    javafx.scene.control.ButtonType loadButtonType =
-        new javafx.scene.control.ButtonType(
-            "Load", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
-    dialog
-        .getDialogPane()
-        .getButtonTypes()
-        .addAll(loadButtonType, javafx.scene.control.ButtonType.CANCEL);
+    ButtonType loadButtonType = new ButtonType("Load", ButtonBar.ButtonData.OK_DONE);
+    dialog.getDialogPane().getButtonTypes().addAll(loadButtonType, ButtonType.CANCEL);
 
     dialog.setResultConverter(
         dialogButton -> {

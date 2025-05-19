@@ -4,6 +4,8 @@ import edu.ntnu.iir.bidata.controller.BaseGameController;
 import edu.ntnu.iir.bidata.controller.SnakesAndLaddersController;
 import edu.ntnu.iir.bidata.model.Observer;
 import edu.ntnu.iir.bidata.model.player.Player;
+import edu.ntnu.iir.bidata.view.common.BoardManagementUI;
+import edu.ntnu.iir.bidata.view.common.CommonButtons;
 import edu.ntnu.iir.bidata.view.common.DiceView;
 import edu.ntnu.iir.bidata.view.common.JavaFXBoardGameLauncher;
 import java.util.ArrayList;
@@ -98,6 +100,9 @@ public class SnakesAndLaddersGameUI implements Observer {
     controller.setPlayerNames(
         playerNames.stream().map(Player::getName).collect(Collectors.toList()));
     updateCurrentPlayerIndicator(controller.getCurrentSnakesAndLaddersPlayerName());
+
+    // Create top bar with back button and game controls
+    setUpTopBarWithControls();
   }
 
   /**
@@ -123,7 +128,7 @@ public class SnakesAndLaddersGameUI implements Observer {
 
     LOGGER.info("NEW FEAT: Saving game: " + "new-game");
     controller.saveGame("new-game", false);
-    
+
   }
   private void setupGamePage() {
     LOGGER.info("Setting up game page");
@@ -132,22 +137,6 @@ public class SnakesAndLaddersGameUI implements Observer {
     root = new BorderPane();
     root.setPadding(new Insets(20));
     root.getStyleClass().add("snl-game-root");
-
-    // Create top bar with back button and game controls
-    HBox topBar = new HBox(20);
-    topBar.setPadding(new Insets(10));
-    topBar.setAlignment(Pos.CENTER_LEFT);
-
-    backButton = new Button("← Back to Menu");
-    backButton.getStyleClass().add("game-control-button");
-    backButton.setOnAction(e -> handleBackToMainMenu());
-
-    saveButton = new Button("Save Game");
-    saveButton.getStyleClass().add("game-control-button");
-    saveButton.setOnAction(e -> handleSaveGame()); //TODO: Implement the save game logic in controller or use from base game controller
-
-    topBar.getChildren().addAll(backButton, saveButton);
-    root.setTop(topBar);
 
     // --- Board (center) ---
     StackPane boardPane = new StackPane();
@@ -251,6 +240,22 @@ public class SnakesAndLaddersGameUI implements Observer {
     );
     primaryStage.setScene(scene);
     primaryStage.show();
+  }
+
+  private void setUpTopBarWithControls() {
+    HBox topBar = new HBox(20);
+    topBar.setPadding(new Insets(10));
+    topBar.setAlignment(Pos.CENTER_LEFT);
+
+    backButton = CommonButtons.backToMainMenu(primaryStage, false, controller);
+    backButton.getStyleClass().add("game-control-button");
+
+    saveButton = new Button("Save Game");
+    saveButton.getStyleClass().add("game-control-button");
+    saveButton.setOnAction(e -> handleSaveGame()); //TODO: Implement the save game logic in controller or use from base game controller
+
+    topBar.getChildren().addAll(backButton, saveButton);
+    root.setTop(topBar);
   }
 
   /**
@@ -492,7 +497,7 @@ public class SnakesAndLaddersGameUI implements Observer {
     return root;
   }
 
- 
+
   private void handleBackToMainMenu() {
     if (isLoadedGame && loadedGameName != null) {
       // Auto-save loaded games
