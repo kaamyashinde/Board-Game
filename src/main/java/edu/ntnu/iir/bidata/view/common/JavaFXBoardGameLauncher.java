@@ -169,33 +169,31 @@ public class JavaFXBoardGameLauncher extends Application {
 
   /**
    * Displays the Snakes and Ladders game board UI.
+   * Optimized version that avoids adding players twice.
    *
    * @param stage   The primary stage to show the game on
-   * @param players The list of player names to use in the game
+   * @param players The list of players to use in the game
    */
   private void showSnakesAndLaddersGameBoard(Stage stage, List<Player> players) {
     LOGGER.info("Initializing Snakes and Ladders game with players: " + players);
     try {
-      // Create view
+      // Create view first
       SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(stage, players);
 
-      // Create model
+      // Create model (board)
       Board board = BoardFactory.createSnakesAndLaddersBoard(90, players);
       BoardGame boardGame = new BoardGame(board, 1);
 
-      // Add players to the model
-      for (Player player : players) {
-        boardGame.addPlayer(player.getName());
-      }
+      // Set players directly instead of adding them one by one (avoids potential duplicates)
+      boardGame.setPlayers(players);
 
-      // Register the UI as an observer
       boardGame.addObserver(gameUI);
 
-      // Create controller and connect it with the view
       SnakesAndLaddersController controller = new SnakesAndLaddersController(boardGame);
       gameUI.setController(controller);
 
-      // Start the game
+      controller.setPlayerNames(players.stream().map(Player::getName).toList());
+
       controller.startGame();
       LOGGER.info("Snakes and Ladders game started successfully");
     } catch (Exception e) {
