@@ -68,7 +68,7 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
     Map<String, Object> simplifiedGame = new HashMap<>();
 
     // Serialize essential tile data
-    List<Map<String, Object>> tilesData = new ArrayList<>();
+    Map<String, Map<String, Object>> tilesData = new HashMap<>();
     for (Map.Entry<Integer, Tile> entry : boardGame.getBoard().getTiles().entrySet()) {
       Tile tile = entry.getValue();
       Map<String, Object> tileData = new HashMap<>();
@@ -82,10 +82,14 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
         tileData.put(
             "owner", propertyTile.getOwner() != null ? propertyTile.getOwner().getName() : null);
       }
-      tilesData.add(tileData);
+      tilesData.put(String.valueOf(tile.getId()), tileData);
     }
-    simplifiedGame.put("tiles", tilesData);
+    Map<String, Object> boardData = new HashMap<>();
+    boardData.put("tiles", tilesData);
+    boardData.put("sizeOfBoard", boardGame.getBoard().getSizeOfBoard());
 
+    simplifiedGame.put("board", boardData);
+    
     // Serialize player data
     List<Map<String, Object>> playersData = new ArrayList<>();
     for (Player player : boardGame.getPlayers()) {

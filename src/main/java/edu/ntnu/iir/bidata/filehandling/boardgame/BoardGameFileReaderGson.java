@@ -4,8 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
+import edu.ntnu.iir.bidata.filehandling.boardgame.utils.BoardDeserializer;
 import edu.ntnu.iir.bidata.filehandling.boardgame.utils.TileSerializer;
 import edu.ntnu.iir.bidata.model.BoardGame;
+import edu.ntnu.iir.bidata.model.board.Board;
 import edu.ntnu.iir.bidata.model.tile.core.Tile;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,12 +26,13 @@ public class BoardGameFileReaderGson implements BoardGameFileReader {
   private final Gson gson;
 
   public BoardGameFileReaderGson() {
-    this.gson =
-        new GsonBuilder()
-            .setPrettyPrinting()
-            .registerTypeAdapter(Tile.class, new TileSerializer())
-            .create();
+    this.gson = new GsonBuilder()
+    .setPrettyPrinting()
+    .registerTypeAdapter(Tile.class, new TileSerializer())
+    .registerTypeAdapter(Board.class, new BoardDeserializer()) // Register custom deserializer
+    .create();
   }
+
 
   /**
    * Reads a board game from a JSON file.
@@ -44,6 +48,8 @@ public class BoardGameFileReaderGson implements BoardGameFileReader {
 
     // First, deserialize the board game without tile connections
     BoardGame boardGame = gson.fromJson(jsonObject, BoardGame.class);
+    System.out.println("Board size after deserialization: " + boardGame.getBoard().getSizeOfBoard());
+
 
     String memberNameBoard = "board";
     // Then, reconstruct the tile connections
