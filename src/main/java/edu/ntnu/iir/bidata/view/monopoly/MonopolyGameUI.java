@@ -213,8 +213,11 @@ public class MonopolyGameUI extends JavaFXGameUI {
   }
 
   private void updatePlayerInfoPanel() {
+    LOGGER.info("Clearing playerInfoPanel and updating player info...");
     playerInfoPanel.getChildren().clear();
+    int playerCount = 0;
     for (Player player : boardGame.getPlayers()) {
+      LOGGER.info("Processing player: " + player.getName() + " of class: " + player.getClass().getName());
       if (player instanceof SimpleMonopolyPlayer) {
         SimpleMonopolyPlayer monopolyPlayer = (SimpleMonopolyPlayer) player;
         VBox playerBox = new VBox(5);
@@ -231,8 +234,12 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
         playerBox.getChildren().addAll(nameLabel, moneyLabel, positionLabel, propertiesLabel);
         playerInfoPanel.getChildren().add(playerBox);
+        LOGGER.info(String.format("Added player to panel: name=%s, money=%d, position=%d, properties=%d", 
+          monopolyPlayer.getName(), monopolyPlayer.getMoney(), monopolyPlayer.getCurrentTile().getId(), monopolyPlayer.getOwnedProperties().size()));
+        playerCount++;
       }
     }
+    LOGGER.info("Total players added to playerInfoPanel: " + playerCount);
   }
 
   private void updatePlayerTokens() {

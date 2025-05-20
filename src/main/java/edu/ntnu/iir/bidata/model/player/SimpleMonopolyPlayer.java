@@ -43,6 +43,15 @@ public class SimpleMonopolyPlayer extends Player {
     }
 
     /**
+     * No-argument constructor for Gson deserialization.
+     */
+    public SimpleMonopolyPlayer() {
+        super("");
+        this.money = 1500;
+        this.ownedProperties = new ArrayList<>();
+    }
+
+    /**
      * Buys a property.
      * 
      * @param propertyTile The property to buy.
