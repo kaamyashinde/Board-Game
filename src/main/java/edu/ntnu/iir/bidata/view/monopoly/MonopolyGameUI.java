@@ -183,41 +183,30 @@ public class MonopolyGameUI extends JavaFXGameUI {
     } else {
       diceLabel.setText("Dice: -");
     }
-    updateUI();
   }
 
   private void handleBuyProperty() {
     controller.buyPropertyForCurrentPlayer();
-    updateUI();
   }
 
   private void handleSkipAction() {
     controller.skipActionForCurrentPlayer();
-    updateUI();
   }
 
   private void handlePayRent() {
     controller.payRentForCurrentPlayer();
-    updateUI();
   }
 
   private void handleJailRoll() {
     controller.handleJailRollDice();
-    updateUI();
   }
 
   private void handleJailPay() {
     controller.handleJailPay();
-    updateUI();
   }
 
   @Override
-  public void refreshUIFromBoardGame() {
-    super.refreshUIFromBoardGame();
-    updateUI();
-  }
-
-  public void updateUI() {
+  public void update() {
     updatePlayerInfoPanel();
     updatePlayerTokens();
     updateRollDiceButtonState();
@@ -288,7 +277,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
   public void setBoardGame(BoardGame boardGame) {
     this.boardGame = boardGame;
     initializeBoard();
-    updateUI();
+    update();
   }
 
   private void initializeBoard() {

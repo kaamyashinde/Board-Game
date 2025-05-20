@@ -171,8 +171,7 @@ public class SnakesAndLaddersController extends BaseGameController {
     }
   }
 
-  public void loadGameFromPath(
-      Path savePath, edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI ui) {
+  public void loadGameFromPath(Path savePath) {
     try {
       BoardGame loadedGame = boardGameReader.readBoardGame(savePath);
       this.boardGame = loadedGame;
@@ -181,9 +180,7 @@ public class SnakesAndLaddersController extends BaseGameController {
         updateSnakesAndLaddersPosition(player.getName(), player.getCurrentPosition());
       }
       boardGame.setCurrentPlayerIndex(loadedGame.getCurrentPlayerIndex());
-      if (ui != null) {
-        ui.refreshUIFromBoardGame();
-      }
+      boardGame.notifyObservers();
       LOGGER.info("Game loaded from: " + savePath);
     } catch (IOException e) {
       LOGGER.severe("Failed to load game: " + e.getMessage());

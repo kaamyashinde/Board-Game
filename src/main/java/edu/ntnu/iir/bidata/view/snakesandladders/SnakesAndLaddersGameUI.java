@@ -451,30 +451,6 @@ public class SnakesAndLaddersGameUI implements Observer {
     }
     this.boardGame = newBoardGame;
     this.boardGame.addObserver(this);
-    refreshUIFromBoardGame();
-  }
-
-  public void refreshUIFromBoardGame() {
-    // Update all player positions and labels from the loaded BoardGame
-    if (controller == null || boardGame == null) return;
-    for (Player player : boardGame.getPlayers()) {
-      String playerName = player.getName();
-      int position = controller.getPlayerPosition(playerName);
-      // Update position label
-      Label positionLabel = playerPositionLabels.get(playerName);
-      if (positionLabel != null) {
-        positionLabel.setText("at position: " + position);
-      }
-      // Move the token on the board
-      movePlayerToken(playerName, position);
-    }
-    // Update current player indicator
-    String currentPlayer = controller.getCurrentSnakesAndLaddersPlayerName();
-    updateCurrentPlayerIndicator(currentPlayer);
-  }
-
-  public BorderPane getRoot() {
-    return root;
   }
 
   private void handleBackToMainMenu() {
@@ -519,5 +495,9 @@ public class SnakesAndLaddersGameUI implements Observer {
                 // If cancel, do nothing and stay on the game screen
               });
     }
+  }
+
+  public BorderPane getRoot() {
+    return root;
   }
 }

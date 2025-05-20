@@ -49,6 +49,7 @@ public abstract class BaseGameController {
     currentPlayerIndex = (currentPlayerIndex + 1) % playerNames.size();
     boardGame.setCurrentPlayerIndex(currentPlayerIndex);
     diceRolled = false;
+    boardGame.notifyObservers();
   }
 
   /** Abstract method to handle player movement Must be implemented by specific game controllers */
