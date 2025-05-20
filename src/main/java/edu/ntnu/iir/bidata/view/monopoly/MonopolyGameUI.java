@@ -79,23 +79,23 @@ public class MonopolyGameUI extends JavaFXGameUI {
     Button backButton;
     Button saveButton;
     root = new BorderPane();
-    root.setPadding(new Insets(20));
-    root.setPrefWidth(1000);
-    root.setPrefHeight(700);
+    root.setPadding(new Insets(25));
+    root.setPrefWidth(1100);
+    root.setPrefHeight(750);
 
     // Configure board pane
-    boardPane.setHgap(2);
-    boardPane.setVgap(2);
-    boardPane.setPadding(new Insets(10));
+    boardPane.setHgap(5);
+    boardPane.setVgap(5);
+    boardPane.setPadding(new Insets(15));
     boardPane.getStyleClass().add("monopoly-board-pane");
 
     // Configure player info panel
-    playerInfoPanel.setPadding(new Insets(10));
+    playerInfoPanel.setPadding(new Insets(15));
     playerInfoPanel.getStyleClass().add("monopoly-player-info-panel");
-    playerInfoPanel.setPrefWidth(200);
+    playerInfoPanel.setPrefWidth(220);
 
     // Configure game controls
-    gameControls.setPadding(new Insets(10));
+    gameControls.setPadding(new Insets(15));
     gameControls.setAlignment(Pos.CENTER);
     gameControls.getStyleClass().add("monopoly-game-controls");
 
@@ -107,10 +107,10 @@ public class MonopolyGameUI extends JavaFXGameUI {
     // Set the root of the existing scene
     getScene().setRoot(mainLayout);
 
-    primaryStage.setWidth(1200);
-    primaryStage.setHeight(800);
-    primaryStage.setMinWidth(1200);
-    primaryStage.setMinHeight(800);
+    primaryStage.setWidth(1300);
+    primaryStage.setHeight(850);
+    primaryStage.setMinWidth(1300);
+    primaryStage.setMinHeight(850);
 
     // Initialize the board
     initializeBoard();
@@ -160,6 +160,18 @@ public class MonopolyGameUI extends JavaFXGameUI {
     // Add stylesheets
     getScene().getStylesheets().add(getClass().getResource("/monopoly.css").toExternalForm());
     getScene().getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+
+    // Ensure buttons have consistent styling
+    rollDiceButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
+    buyButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
+    skipButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
+    payRentButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
+    jailRollButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
+    jailPayButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
+    backButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
+
+    // Ensure actionLabel has consistent styling
+    actionLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333;");
   }
 
   private void handleRollDice() {
@@ -258,11 +270,12 @@ public class MonopolyGameUI extends JavaFXGameUI {
     boolean awaitingBuy = controller.isAwaitingPlayerAction();
     boolean awaitingRent = controller.isAwaitingRentAction();
     boolean inJail = controller.isCurrentPlayerInJail();
-    rollDiceButton.setDisable(
-        current == null || isGameOver || awaitingBuy || awaitingRent || inJail);
-    buyButton.setDisable(isGameOver || awaitingRent || inJail);
-    skipButton.setDisable(isGameOver || awaitingRent || inJail);
-    payRentButton.setDisable(isGameOver || awaitingBuy || inJail);
+    boolean rollDiceActive = current != null && !isGameOver && !awaitingBuy && !awaitingRent && !inJail;
+
+    rollDiceButton.setDisable(!rollDiceActive);
+    buyButton.setDisable(rollDiceActive || isGameOver || awaitingRent || inJail);
+    skipButton.setDisable(rollDiceActive || isGameOver || awaitingRent || inJail);
+    payRentButton.setDisable(rollDiceActive || isGameOver || awaitingBuy || inJail);
     jailRollButton.setDisable(isGameOver || !inJail);
     jailPayButton.setDisable(isGameOver || !inJail);
   }
