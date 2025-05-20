@@ -15,11 +15,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
- * Implementation of the BoardGameFileWriter interface using Gson for JSON serialization.
- * This class provides the functionality to write board game data to a JSON file.
+ * Implementation of the BoardGameFileWriter interface using Gson for JSON serialization. This class
+ * provides the functionality to write board game data to a JSON file.
  */
 public class BoardGameFileWriterGson implements BoardGameFileWriter {
   private final Gson gson;
@@ -33,14 +32,14 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
   }
 
   /**
-   * Writes a board game to a JSON file. Depending on the value of {@code isMonopoly},
-   * the method either serializes the board game with custom logic for Monopoly or writes
-   * a standard JSON representation of the board game.
+   * Writes a board game to a JSON file. Depending on the value of {@code isMonopoly}, the method
+   * either serializes the board game with custom logic for Monopoly or writes a standard JSON
+   * representation of the board game.
    *
    * @param boardGame the board game instance to write to a JSON file
    * @param path the path to the file where the JSON output will be saved
-   * @param isMonopoly a flag indicating whether the board game is a Monopoly game,
-   *        requiring custom serialization
+   * @param isMonopoly a flag indicating whether the board game is a Monopoly game, requiring custom
+   *     serialization
    * @throws IOException if writing to the file fails
    */
   @Override
@@ -55,8 +54,8 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
   }
 
   /**
-   * Serializes a Monopoly board game to JSON format and writes it to the specified file path.
-   * The method simplifies the board game structure for serialization, including details about tiles,
+   * Serializes a Monopoly board game to JSON format and writes it to the specified file path. The
+   * method simplifies the board game structure for serialization, including details about tiles,
    * players, and the current game state.
    *
    * @param boardGame the Monopoly board game instance to be serialized
@@ -68,7 +67,6 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
     Map<String, Object> simplifiedGame = new HashMap<>();
     simplifiedGame.put("dice", boardGame.getDice());
 
-
     // Serialize essential tile data
     Map<String, Map<String, Object>> tilesData = new HashMap<>();
     for (Map.Entry<Integer, Tile> entry : boardGame.getBoard().getTiles().entrySet()) {
@@ -76,8 +74,7 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
       Map<String, Object> tileData = new HashMap<>();
       tileData.put("id", tile.getId());
       tileData.put("type", tile.getClass().getSimpleName());
-      if (tile instanceof PropertyTile) {
-        PropertyTile propertyTile = (PropertyTile) tile;
+      if (tile instanceof PropertyTile propertyTile) {
         tileData.put("price", propertyTile.getPrice());
         tileData.put("rent", propertyTile.getRent());
         tileData.put("group", propertyTile.getGroup());
@@ -88,10 +85,10 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
     }
     Map<String, Object> boardData = new HashMap<>();
     boardData.put("tiles", tilesData);
-    boardData.put("sizeOfBoard", boardGame.getBoard().getSizeOfBoard());
+    boardData.put("boardSize", boardGame.getBoard().getSizeOfBoard());
 
     simplifiedGame.put("board", boardData);
-    
+
     // Serialize player data
     List<Map<String, Object>> playersData = new ArrayList<>();
     for (Player player : boardGame.getPlayers()) {
