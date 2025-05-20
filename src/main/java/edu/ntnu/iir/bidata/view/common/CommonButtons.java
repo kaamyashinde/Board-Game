@@ -4,13 +4,17 @@ import static java.util.logging.Level.INFO;
 
 import edu.ntnu.iir.bidata.controller.BaseGameController;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 /**
@@ -152,5 +156,91 @@ public class CommonButtons {
             actionLabel.setText("Error saving game: " + ex.getMessage());
           }
         });
+  }
+
+  /**
+   * Sets up a dialog window for selecting a saved game based on the provided game type. The dialog
+   * includes a dropdown menu for selecting saved games and button controls for loading or
+   * canceling.
+   *
+   * @param isMonopoly a boolean flag indicating whether the current game is Monopoly or another
+   *     game (e.g., Snakes and Ladders)
+   * @return a dialog instance configured for selecting and loading a saved game
+   */
+  public static Dialog<String> setUpStringDialog(boolean isMonopoly) {
+    Dialog<String> dialog = getLoadStringDialog(isMonopoly);
+
+    VBox content = gameListDropDown(isMonopoly);
+    ComboBox<String> gameList =
+        content.getChildren().stream()
+            .filter(node -> node instanceof ComboBox)
+            .map(node -> (ComboBox<String>) node)
+            .findFirst()
+            .orElse(null);
+
+    dialog.getDialogPane().setContent(content);
+
+    ButtonType loadButtonType = new ButtonType("Load", ButtonBar.ButtonData.OK_DONE);
+    dialog.getDialogPane().getButtonTypes().addAll(loadButtonType, ButtonType.CANCEL);
+
+    dialog.setResultConverter(
+        dialogButton -> {
+          if (dialogButton == loadButtonType) {
+            return gameList.getValue();
+          }
+          return null;
+        });
+    return dialog;
+  }
+
+  /**
+   * Creates and returns a dialog for selecting a saved game to load. The dialog is customized based
+   * on the game type (Monopoly or Snakes and Ladders).
+   *
+   * @param isMonopoly a boolean flag indicating whether the current game is Monopoly. If true, the
+   *     dialog is configured for Monopoly; otherwise, for Snakes and Ladders.
+   * @return a Dialog of type String, pre-configured with a title and header text for loading a
+   *     saved game.
+   */
+  private static Dialog<String> getLoadStringDialog(boolean isMonopoly) {
+    Dialog<String> dialog = new Dialog<>();
+    dialog.setTitle("Load " + (isMonopoly ? "Monopoly" : "Snakes and Ladders") + " game");
+    dialog.setHeaderText("Select a saved game to load");
+    return dialog;
+  }
+
+  /**
+   * Creates and returns a VBox containing a dropdown menu for selecting saved game files. The
+   * content is dynamically populated based on whether the specified game is Monopoly or Snakes and
+   * Ladders.
+   *
+   * @param isMonopoly a boolean flag indicating whether the dropdown menu should display saved
+   *     games for Monopoly (true) or Snakes and Ladders (false)
+   * @return a VBox containing a label and a ComboBox for selecting saved game files
+   */
+  private static VBox gameListDropDown(boolean isMonopoly) {
+    VBox content = new VBox(10);
+    ComboBox<String> gameList = new ComboBox<>();
+    gameList.setPromptText("Select a game");
+    java.io.File savedGamesDir =
+        new java.io.File(
+            "src/main/resources/saved_games/" + (isMonopoly ? "monopoly" : "snakesandladder"));
+    final long MAX_SIZE = 1024 * 1024; // 1MB
+    if (savedGamesDir.exists() && savedGamesDir.isDirectory()) {
+      java.io.File[] files = savedGamesDir.listFiles((dir, name) -> name.endsWith(".json"));
+      if (files != null) {
+        for (java.io.File file : files) {
+          try {
+            if (file.length() > MAX_SIZE) continue; // Skip large files
+            gameList.getItems().add(file.getName().replace(".json", ""));
+          } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Could not read large files");
+          }
+        }
+      }
+    }
+    content.getChildren().addAll(new Label("Select a saved game:"), gameList);
+
+    return content;
   }
 }
