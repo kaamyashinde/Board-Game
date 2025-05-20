@@ -141,7 +141,7 @@ public class JavaFXBoardGameLauncher extends Application {
     LOGGER.info("Initializing Monopoly game with players: " + players);
     try {
       Board board = MonopolyBoardFactory.createBoard();
-      BoardGame boardGame = new BoardGame(board, 1);
+        BoardGame boardGame = new BoardGame(board, 2);
       players.forEach(player -> boardGame.addPlayer(player.getName()));
       boardGame.setPlayers(new ArrayList<>(players)); // Cast to List<Player> if needed
       MonopolyGameUI monopolyGameUI = new MonopolyGameUI(boardGame, stage);
@@ -167,7 +167,7 @@ public class JavaFXBoardGameLauncher extends Application {
 
       // Create model
       Board board = BoardFactory.createSnakesAndLaddersBoard(100, players);
-      BoardGame boardGame = new BoardGame(board, 1);
+      BoardGame boardGame = new BoardGame(board, 2);
 
       // Set players directly instead of adding them one by one (avoids potential duplicates)
       boardGame.setPlayers(players);

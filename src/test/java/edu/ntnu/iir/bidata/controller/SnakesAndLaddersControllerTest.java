@@ -67,7 +67,7 @@ class SnakesAndLaddersControllerTest {
     @Test
     void testRollDice() {
         controller.startGame();
-        controller.rollDiceForSnakesAndLadders();
+        controller.rollDice();
         int roll = controller.getLastDiceRoll();
         assertTrue(roll >= 1 && roll <= 6);
     }
@@ -76,7 +76,7 @@ class SnakesAndLaddersControllerTest {
     void testNormalMove() {
         controller.startGame();
         // Force a specific dice roll value of 2 to avoid landing on ladder at position 3
-        controller.rollDiceForSnakesAndLadders();
+        controller.rollDice();
         int roll = 2;  // Use a fixed value instead of the random roll
         SnakesAndLaddersController.MoveResult result = controller.movePlayer("Player1", roll);
         
@@ -122,7 +122,7 @@ class SnakesAndLaddersControllerTest {
     @Test
     void testHandlePlayerMove() {
         controller.startGame();
-        controller.rollDiceForSnakesAndLadders();
+        controller.rollDice();
         controller.handlePlayerMove();
         // Player should have moved and turn should have passed to next player
         assertNotEquals(0, controller.getPlayerPosition("Player1"));

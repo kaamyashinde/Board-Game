@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import edu.ntnu.iir.bidata.filehandling.boardgame.TileActionTypeAdapterFactory;
 
 /**
  * Class to read a board game from a JSON file using Gson.
@@ -30,6 +31,8 @@ public class BoardGameFileReaderGson implements BoardGameFileReader {
     .setPrettyPrinting()
     .registerTypeAdapter(Tile.class, new TileSerializer())
     .registerTypeAdapter(Board.class, new BoardDeserializer()) // Register custom deserializer
+    .registerTypeAdapterFactory(new PlayerTypeAdapterFactory()) // Register custom player deserializer
+    .registerTypeAdapterFactory(new TileActionTypeAdapterFactory()) // Register TileAction type adapter
     .create();
   }
 
@@ -63,6 +66,23 @@ public class BoardGameFileReaderGson implements BoardGameFileReader {
 
       // Second pass: establish connections
       connectTilesFromBoardGameJsonFile(tilesObject, tileMap);
+
+      // Third pass: set each player's currentTile to the correct Tile instance from the board
+      if (jsonObject.has("players")) {
+        for (var playerElement : jsonObject.getAsJsonArray("players")) {
+          JsonObject playerObj = playerElement.getAsJsonObject();
+          if (playerObj.has("currentTile")) {
+            JsonObject currentTileObj = playerObj.getAsJsonObject("currentTile");
+            int tileId = currentTileObj.get("id").getAsInt();
+            // Find the player in the boardGame's player list by name
+            String playerName = playerObj.get("name").getAsString();
+            boardGame.getPlayers().stream()
+                .filter(p -> p.getName().equals(playerName))
+                .findFirst()
+                .ifPresent(p -> p.setCurrentTile(boardGame.getBoard().getTile(tileId)));
+          }
+        }
+      }
     }
 
     return boardGame;

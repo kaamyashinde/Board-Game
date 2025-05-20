@@ -12,6 +12,7 @@ import edu.ntnu.iir.bidata.model.tile.core.monopoly.JailTile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.PropertyTile;
 import edu.ntnu.iir.bidata.view.common.CommonButtons;
 import edu.ntnu.iir.bidata.view.common.JavaFXGameUI;
+import edu.ntnu.iir.bidata.view.common.DiceView;
 import java.util.*;
 import java.util.logging.Logger;
 import javafx.geometry.Insets;
@@ -52,7 +53,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
   private final GridPane boardPane;
   private final VBox playerInfoPanel;
   private final HBox gameControls;
-  private final Label diceLabel = new Label("Dice: -");
+  private final DiceView diceView = new DiceView();
   private final Stage primaryStage;
   protected BoardGame boardGame;
 
@@ -116,7 +117,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
     initializeBoard();
 
     // Add dice label and roll button to game controls
-    diceLabel.getStyleClass().add("monopoly-dice-label");
+    diceView.getStyleClass().add("monopoly-dice-view");
 
     rollDiceButton.getStyleClass().add("monopoly-roll-dice-button");
     rollDiceButton.setOnAction(e -> handleRollDice());
@@ -155,7 +156,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
             jailRollButton,
             jailPayButton,
             saveButton,
-            diceLabel);
+            diceView);
 
     // Add stylesheets
     getScene().getStylesheets().add(getClass().getResource("/monopoly.css").toExternalForm());
@@ -177,55 +178,50 @@ public class MonopolyGameUI extends JavaFXGameUI {
   private void handleRollDice() {
     controller.handlePlayerMove();
     // Show dice value
-    int[] diceValues = getBoardGame().getCurrentDiceValues();
-    if (diceValues != null && diceValues.length > 0) {
-      diceLabel.setText("Dice: " + Arrays.toString(diceValues));
+    int[] diceValues = controller.getLastDiceRolls();
+    if (diceValues != null && diceValues.length == 2) {
+      diceView.setValues(diceValues[0], diceValues[1]);
+    } else if (diceValues != null && diceValues.length == 1) {
+      diceView.setValues(diceValues[0], diceValues[0]);
     } else {
-      diceLabel.setText("Dice: -");
+      diceView.setValues(1, 1);
     }
-    updateUI();
+    // Optionally, display the sum somewhere if needed
   }
 
   private void handleBuyProperty() {
     controller.buyPropertyForCurrentPlayer();
-    updateUI();
   }
 
   private void handleSkipAction() {
     controller.skipActionForCurrentPlayer();
-    updateUI();
   }
 
   private void handlePayRent() {
     controller.payRentForCurrentPlayer();
-    updateUI();
   }
 
   private void handleJailRoll() {
     controller.handleJailRollDice();
-    updateUI();
   }
 
   private void handleJailPay() {
     controller.handleJailPay();
-    updateUI();
   }
 
   @Override
-  public void refreshUIFromBoardGame() {
-    super.refreshUIFromBoardGame();
-    updateUI();
-  }
-
-  public void updateUI() {
+  public void update() {
     updatePlayerInfoPanel();
     updatePlayerTokens();
     updateRollDiceButtonState();
   }
 
   private void updatePlayerInfoPanel() {
+    LOGGER.info("Clearing playerInfoPanel and updating player info...");
     playerInfoPanel.getChildren().clear();
+    int playerCount = 0;
     for (Player player : boardGame.getPlayers()) {
+      LOGGER.info("Processing player: " + player.getName() + " of class: " + player.getClass().getName());
       if (player instanceof SimpleMonopolyPlayer) {
         SimpleMonopolyPlayer monopolyPlayer = (SimpleMonopolyPlayer) player;
         VBox playerBox = new VBox(5);
@@ -242,8 +238,12 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
         playerBox.getChildren().addAll(nameLabel, moneyLabel, positionLabel, propertiesLabel);
         playerInfoPanel.getChildren().add(playerBox);
+        LOGGER.info(String.format("Added player to panel: name=%s, money=%d, position=%d, properties=%d", 
+          monopolyPlayer.getName(), monopolyPlayer.getMoney(), monopolyPlayer.getCurrentTile().getId(), monopolyPlayer.getOwnedProperties().size()));
+        playerCount++;
       }
     }
+    LOGGER.info("Total players added to playerInfoPanel: " + playerCount);
   }
 
   private void updatePlayerTokens() {
@@ -286,9 +286,15 @@ public class MonopolyGameUI extends JavaFXGameUI {
   }
 
   public void setBoardGame(BoardGame boardGame) {
+    // Remove this UI as observer from the old boardGame if needed
+    if (this.boardGame != null) {
+      this.boardGame.removeObserver(this);
+    }
     this.boardGame = boardGame;
+    // Register as observer to the new boardGame
+    this.boardGame.addObserver(this);
     initializeBoard();
-    updateUI();
+    update();
   }
 
   private void initializeBoard() {
@@ -376,6 +382,6 @@ public class MonopolyGameUI extends JavaFXGameUI {
   }
 
   public BorderPane getRoot() {
-    return root;
+    return mainLayout;
   }
 }

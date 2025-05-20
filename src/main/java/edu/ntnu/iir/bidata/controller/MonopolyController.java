@@ -33,6 +33,7 @@ public class MonopolyController extends BaseGameController {
     private PropertyTile pendingRentPropertyTile = null;
     private boolean awaitingJailAction = false;
     private boolean jailRolledSix = false;
+    private boolean diceRolled = false;
 
     public MonopolyController(BoardGame boardGame) {
         super(boardGame);
@@ -127,6 +128,7 @@ public class MonopolyController extends BaseGameController {
         SimpleMonopolyPlayer currentPlayer = (SimpleMonopolyPlayer) boardGame.getCurrentPlayer();
         if (currentPlayer.isInJail()) {
             awaitingJailAction = true;
+            boardGame.notifyObservers();
             return;
         }
         if (!gameStarted) {
@@ -219,6 +221,22 @@ public class MonopolyController extends BaseGameController {
         nextPlayer();
     }
 
-   
+    public int[] getLastDiceRolls() {
+        return boardGame.getCurrentDiceValues();
+    }
 
-  } 
+    public int getLastDiceSum() {
+        int[] values = boardGame.getCurrentDiceValues();
+        int sum = 0;
+        if (values != null) {
+            for (int v : values) sum += v;
+        }
+        return sum;
+    }
+
+    public void rollDice() {
+        boardGame.getDice().rollAllDice();
+        diceRolled = true;
+        LOGGER.info("Dice rolled: " + java.util.Arrays.toString(boardGame.getCurrentDiceValues()));
+    }
+} 
