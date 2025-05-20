@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import java.io.IOException;
 import java.io.File;
 import edu.ntnu.iir.bidata.model.utils.GameMediator;
+import edu.ntnu.iir.bidata.Inject;
 
 /**
  * Controller class specifically for Monopoly game logic.
@@ -37,6 +38,7 @@ public class MonopolyController extends BaseGameController {
     private boolean diceRolled = false;
     private final GameMediator mediator;
 
+    @Inject
     public MonopolyController(BoardGame boardGame, BoardGameFileWriter boardGameWriter, BoardGameFileReader boardGameReader, GameMediator mediator) {
         super(boardGame);
         this.boardGameWriter = boardGameWriter;

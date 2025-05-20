@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.logging.Logger;
+import edu.ntnu.iir.bidata.Inject;
 
 /** Controller class specifically for Snakes and Ladders game logic. */
 public class SnakesAndLaddersController extends BaseGameController {
@@ -29,11 +30,12 @@ public class SnakesAndLaddersController extends BaseGameController {
   private BoardGame boardGame;
   private final GameMediator mediator;
 
-  public SnakesAndLaddersController(BoardGame boardGame, GameMediator mediator) {
+  @Inject
+  public SnakesAndLaddersController(BoardGame boardGame, BoardGameFileWriter boardGameWriter, BoardGameFileReader boardGameReader, GameMediator mediator) {
     super(boardGame);
     this.boardGame = boardGame;
-    this.boardGameWriter = new BoardGameFileWriterGson();
-    this.boardGameReader = new BoardGameFileReaderGson();
+    this.boardGameWriter = boardGameWriter;
+    this.boardGameReader = boardGameReader;
     this.mediator = mediator;
     LOGGER.info("SnakesAndLaddersController initialized");
   }
