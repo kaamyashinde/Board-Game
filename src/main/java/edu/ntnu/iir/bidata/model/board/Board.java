@@ -5,6 +5,7 @@ import edu.ntnu.iir.bidata.model.tile.core.Tile;
 import edu.ntnu.iir.bidata.model.tile.core.TileAction;
 import edu.ntnu.iir.bidata.model.utils.ParameterValidation;
 import java.util.HashMap;
+import java.util.Objects;
 import lombok.Getter;
 
 /**
@@ -131,5 +132,19 @@ public class Board {
    */
   public Tile getTile(int id) {
     return tiles.get(id);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null || getClass() != obj.getClass()) return false;
+    Board other = (Board) obj;
+    return boardSize == other.boardSize &&
+           Objects.equals(tiles, other.tiles);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(boardSize, tiles);
   }
 }

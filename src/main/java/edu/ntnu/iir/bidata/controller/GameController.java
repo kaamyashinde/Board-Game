@@ -5,10 +5,6 @@ import edu.ntnu.iir.bidata.model.tile.core.TileAction;
 import edu.ntnu.iir.bidata.model.game.GameState;
 import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.model.Observable;
-import edu.ntnu.iir.bidata.filehandling.game.GameStateFileWriter;
-import edu.ntnu.iir.bidata.filehandling.game.GameStateFileReader;
-import edu.ntnu.iir.bidata.filehandling.game.GameStateFileWriterGson;
-import edu.ntnu.iir.bidata.filehandling.game.GameStateFileReaderGson;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -47,14 +43,10 @@ public class GameController {
   @Getter
   @Setter
   private boolean movingPiece = false;
-  private final GameStateFileWriter gameStateWriter;
-  private final GameStateFileReader gameStateReader;
   private boolean isPaused = false;
 
   public GameController(BoardGame boardGame) {
     this.boardGame = boardGame;
-    this.gameStateWriter = new GameStateFileWriterGson();
-    this.gameStateReader = new GameStateFileReaderGson();
     LOGGER.info("GameController initialized");
   }
 
@@ -302,48 +294,6 @@ public class GameController {
     return isPaused;
   }
 
-  public void saveGame(String gameName) {
-    if (!gameStarted) {
-      LOGGER.warning("Cannot save game: Game has not started");
-      return;
-    }
-    
-    GameState gameState = new GameState(
-        boardGame.getBoard(),
-        boardGame.getPlayers(),
-        currentPlayerIndex,
-        gameName
-    );
-    
-    Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
-    gameStateWriter.writeGameState(gameState, savePath);
-    LOGGER.info("Game saved: " + gameName);
-  }
 
-  public void loadGame(String gameName) {
-    Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
-    GameState gameState = gameStateReader.readGameState(savePath);
-    
-    // Create a new BoardGame instance with the loaded board
-    BoardGame newBoardGame = new BoardGame(gameState.getBoard(), boardGame.getDice().getLastRolledValues().length);
-    
-    // Add all players from the saved state
-    for (Player player : gameState.getPlayers()) {
-        newBoardGame.addPlayer(player.getName());
-    }
-    
-    // Set the current player index
-    currentPlayerIndex = gameState.getCurrentPlayerIndex();
-    gameStarted = true;
-    
-    // Initialize the new game
-    newBoardGame.startGame();
-    
-    // Update the game state in the UI
-    if (boardGame instanceof Observable) {
-        ((Observable) boardGame).notifyObservers();
-    }
-    
-    LOGGER.info("Game loaded: " + gameName);
-  }
+
 }

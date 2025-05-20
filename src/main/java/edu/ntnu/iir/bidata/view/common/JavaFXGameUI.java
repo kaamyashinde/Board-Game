@@ -48,7 +48,6 @@ public class JavaFXGameUI implements Observer {
   private final VBox gameInfoPane;
   private final Button pauseButton;
   private final Button saveButton;
-  private final Button loadButton;
   private boolean isPaused = false;
   private GameController controller;
 
@@ -67,8 +66,6 @@ public class JavaFXGameUI implements Observer {
     this.diceView = new DiceView();
     this.pauseButton = new Button("Pause");
     this.saveButton = new Button("Save Game");
-    this.loadButton = new Button("Load Game");
-    loadButton.getStyleClass().add("game-control-button");
 
     boardGame.addObserver(this);
     initializeUI();
@@ -103,7 +100,7 @@ public class JavaFXGameUI implements Observer {
     // Create a container for game control buttons
     HBox gameControls = new HBox(10);
     gameControls.setAlignment(Pos.CENTER);
-    gameControls.getChildren().addAll(pauseButton, saveButton, loadButton);
+    gameControls.getChildren().addAll(pauseButton, saveButton);
     
     controls.getChildren().addAll(diceView, nextTurnButton, gameControls);
     root.setBottom(controls);
@@ -288,62 +285,6 @@ public class JavaFXGameUI implements Observer {
     });
   }
 
-  public void setLoadAction(Runnable action) {
-    loadButton.setOnAction(e -> {
-      if (controller != null) {
-        // Create a dialog
-        Dialog<String> dialog = new Dialog<>();
-        dialog.setTitle("Load Game");
-        dialog.setHeaderText("Select a saved game to load");
-
-        // Create the ComboBox
-        ComboBox<String> gameList = new ComboBox<>();
-        gameList.setPromptText("Select a game");
-        
-        // Get list of saved games
-        File savedGamesDir = new File("src/main/resources/saved_games");
-        if (savedGamesDir.exists() && savedGamesDir.isDirectory()) {
-            File[] savedGames = savedGamesDir.listFiles((dir, name) -> name.endsWith(".json"));
-            if (savedGames != null) {
-                for (File game : savedGames) {
-                    // Remove .json extension from the name
-                    String gameName = game.getName().replace(".json", "");
-                    gameList.getItems().add(gameName);
-                }
-            }
-        }
-
-        // Add the ComboBox to the dialog
-        dialog.getDialogPane().setContent(gameList);
-
-        // Add buttons to the dialog
-        ButtonType loadButtonType = new ButtonType("Load", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(loadButtonType, ButtonType.CANCEL);
-
-        // Convert the result to a game name when the load button is clicked
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == loadButtonType) {
-                return gameList.getValue();
-            }
-            return null;
-        });
-
-        // Show the dialog and handle the result
-        Optional<String> result = dialog.showAndWait();
-        result.ifPresent(gameName -> {
-            if (gameName != null) {
-                try {
-                    controller.loadGame(gameName);
-                    statusLabel.setText("Game loaded: " + gameName);
-                } catch (Exception ex) {
-                    statusLabel.setText("Error loading game: " + ex.getMessage());
-                }
-            }
-        });
-      }
-    });
-  }
-
   @Override
   public void update() {
     Platform.runLater(() -> {
@@ -409,66 +350,12 @@ public class JavaFXGameUI implements Observer {
       Optional<String> result = dialog.showAndWait();
       result.ifPresent(gameName -> {
         try {
-          controller.saveGame(gameName);
+          //controller.saveGame(gameName);
           statusLabel.setText("Game saved as: " + gameName);
         } catch (Exception ex) {
           statusLabel.setText("Error saving game: " + ex.getMessage());
         }
       });
-    });
-
-    loadButton.setOnAction(e -> {
-      if (controller != null) {
-        // Create a dialog
-        Dialog<String> dialog = new Dialog<>();
-        dialog.setTitle("Load Game");
-        dialog.setHeaderText("Select a saved game to load");
-
-        // Create the ComboBox
-        ComboBox<String> gameList = new ComboBox<>();
-        gameList.setPromptText("Select a game");
-        
-        // Get list of saved games
-        File savedGamesDir = new File("src/main/resources/saved_games");
-        if (savedGamesDir.exists() && savedGamesDir.isDirectory()) {
-            File[] savedGames = savedGamesDir.listFiles((dir, name) -> name.endsWith(".json"));
-            if (savedGames != null) {
-                for (File game : savedGames) {
-                    // Remove .json extension from the name
-                    String gameName = game.getName().replace(".json", "");
-                    gameList.getItems().add(gameName);
-                }
-            }
-        }
-
-        // Add the ComboBox to the dialog
-        dialog.getDialogPane().setContent(gameList);
-
-        // Add buttons to the dialog
-        ButtonType loadButtonType = new ButtonType("Load", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(loadButtonType, ButtonType.CANCEL);
-
-        // Convert the result to a game name when the load button is clicked
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == loadButtonType) {
-                return gameList.getValue();
-            }
-            return null;
-        });
-
-        // Show the dialog and handle the result
-        Optional<String> result = dialog.showAndWait();
-        result.ifPresent(gameName -> {
-            if (gameName != null) {
-                try {
-                    controller.loadGame(gameName);
-                    statusLabel.setText("Game loaded: " + gameName);
-                } catch (Exception ex) {
-                    statusLabel.setText("Error loading game: " + ex.getMessage());
-                }
-            }
-        });
-      }
     });
   }
 
@@ -503,7 +390,7 @@ public class JavaFXGameUI implements Observer {
   protected HBox getGameControls() {
     HBox gameControls = new HBox(10);
     gameControls.setAlignment(Pos.CENTER);
-    gameControls.getChildren().addAll(pauseButton, saveButton, loadButton);
+    gameControls.getChildren().addAll(pauseButton, saveButton);
     return gameControls;
   }
 

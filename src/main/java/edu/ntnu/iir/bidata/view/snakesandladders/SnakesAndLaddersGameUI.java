@@ -1,8 +1,10 @@
 package edu.ntnu.iir.bidata.view.snakesandladders;
 
 import edu.ntnu.iir.bidata.controller.SnakesAndLaddersController;
+import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.Observer;
 import edu.ntnu.iir.bidata.model.player.Player;
+import edu.ntnu.iir.bidata.view.common.CommonButtons;
 import edu.ntnu.iir.bidata.view.common.DiceView;
 import edu.ntnu.iir.bidata.view.common.JavaFXBoardGameLauncher;
 import java.util.ArrayList;
@@ -10,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javafx.animation.PauseTransition;
@@ -17,7 +20,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -25,16 +29,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import javafx.scene.control.TextInputDialog;
-import java.util.Optional;
-import java.io.File;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
-import edu.ntnu.iir.bidata.model.BoardGame;
 
 public class SnakesAndLaddersGameUI implements Observer {
 
@@ -43,16 +39,16 @@ public class SnakesAndLaddersGameUI implements Observer {
   private final Map<String, Circle> playerTokenMap = new HashMap<>();
   private final Map<String, Label> playerPositionLabels = new HashMap<>();
   private final int TILE_SIZE = 50;
-  private final int BOARD_SIZE = 10; // 10x10 board
   private final Color[] PLAYER_COLORS = {
-      Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.PURPLE
+    Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.PURPLE
   };
+  private int gridSize;
+  private int boardSize;
   private DiceView diceView;
   private Pane playerLayer;
-  private VBox playerPanel;
+
   private Button rollDiceBtn;
-  private Button backButton;
-  private Button saveButton;
+
   private Button loadButton;
   private Label statusLabel;
   private List<Player> playerNames;
@@ -60,12 +56,13 @@ public class SnakesAndLaddersGameUI implements Observer {
   private BoardGame boardGame;
   private boolean isLoadedGame = false;
   private String loadedGameName = null;
+  private BorderPane root;
 
   /**
    * Constructor that receives the selected players from the menu
    *
    * @param primaryStage The primary stage
-   * @param playerNames  List of player names selected in the menu
+   * @param playerNames List of player names selected in the menu
    */
   public SnakesAndLaddersGameUI(Stage primaryStage, List<Player> playerNames) {
     LOGGER.info("Initializing Snakes and Ladders Game UI with players: " + playerNames);
@@ -94,8 +91,30 @@ public class SnakesAndLaddersGameUI implements Observer {
     controller.setPlayerNames(
         playerNames.stream().map(Player::getName).collect(Collectors.toList()));
     updateCurrentPlayerIndicator(controller.getCurrentSnakesAndLaddersPlayerName());
+
+    // Create top bar with back button and game controls
+    setUpTopBarWithControls();
   }
 
+  /** Updates the current player indicator in the UI */
+  public void updateCurrentPlayerIndicator(String currentPlayer) {
+    LOGGER.info("Updating current player indicator: " + currentPlayer);
+    statusLabel.setText(currentPlayer + "'s Turn");
+  }
+
+  private void setUpTopBarWithControls() {
+    Button backButton;
+    Button saveButton = CommonButtons.saveGameBtn(false, controller, new Label());
+    HBox topBar = new HBox(20);
+    topBar.setPadding(new Insets(10));
+    topBar.setAlignment(Pos.CENTER_LEFT);
+
+    backButton = CommonButtons.backToMainMenu(primaryStage, false, controller);
+    backButton.getStyleClass().add("game-control-button");
+
+    topBar.getChildren().addAll(backButton, saveButton);
+    root.setTop(topBar);
+  }
   /**
    * Sets whether this is a loaded game and its name
    *
@@ -107,100 +126,35 @@ public class SnakesAndLaddersGameUI implements Observer {
     this.loadedGameName = gameName;
   }
 
-  /**
-   * Updates the current player indicator in the UI
-   */
-  public void updateCurrentPlayerIndicator(String currentPlayer) {
-    LOGGER.info("Updating current player indicator: " + currentPlayer);
-    statusLabel.setText(currentPlayer + "'s Turn");
-  }
-
   private void setupGamePage() {
+    VBox playerPanel;
     LOGGER.info("Setting up game page");
     primaryStage.setTitle("Snakes & Ladders - Game");
 
-    BorderPane root = new BorderPane();
+    root = new BorderPane();
     root.setPadding(new Insets(20));
     root.getStyleClass().add("snl-game-root");
-
-    // Create top bar with back button and game controls
-    HBox topBar = new HBox(20);
-    topBar.setPadding(new Insets(10));
-    topBar.setAlignment(Pos.CENTER_LEFT);
-
-    backButton = new Button("← Back to Menu");
-    backButton.getStyleClass().add("game-control-button");
-    backButton.setOnAction(e -> {
-      if (isLoadedGame && loadedGameName != null) {
-        // Auto-save loaded games
-        controller.saveGame(loadedGameName);
-        JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
-      } else {
-        // For new games, ask if user wants to save
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Save Game");
-        dialog.setHeaderText("Would you like to save this game before returning to the main menu?");
-        dialog.setContentText("Choose an option:");
-
-        ButtonType saveButtonType = new ButtonType("Save Game");
-        ButtonType dontSaveButton = new ButtonType("Don't Save");
-        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-
-        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, dontSaveButton, cancelButton);
-
-        dialog.showAndWait().ifPresent(response -> {
-          if (response == saveButtonType) {
-            // Use the existing save button's functionality
-            saveButton.fire();
-            // Wait a bit for the save to complete before returning to main menu
-            PauseTransition pause = new PauseTransition(Duration.millis(500));
-            pause.setOnFinished(event -> {
-              JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
-            });
-            pause.play();
-          } else if (response == dontSaveButton) {
-            // Return to main menu without saving
-            JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
-          }
-          // If cancel, do nothing and stay on the game screen
-        });
-      }
-    });
-
-    saveButton = new Button("Save Game");
-    saveButton.getStyleClass().add("game-control-button");
-    saveButton.setOnAction(e -> {
-      if (controller != null) {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Save Game");
-        dialog.setHeaderText("Enter a name for your saved game");
-        dialog.setContentText("Game name:");
-
-        Optional<String> result = dialog.showAndWait();
-        result.ifPresent(gameName -> {
-          try {
-            controller.saveGame(gameName);
-            statusLabel.setText("Game saved as: " + gameName);
-          } catch (Exception ex) {
-            statusLabel.setText("Error saving game: " + ex.getMessage());
-          }
-        });
-      }
-    });
-
-    topBar.getChildren().addAll(backButton, saveButton);
-    root.setTop(topBar);
 
     // --- Board (center) ---
     StackPane boardPane = new StackPane();
     boardPane.setAlignment(Pos.CENTER_LEFT);
 
+    if (boardGame != null && boardGame.getBoard() != null) {
+      this.boardSize = boardGame.getBoard().getSizeOfBoard();
+      this.gridSize = (int) Math.ceil(Math.sqrt(boardSize));
+    } else {
+      this.boardSize = 100;
+      this.gridSize = 10;
+    }
+
     // Load custom board image
-    Image boardImage = new Image(
-        Objects.requireNonNull(getClass().getResourceAsStream("/snakes_and_ladders_board.jpeg")));
+    Image boardImage =
+        new Image(
+            Objects.requireNonNull(
+                getClass().getResourceAsStream("/snakes_and_ladders_board.jpeg")));
     ImageView boardView = new ImageView(boardImage);
-    boardView.setFitWidth(TILE_SIZE * BOARD_SIZE);
-    boardView.setFitHeight(TILE_SIZE * BOARD_SIZE);
+    boardView.setFitWidth(TILE_SIZE * gridSize);
+    boardView.setFitHeight(TILE_SIZE * gridSize);
     boardView.setPreserveRatio(false);
 
     // Add the board image to the pane
@@ -279,17 +233,16 @@ public class SnakesAndLaddersGameUI implements Observer {
     root.setBottom(bottomBox);
 
     Scene scene = new Scene(root, 1200, 800);
-    scene.getStylesheets().addAll(
-        getClass().getResource("/styles.css").toExternalForm(),
-        getClass().getResource("/snakesandladders.css").toExternalForm()
-    );
+    scene
+        .getStylesheets()
+        .addAll(
+            getClass().getResource("/styles.css").toExternalForm(),
+            getClass().getResource("/snakesandladders.css").toExternalForm());
     primaryStage.setScene(scene);
     primaryStage.show();
   }
 
-  /**
-   * Initialize all player positions to the starting position
-   */
+  /** Initialize all player positions to the starting position */
   private void initializePlayerPositions() {
     LOGGER.info("Initializing player positions");
     for (Player player : playerNames) {
@@ -298,9 +251,7 @@ public class SnakesAndLaddersGameUI implements Observer {
     }
   }
 
-  /**
-   * Roll the dice and move the current player
-   */
+  /** Roll the dice and move the current player */
   private void rollDiceAndMove() {
     if (controller == null) {
       return;
@@ -317,32 +268,33 @@ public class SnakesAndLaddersGameUI implements Observer {
     statusLabel.setText(currentPlayer + " rolled a " + roll + "!");
 
     PauseTransition pause = new PauseTransition(Duration.millis(800));
-    pause.setOnFinished(event -> {
-      SnakesAndLaddersController.MoveResult result = controller.movePlayer(currentPlayer, roll);
+    pause.setOnFinished(
+        event -> {
+          SnakesAndLaddersController.MoveResult result = controller.movePlayer(currentPlayer, roll);
 
-      // Update the player position immediately after the move
-      updatePlayerPosition(currentPlayer);
+          // Update the player position immediately after the move
+          updatePlayerPosition(currentPlayer);
 
-      if (result.type.equals("snake")) {
-        displaySnakeOrLadderMessage(currentPlayer, result.start, result.end, "snake");
-        // Update position again after snake
-        updatePlayerPosition(currentPlayer);
-      } else if (result.type.equals("ladder")) {
-        displaySnakeOrLadderMessage(currentPlayer, result.start, result.end, "ladder");
-        // Update position again after ladder
-        updatePlayerPosition(currentPlayer);
-      }
+          if (result.type.equals("snake")) {
+            displaySnakeOrLadderMessage(currentPlayer, result.start, result.end, "snake");
+            // Update position again after snake
+            updatePlayerPosition(currentPlayer);
+          } else if (result.type.equals("ladder")) {
+            displaySnakeOrLadderMessage(currentPlayer, result.start, result.end, "ladder");
+            // Update position again after ladder
+            updatePlayerPosition(currentPlayer);
+          }
 
-      if (result.end == 100) {
-        statusLabel.setText("🏆 " + currentPlayer + " WINS! 🏆");
-        rollDiceBtn.setDisable(true);
-        return;
-      }
+          if (result.end == 100) {
+            statusLabel.setText("🏆 " + currentPlayer + " WINS! 🏆");
+            rollDiceBtn.setDisable(true);
+            return;
+          }
 
-      controller.nextSnakesAndLaddersPlayer();
-      updateCurrentPlayerIndicator(controller.getCurrentSnakesAndLaddersPlayerName());
-      rollDiceBtn.setDisable(false);
-    });
+          controller.nextSnakesAndLaddersPlayer();
+          updateCurrentPlayerIndicator(controller.getCurrentSnakesAndLaddersPlayerName());
+          rollDiceBtn.setDisable(false);
+        });
     pause.play();
   }
 
@@ -350,7 +302,7 @@ public class SnakesAndLaddersGameUI implements Observer {
    * Creates a player token with the specified color
    *
    * @param playerNumber the player number (1-based)
-   * @param playerName   the player's name
+   * @param playerName the player's name
    * @return the Circle representing the player token
    */
   private Circle createPlayerToken(int playerNumber, String playerName) {
@@ -369,25 +321,24 @@ public class SnakesAndLaddersGameUI implements Observer {
     return token;
   }
 
-  /**
-   * Display a message about a snake or ladder
-   */
-  public void displaySnakeOrLadderMessage(String playerName, int fromPosition, int toPosition,
-      String type) {
+  /** Display a message about a snake or ladder */
+  public void displaySnakeOrLadderMessage(
+      String playerName, int fromPosition, int toPosition, String type) {
     statusLabel.setText(
         playerName + " hit a " + type + "! Moving from " + fromPosition + " to " + toPosition);
 
     // Add a short delay before actually moving the token
     PauseTransition pause = new PauseTransition(Duration.millis(1000));
-    pause.setOnFinished(e -> {
-      // Move the token to the new position
-      movePlayerToken(playerName, toPosition);
-      // Update the position label
-      Label positionLabel = playerPositionLabels.get(playerName);
-      if (positionLabel != null) {
-        positionLabel.setText("at position: " + toPosition);
-      }
-    });
+    pause.setOnFinished(
+        e -> {
+          // Move the token to the new position
+          movePlayerToken(playerName, toPosition);
+          // Update the position label
+          Label positionLabel = playerPositionLabels.get(playerName);
+          if (positionLabel != null) {
+            positionLabel.setText("at position: " + toPosition);
+          }
+        });
     pause.play();
   }
 
@@ -429,7 +380,7 @@ public class SnakesAndLaddersGameUI implements Observer {
    * Moves a player token to a specific position on the board
    *
    * @param playerName the player's name
-   * @param position   the board position (1-100)
+   * @param position the board position (1-100)
    */
   private void movePlayerToken(String playerName, int position) {
     Circle token = playerTokenMap.get(playerName);
@@ -440,11 +391,11 @@ public class SnakesAndLaddersGameUI implements Observer {
     if (position == 0) {
       // Starting position (off board)
       token.setTranslateX(20);
-      token.setTranslateY(TILE_SIZE * BOARD_SIZE + 20);
+      token.setTranslateY(TILE_SIZE * gridSize + 20);
       return;
     }
 
-    if (position < 1 || position > 100) {
+    if (position < 1 || position > boardSize) {
       return;
     }
 
@@ -470,28 +421,28 @@ public class SnakesAndLaddersGameUI implements Observer {
    * @return x, y coordinates for the position on the board
    */
   public int[] getCoordinatesForPosition(int position) {
-    if (position < 1 || position > 100) {
-      throw new IllegalArgumentException("Position must be between 1 and 100");
+    if (position < 1 || position > boardSize) {
+      throw new IllegalArgumentException("Position must be between 1 and " + boardSize);
     }
 
-    int row = (position - 1) / BOARD_SIZE;
+    int row = (position - 1) / gridSize;
     int col;
 
     // Handle snake and ladder board row alternating direction
-    if (row % 2 == 0) { // Even rows (0, 2, 4, 6, 8) go left to right
-      col = (position - 1) % BOARD_SIZE;
-    } else { // Odd rows (1, 3, 5, 7, 9) go right to left
-      col = BOARD_SIZE - 1 - ((position - 1) % BOARD_SIZE);
+    if (row % 2 == 0) { // Even rows (0, 2, 4, ...) go left to right
+      col = (position - 1) % gridSize;
+    } else { // Odd rows go right to left
+      col = gridSize - 1 - ((position - 1) % gridSize);
     }
 
     // Flip row because the board starts from the bottom
-    row = BOARD_SIZE - row;
+    row = gridSize - row;
 
     // Calculate pixel coordinates (adding offset to center token in tile)
     int x = col * TILE_SIZE + TILE_SIZE / 2;
     int y = row * TILE_SIZE + TILE_SIZE / 2;
 
-    return new int[]{x, y};
+    return new int[] {x, y};
   }
 
   public void setBoardGame(BoardGame newBoardGame) {
@@ -520,5 +471,53 @@ public class SnakesAndLaddersGameUI implements Observer {
     // Update current player indicator
     String currentPlayer = controller.getCurrentSnakesAndLaddersPlayerName();
     updateCurrentPlayerIndicator(currentPlayer);
+  }
+
+  public BorderPane getRoot() {
+    return root;
+  }
+
+  private void handleBackToMainMenu() {
+    if (isLoadedGame && loadedGameName != null) {
+      // Auto-save loaded games
+      try {
+        // controller.saveGame(loadedGameName);
+        JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
+      } catch (Exception e) {
+        LOGGER.log(Level.SEVERE, "Error auto-saving game", e);
+        statusLabel.setText("Error saving game: " + e.getMessage());
+      }
+    } else {
+      // For new games, ask if user wants to save
+      Dialog<ButtonType> dialog = new Dialog<>();
+      dialog.setTitle("Save Game");
+      dialog.setHeaderText("Would you like to save this game before returning to the main menu?");
+      dialog.setContentText("Choose an option:");
+
+      ButtonType saveButtonType = new ButtonType("Save Game");
+      ButtonType dontSaveButton = new ButtonType("Don't Save");
+      ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+      dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, dontSaveButton, cancelButton);
+
+      dialog
+          .showAndWait()
+          .ifPresent(
+              response -> {
+                if (response == saveButtonType) {
+                  // handleSaveGame();
+                  // Wait a bit for the save to complete before returning to main menu
+                  PauseTransition pause = new PauseTransition(Duration.millis(500));
+                  pause.setOnFinished(
+                      event -> {
+                        JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
+                      });
+                  pause.play();
+                } else if (response == dontSaveButton) {
+                  JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
+                }
+                // If cancel, do nothing and stay on the game screen
+              });
+    }
   }
 }

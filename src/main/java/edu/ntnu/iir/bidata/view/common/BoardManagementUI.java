@@ -15,6 +15,8 @@ import javafx.stage.StageStyle;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * UI for board management operations including adding, loading and removing board configurations
@@ -23,6 +25,7 @@ public class BoardManagementUI {
   private final Stage ownerStage;
   private List<String> boardsList = new ArrayList<>();
   private edu.ntnu.iir.bidata.model.board.Board currentBoard = null;
+  private static final Logger LOGGER = Logger.getLogger(BoardManagementUI.class.getName());
 
   /**
    * Creates a new board management UI class
@@ -108,39 +111,39 @@ public class BoardManagementUI {
    * Shows the Load Board dialog with options to add or remove boards
    */
   public void showLoadBoardDialog() {
-            javafx.scene.control.Dialog<String> dialog = new javafx.scene.control.Dialog<>();
-            dialog.setTitle("Load Game");
-            dialog.setHeaderText("Select a saved game to load");
+    javafx.scene.control.Dialog<String> dialog = new javafx.scene.control.Dialog<>();
+    dialog.setTitle("Load Game");
+    dialog.setHeaderText("Select a saved game to load");
 
-            javafx.scene.control.ComboBox<String> gameList = new javafx.scene.control.ComboBox<>();
-            gameList.setPromptText("Select a game");
-            java.io.File savedGamesDir = new java.io.File("src/main/resources/saved_games");
-            if (savedGamesDir.exists() && savedGamesDir.isDirectory()) {
-                java.io.File[] savedGames = savedGamesDir.listFiles((dir, name) -> name.endsWith(".json"));
-                if (savedGames != null) {
-                    for (java.io.File game : savedGames) {
-                        String gameName = game.getName().replace(".json", "");
-                        gameList.getItems().add(gameName);
-                    }
-                }
-            }
-            dialog.getDialogPane().setContent(gameList);
-            javafx.scene.control.ButtonType loadButtonType = new javafx.scene.control.ButtonType("Load", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
-            dialog.getDialogPane().getButtonTypes().addAll(loadButtonType, javafx.scene.control.ButtonType.CANCEL);
-            dialog.setResultConverter(dialogButton -> {
-                if (dialogButton == loadButtonType) {
-                    return gameList.getValue();
-                }
-                return null;
-            });
-            java.util.Optional<String> result = dialog.showAndWait();
-            result.ifPresent(gameName -> {
-                if (gameName != null) {
-                    // Use the launcher to show the loaded game
-                    JavaFXBoardGameLauncher.getInstance().showSnakesAndLaddersGameBoardWithLoad(ownerStage, gameName);
-                }
-            });
+    javafx.scene.control.ComboBox<String> gameList = new javafx.scene.control.ComboBox<>();
+    gameList.setPromptText("Select a game");
+    java.io.File savedGamesDir = new java.io.File("src/main/resources/saved_games");
+    if (savedGamesDir.exists() && savedGamesDir.isDirectory()) {
+      java.io.File[] savedGames = savedGamesDir.listFiles((dir, name) -> name.endsWith(".json"));
+      if (savedGames != null) {
+        for (java.io.File game : savedGames) {
+          String gameName = game.getName().replace(".json", "");
+          gameList.getItems().add(gameName);
         }
+      }
+    }
+    dialog.getDialogPane().setContent(gameList);
+    javafx.scene.control.ButtonType loadButtonType = new javafx.scene.control.ButtonType("Load", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
+    dialog.getDialogPane().getButtonTypes().addAll(loadButtonType, javafx.scene.control.ButtonType.CANCEL);
+    dialog.setResultConverter(dialogButton -> {
+      if (dialogButton == loadButtonType) {
+        return gameList.getValue();
+      }
+      return null;
+    });
+    java.util.Optional<String> result = dialog.showAndWait();
+    result.ifPresent(gameName -> {
+      if (gameName != null) {
+        //TODO: Load the game
+      }
+    });
+  }
+
   /**
    * Creates a styled button with consistent appearance
    */
@@ -167,43 +170,5 @@ public class BoardManagementUI {
     alert.setHeaderText(null);
     alert.setContentText(message);
     alert.showAndWait();
-  }
-
-  private void loadBoardFromJson() {
-    FileChooser fileChooser = new FileChooser();
-    fileChooser.setTitle("Load Board from JSON");
-    fileChooser.getExtensionFilters().add(
-        new FileChooser.ExtensionFilter("JSON Files", "*.json")
-    );
-    File file = fileChooser.showOpenDialog(ownerStage);
-    if (file != null) {
-      try {
-        currentBoard = new edu.ntnu.iir.bidata.filehandling.board.BoardFileReaderGson().readBoard(file.toPath());
-        showAlert("Board loaded from JSON file!");
-      } catch (Exception e) {
-        showAlert("Error loading board: " + e.getMessage());
-      }
-    }
-  }
-
-  private void saveBoardToJson() {
-    // For demo: create a standard board if none loaded
-    if (currentBoard == null) {
-      currentBoard = edu.ntnu.iir.bidata.model.board.BoardFactory.createStandardBoard(16, new java.util.ArrayList<>());
-    }
-    FileChooser fileChooser = new FileChooser();
-    fileChooser.setTitle("Save Board to JSON");
-    fileChooser.getExtensionFilters().add(
-        new FileChooser.ExtensionFilter("JSON Files", "*.json")
-    );
-    File file = fileChooser.showSaveDialog(ownerStage);
-    if (file != null) {
-      try {
-        new edu.ntnu.iir.bidata.filehandling.board.BoardFileWriterGson().writeBoard(currentBoard, file.toPath());
-        showAlert("Board saved to JSON file!");
-      } catch (Exception e) {
-        showAlert("Error saving board: " + e.getMessage());
-      }
-    }
   }
 }

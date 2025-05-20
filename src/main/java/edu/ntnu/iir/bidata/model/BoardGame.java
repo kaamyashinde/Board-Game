@@ -14,6 +14,7 @@ import edu.ntnu.iir.bidata.model.utils.ParameterValidation;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
+import java.util.Objects;
 
 /**
  * A facade class that handles the main game logic and coordinates between different components.
@@ -303,5 +304,24 @@ public class BoardGame implements Observable {
 
   public void setCurrentPlayerIndex(int index) {
     this.currentPlayerIndex = index;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null || getClass() != obj.getClass()) return false;
+    BoardGame other = (BoardGame) obj;
+    return board.equals(other.board) &&
+           players.equals(other.players) &&
+           dice.equals(other.dice) &&
+           currentPlayerIndex == other.currentPlayerIndex &&
+           gameOver == other.gameOver &&
+           gameInitialized == other.gameInitialized &&
+           roundNumber == other.roundNumber;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(board, players, dice, currentPlayerIndex, gameOver, gameInitialized, roundNumber);
   }
 }

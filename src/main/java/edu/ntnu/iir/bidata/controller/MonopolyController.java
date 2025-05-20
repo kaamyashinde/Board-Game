@@ -6,30 +6,24 @@ import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.model.player.SimpleMonopolyPlayer;
 import edu.ntnu.iir.bidata.model.tile.core.Tile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.PropertyTile;
-import edu.ntnu.iir.bidata.filehandling.game.GameStateFileWriter;
-import edu.ntnu.iir.bidata.filehandling.game.GameStateFileReader;
-import edu.ntnu.iir.bidata.filehandling.game.GameStateFileWriterGson;
-import edu.ntnu.iir.bidata.filehandling.game.GameStateFileReaderGson;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriter;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReader;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson;
 import edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI;
-import edu.ntnu.iir.bidata.model.gamestate.MonopolyGameState;
 import java.util.List;
 import java.util.logging.Logger;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
 import java.io.IOException;
+import java.io.File;
 
 /**
  * Controller class specifically for Monopoly game logic.
  */
 public class MonopolyController extends BaseGameController {
     private static final Logger LOGGER = Logger.getLogger(MonopolyController.class.getName());
-    private final GameStateFileWriter gameStateWriter;
-    private final GameStateFileReader gameStateReader;
     private final BoardGameFileWriter boardGameWriter;
     private final BoardGameFileReader boardGameReader;
     private boolean gameStarted = false;
@@ -42,8 +36,6 @@ public class MonopolyController extends BaseGameController {
 
     public MonopolyController(BoardGame boardGame) {
         super(boardGame);
-        this.gameStateWriter = new GameStateFileWriterGson();
-        this.gameStateReader = new GameStateFileReaderGson();
         this.boardGameWriter = new BoardGameFileWriterGson();
         this.boardGameReader = new BoardGameFileReaderGson();
         LOGGER.info("MonopolyController initialized");
@@ -227,49 +219,6 @@ public class MonopolyController extends BaseGameController {
         nextPlayer();
     }
 
-    public void saveGame(String gameName) {
-        if (!gameStarted) {
-            LOGGER.warning("Cannot save game: Game has not started");
-            return;
-        }
-        try {
-            MonopolyGameState gameState = MonopolyGameState.fromBoardGame(boardGame);
-            Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
-            // Serialize MonopolyGameState directly
-            if (boardGameWriter instanceof edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson) {
-                ((edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson) boardGameWriter).writeMonopolyGameState(gameState, savePath);
-            } else {
-                throw new IOException("BoardGameWriter does not support MonopolyGameState");
-            }
-            LOGGER.info("Game saved: " + gameName);
-        } catch (IOException e) {
-            LOGGER.severe("Failed to save game: " + e.getMessage());
-        }
-    }
+   
 
-    public void loadGame(String gameName, MonopolyGameUI ui) {
-        try {
-            Path savePath = Paths.get("src/main/resources/saved_games", gameName + ".json");
-            MonopolyGameState gameState;
-            if (boardGameReader instanceof edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson) {
-                gameState = ((edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson) boardGameReader).readMonopolyGameState(savePath);
-                // Verify this is a Monopoly game
-                if (!"MONOPOLY".equals(gameState.getGameType())) {
-                    LOGGER.severe("Cannot load game: Not a Monopoly save file");
-                    return;
-                }
-            } else {
-                throw new IOException("BoardGameReader does not support MonopolyGameState");
-            }
-            this.boardGame = gameState.toBoardGame();
-            this.gameStarted = true;
-            if (ui != null) {
-                ui.refreshUIFromBoardGame();
-                ui.updateUI();  // Add explicit UI update
-            }
-            LOGGER.info("Game loaded: " + gameName);
-        } catch (IOException e) {
-            LOGGER.severe("Failed to load game: " + e.getMessage());
-        }
-    }
-} 
+  } 

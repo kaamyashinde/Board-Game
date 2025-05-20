@@ -1,198 +1,362 @@
 package edu.ntnu.iir.bidata.view.monopoly;
 
+import edu.ntnu.iir.bidata.controller.MonopolyController;
+import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson;
+import edu.ntnu.iir.bidata.model.BoardGame;
+import edu.ntnu.iir.bidata.view.common.CommonButtons;
+import edu.ntnu.iir.bidata.view.common.JavaFXBoardGameLauncher;
+import edu.ntnu.iir.bidata.view.common.PlayerSelectionUI;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-import edu.ntnu.iir.bidata.view.common.BoardManagementUI;
-import edu.ntnu.iir.bidata.view.common.PlayerSelectionUI;
-import edu.ntnu.iir.bidata.view.common.JavaFXBoardGameLauncher;
 import lombok.Getter;
 
+/**
+ * Represents the UI for the Monopoly game main menu.
+ *
+ * <p>This class sets up and manages the user interface for the Monopoly menu, allowing users to: -
+ * Load a game board - Select players for the game - Start a new game
+ *
+ * <p>The class utilizes JavaFX components to create a responsive menu with a dynamic layout and
+ * styled visual elements.
+ */
 public class MonopolyMenuUI {
-    private final Stage primaryStage;
-    private final Consumer<List<String>> onStartGame;
-    private final BoardManagementUI boardManagementUI;
-    @Getter
-    private List<String> selectedPlayers = new ArrayList<>();
-    private Label playerCountLabel;
+  private static final Logger LOGGER = Logger.getLogger(MonopolyMenuUI.class.getName());
+  private final Stage primaryStage;
+  private final Consumer<List<String>> onStartGame;
+  String monopolyPlayerCountLabelClass = "monopolyPlayerCountLabelClass";
+  @Getter private List<String> selectedPlayers = new ArrayList<>();
+  private Label playerCountLabel;
 
-    public MonopolyMenuUI(Stage primaryStage, Consumer<List<String>> onStartGame) {
-        this.primaryStage = primaryStage;
-        this.onStartGame = onStartGame;
-        this.boardManagementUI = new BoardManagementUI(primaryStage);
-        setupMenu();
-    }
+  /**
+   * Constructs a new MonopolyMenuUI instance for the Monopoly game application.
+   *
+   * <p>This constructor initializes the primary stage and a callback function to handle the start
+   * game action. It also sets up the menu UI for the game.
+   *
+   * @param primaryStage the primary stage of the JavaFX application where the Monopoly menu UI will
+   *     be displayed
+   * @param onStartGame a callback function that accepts a list of selected players' names and
+   *     triggers the start of the game
+   */
+  public MonopolyMenuUI(Stage primaryStage, Consumer<List<String>> onStartGame) {
+    this.primaryStage = primaryStage;
+    this.onStartGame = onStartGame;
+    setupMenu();
+  }
 
-    private void setupMenu() {
-        primaryStage.setTitle("Monopoly");
+  /**
+   * Initializes and configures the menu UI for the Monopoly game application.
+   *
+   * <p>This method sets up the main structure, style, and behavior for the Monopoly menu screen,
+   * including the top navigation bar, logo display, central menu options, and action handlers for
+   * various buttons. It also applies stylesheets and loads the UI scene onto the primary stage.
+   *
+   * <p>Key elements of the menu include: - A back button in the top bar to navigate to the main
+   * menu. - A logo display in the left pane created using the {@code createLogoStack} method. - A
+   * title pane with a stylized "MONOPOLY" label. - Buttons for loading a board, selecting players,
+   * and starting the game. - A label to indicate the number of selected players.
+   *
+   * <p>Menu options and their action handlers: - "LOAD BOARD": Opens a dialog to load a game board,
+   * implemented by the {@code showLoadBoardDialog} method. - "Choose The Players": Opens the player
+   * selection UI, invoking {@code openPlayerSelection}. - "START": Validates selected players and
+   * invokes the provided start game consumer if at least two players are selected.
+   *
+   * <p>The method ensures proper alignment, padding, and spacing for the UI components and styles
+   * elements using the predefined CSS classes and stylesheets.
+   *
+   * <p>The UI is rendered within a {@code BorderPane} layout and displayed as a scene on the
+   * primary stage.
+   */
+  private void setupMenu() {
+    primaryStage.setTitle("Monopoly");
 
-        BorderPane root = new BorderPane();
-        root.setPadding(new Insets(20));
-        root.getStyleClass().add("monopoly-menu-root");
+    BorderPane root = new BorderPane();
+    root.setPadding(new Insets(20));
+    root.getStyleClass().add("monopoly-menu-root");
 
-        // Top bar with back button
-        HBox topBar = new HBox(10);
-        topBar.setPadding(new Insets(10));
-        topBar.setAlignment(Pos.CENTER_LEFT);
-        Button backButton = new Button("← Back to Main Menu");
-        backButton.getStyleClass().add("monopoly-back-button");
-        backButton.setOnAction(e -> JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage));
-        topBar.getChildren().add(backButton);
-        root.setTop(topBar);
+    // Top bar with back button
+    HBox topBar = new HBox(10);
+    topBar.setPadding(new Insets(10));
+    topBar.setAlignment(Pos.CENTER_LEFT);
+    Button backButton = new Button("← Back to Main Menu");
+    backButton.getStyleClass().add("monopoly-back-button");
+    backButton.setOnAction(e -> JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage));
+    topBar.getChildren().add(backButton);
+    root.setTop(topBar);
 
-        VBox logoStack = createLogoStack();
-        root.setLeft(logoStack);
+    VBox logoStack = createLogoStack();
+    root.setLeft(logoStack);
 
-        VBox centerBox = new VBox(30);
-        centerBox.setAlignment(Pos.TOP_CENTER);
-        centerBox.setPadding(new Insets(40, 0, 0, 0));
+    VBox centerBox = new VBox(30);
+    centerBox.setAlignment(Pos.TOP_CENTER);
+    centerBox.setPadding(new Insets(40, 0, 0, 0));
 
-        StackPane titlePane = new StackPane();
-        titlePane.setPrefSize(400, 60);
-        titlePane.getStyleClass().add("monopoly-title-pane");
-        Label titleLabel = new Label("MONOPOLY");
-        titleLabel.getStyleClass().add("monopoly-title-label");
-        titlePane.getChildren().add(titleLabel);
-        centerBox.getChildren().add(titlePane);
+    StackPane titlePane = new StackPane();
+    titlePane.setPrefSize(400, 60);
+    titlePane.getStyleClass().add("monopoly-title-pane");
+    Label titleLabel = new Label("MONOPOLY");
+    titleLabel.getStyleClass().add("monopoly-title-label");
+    titlePane.getChildren().add(titleLabel);
+    centerBox.getChildren().add(titlePane);
 
-        HBox boardButtons = new HBox(30);
-        boardButtons.setAlignment(Pos.CENTER);
-        Button loadBoardBtn = createMenuButton("LOAD BOARD");
-        loadBoardBtn.setOnAction(e -> showLoadBoardDialog());
-        boardButtons.getChildren().add(loadBoardBtn);
-        centerBox.getChildren().add(boardButtons);
+    HBox boardButtons = new HBox(30);
+    boardButtons.setAlignment(Pos.CENTER);
+    Button loadBoardBtn = createMenuButton("LOAD BOARD");
+    loadBoardBtn.setOnAction(e -> showLoadBoardDialog());
+    boardButtons.getChildren().add(loadBoardBtn);
+    centerBox.getChildren().add(boardButtons);
 
-        Button choosePlayersBtn = createMenuButton("Choose The Players");
-        choosePlayersBtn.setOnAction(e -> openPlayerSelection());
-        centerBox.getChildren().add(choosePlayersBtn);
+    Button choosePlayersBtn = createMenuButton("Choose The Players");
+    choosePlayersBtn.setOnAction(e -> openPlayerSelection());
+    centerBox.getChildren().add(choosePlayersBtn);
 
-        playerCountLabel = new Label("No players selected");
-        playerCountLabel.getStyleClass().add("monopoly-player-count-label");
-        centerBox.getChildren().add(playerCountLabel);
+    playerCountLabel = new Label("No players selected");
+    playerCountLabel.getStyleClass().add(monopolyPlayerCountLabelClass);
+    centerBox.getChildren().add(playerCountLabel);
 
-        Button startGameBtn = createMenuButton("START");
-        startGameBtn.setOnAction(e -> {
-            if (selectedPlayers.size() >= 2) {
-                if (onStartGame != null) onStartGame.accept(selectedPlayers);
-            } else {
-                playerCountLabel.setText("Please select at least two players!");
-                playerCountLabel.setStyle("-fx-text-fill: red;");
-            }
+    Button startGameBtn = createMenuButton("START");
+    startGameBtn.setOnAction(
+        e -> {
+          if (selectedPlayers.size() >= 2) {
+            if (onStartGame != null) onStartGame.accept(selectedPlayers);
+          } else {
+            playerCountLabel.setText("Please select at least two players!");
+            playerCountLabel.setStyle("-fx-text-fill: red;");
+          }
         });
-        centerBox.getChildren().add(startGameBtn);
+    centerBox.getChildren().add(startGameBtn);
 
-        root.setCenter(centerBox);
+    root.setCenter(centerBox);
 
-        Scene scene = new Scene(root, 1200, 800);
-        scene.getStylesheets().add(getClass().getResource("/monopoly.css").toExternalForm());
-        scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
-        primaryStage.setScene(scene);
-        primaryStage.show();
-    }
+    Scene scene = new Scene(root, 1200, 800);
+    scene.getStylesheets().add(getClass().getResource("/monopoly.css").toExternalForm());
+    scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+    primaryStage.setScene(scene);
+    primaryStage.show();
+  }
 
-    private VBox createLogoStack() {
-        VBox logoStack = new VBox(8);
-        logoStack.setPadding(new Insets(10, 20, 10, 10));
-        logoStack.setAlignment(Pos.TOP_LEFT);
-        Color[] colors = {
-            Color.web("#3b3b6d"), Color.web("#f7e6c7"), Color.web("#b39ddb"),
-            Color.web("#e69a28"), Color.web("#c2c2fa")
-        };
-        int[] heights = {40, 30, 40, 20, 30, 20, 40, 30, 20, 40, 30};
-        for (int i = 0; i < 11; i++) {
-            Region r = new Region();
-            r.setPrefSize((i % 3 == 0 ? 40 : (i % 3 == 1 ? 30 : 60)), heights[i]);
-            r.setStyle("-fx-background-radius: 15; -fx-background-color: " + toHexString(colors[i % colors.length]) + ";");
-            logoStack.getChildren().add(r);
-        }
-        return logoStack;
-    }
+  /**
+   * Creates and returns a VBox configured to display a stack of color-coded regions.
+   *
+   * <p>This method initializes a VBox container with predefined padding, alignment, and spacing
+   * properties. It uses the {@code setUpLogoStackHeight} method to populate the VBox with a stack
+   * of styled regions, each taking a color from a predefined array.
+   *
+   * @return a VBox containing a vertically-stacked arrangement of colored regions
+   */
+  private VBox createLogoStack() {
+    VBox logoStack = new VBox(8);
+    logoStack.setPadding(new Insets(10, 20, 10, 10));
+    logoStack.setAlignment(Pos.TOP_LEFT);
+    Color[] colors = {
+      Color.web("#3b3b6d"),
+      Color.web("#f7e6c7"),
+      Color.web("#b39ddb"),
+      Color.web("#e69a28"),
+      Color.web("#c2c2fa")
+    };
+    setUpLogoStackHeight(colors, logoStack);
+    return logoStack;
+  }
 
-    private Button createMenuButton(String text) {
-        Button btn = new Button(text);
-        btn.getStyleClass().add("monopoly-menu-button");
-        return btn;
-    }
+  /**
+   * Creates a stylized menu button with the given text.
+   *
+   * <p>This method instantiates a new Button with the provided text, applies the
+   * "monopoly-menu-button" style class to the button, and returns it for further use.
+   *
+   * @param text the text to be displayed on the button
+   * @return a Button instance with the specified text and applied style
+   */
+  private Button createMenuButton(String text) {
+    Button btn = new Button(text);
+    btn.getStyleClass().add("monopoly-menu-button");
+    return btn;
+  }
 
-    private void openPlayerSelection() {
-        PlayerSelectionUI playerSelection = new PlayerSelectionUI(primaryStage);
-        List<String> playerNames = playerSelection.showAndWait();
-        if (playerNames != null && !playerNames.isEmpty()) {
-            selectedPlayers = playerNames;
-            playerCountLabel.setText(selectedPlayers.size() + " players selected");
-            playerCountLabel.getStyleClass().add("monopoly-player-count-label");
-        } else {
-            playerCountLabel.setText("No players selected");
-            playerCountLabel.getStyleClass().add("monopoly-player-count-label");
-        }
-    }
+  /**
+   * Displays a dialog to load a game board file and initializes the game UI if a valid file is
+   * selected.
+   *
+   * <p>This method sets up a dialog for the user to input the name of a game board file. If the
+   * user provides a non-empty input, the method attempts to load the corresponding board game by
+   * calling {@code readBoardGameFromSelectedFile}. If the board game is successfully loaded, it
+   * initializes the {@code MonopolyGameUI} for the game and sets the scene using {@code
+   * createAndSetScene}. If an error occurs during file loading or UI initialization, the error is
+   * logged.
+   *
+   * <p>The dialog interacts with the user through a {@link Dialog} instance, showing a prompt and
+   * waiting for the user's response.
+   *
+   * <p>Exceptions such as IO errors or game loading issues are handled and logged within the
+   * method.
+   */
+  private void showLoadBoardDialog() {
+    Dialog<String> dialog = CommonButtons.setUpStringDialog(true);
 
-    private String toHexString(Color c) {
-        return String.format("#%02X%02X%02X",
-            (int)(c.getRed() * 255),
-            (int)(c.getGreen() * 255),
-            (int)(c.getBlue() * 255)
-        );
-    }
-
-    private void showLoadBoardDialog() {
-        javafx.scene.control.Dialog<String> dialog = new javafx.scene.control.Dialog<>();
-        dialog.setTitle("Load Monopoly Game");
-        dialog.setHeaderText("Select a saved Monopoly game to load");
-
-        javafx.scene.control.ComboBox<String> gameList = new javafx.scene.control.ComboBox<>();
-        gameList.setPromptText("Select a game");
-        java.io.File savedGamesDir = new java.io.File("src/main/resources/saved_games");
-        final long MAX_SIZE = 1024 * 1024; // 1MB
-        if (savedGamesDir.exists() && savedGamesDir.isDirectory()) {
-            java.io.File[] files = savedGamesDir.listFiles((dir, name) -> name.endsWith(".json"));
-            if (files != null) {
-                for (java.io.File file : files) {
-                    try {
-                        if (file.length() > MAX_SIZE) continue; // Skip large files
-                        String json = java.nio.file.Files.readString(file.toPath());
-                        com.google.gson.Gson gson = new com.google.gson.Gson();
-                        edu.ntnu.iir.bidata.model.gamestate.MonopolyGameState gameState = gson.fromJson(json, edu.ntnu.iir.bidata.model.gamestate.MonopolyGameState.class);
-                        if ("MONOPOLY".equals(gameState.getGameType())) {
-                            gameList.getItems().add(file.getName().replace(".json", ""));
-                        }
-                    } catch (OutOfMemoryError oom) {
-                        // Skip files that are too large or cause OOM
-                        continue;
-                    } catch (Exception e) {
-                        // Skip files that can't be read or aren't valid Monopoly saves
-                        continue;
-                    }
+    dialog
+        .showAndWait()
+        .ifPresent(
+            gameName -> {
+              if (!gameName.isEmpty()) {
+                try {
+                  BoardGame boardGame = readBoardGameFromSelectedFile(gameName);
+                  MonopolyGameUI gameUI = getMonopolyGameUI(boardGame);
+                  // Create and set the scene
+                  createAndSetScene(gameUI.getRoot());
+                } catch (Exception e) {
+                  LOGGER.log(Level.SEVERE, "Error loading Snakes and Ladders game", e);
                 }
-            }
-        }
+              }
+            });
+  }
 
-        javafx.scene.layout.VBox content = new javafx.scene.layout.VBox(10);
-        content.getChildren().addAll(new javafx.scene.control.Label("Select a saved game:"), gameList);
-        dialog.getDialogPane().setContent(content);
-
-        javafx.scene.control.ButtonType loadButtonType = new javafx.scene.control.ButtonType("Load", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(loadButtonType, javafx.scene.control.ButtonType.CANCEL);
-
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == loadButtonType) {
-                return gameList.getValue();
-            }
-            return null;
-        });
-
-        dialog.showAndWait().ifPresent(gameName -> {
-            if (gameName != null && !gameName.isEmpty()) {
-                JavaFXBoardGameLauncher.getInstance().showMonopolyGameBoardWithLoad(primaryStage, gameName);
-            }
-        });
+  /**
+   * Opens the player selection UI and updates the selected players and UI elements accordingly.
+   *
+   * <p>This method initializes a {@code PlayerSelectionUI} instance, displays the player selection
+   * dialog to the user, and retrieves the list of selected players. If any players are selected,
+   * they are saved in the {@code selectedPlayers} field, and the text of {@code playerCountLabel}
+   * is updated to reflect the number of players selected. If no players are selected, a default "No
+   * players selected" message is displayed in the label.
+   *
+   * <p>Additionally, the {@code playerCountLabel} CSS style class is updated to include the {@code
+   * monopolyPlayerCountLabelClass}.
+   */
+  private void openPlayerSelection() {
+    PlayerSelectionUI playerSelection = new PlayerSelectionUI(primaryStage);
+    List<String> playerNames = playerSelection.showAndWait();
+    if (playerNames != null && !playerNames.isEmpty()) {
+      selectedPlayers = playerNames;
+      playerCountLabel.setText(selectedPlayers.size() + " players selected");
+      playerCountLabel.getStyleClass().add(monopolyPlayerCountLabelClass);
+    } else {
+      playerCountLabel.setText("No players selected");
+      playerCountLabel.getStyleClass().add(monopolyPlayerCountLabelClass);
     }
+  }
+
+  /**
+   * Configures and populates the specified VBox with a stack of color-coded regions, each with
+   * predefined heights and styles based on the provided colors array.
+   *
+   * @param colors an array of Color objects used to set the background colors of the regions
+   * @param logoStack the VBox container to which the styled regions will be added
+   */
+  private void setUpLogoStackHeight(Color[] colors, VBox logoStack) {
+    int[] heights = {40, 30, 40, 20, 30, 20, 40, 30, 20, 40, 30};
+    for (int i = 0; i < 11; i++) {
+      Region r = new Region();
+      int operation = i % 3 == 1 ? 30 : 60;
+      r.setPrefSize((i % 3 == 0 ? 40 : operation), heights[i]);
+      r.setStyle(
+          "-fx-background-radius: 15; -fx-background-color: "
+              + toHexString(colors[i % colors.length])
+              + ";");
+      logoStack.getChildren().add(r);
+    }
+  }
+
+  /**
+   * Reads a board game configuration from a JSON file located in the Monopoly game's saved games
+   * directory.
+   *
+   * <p>This method attempts to load a board game file by appending the provided game name with the
+   * ".json" extension and locating it in the "src/main/resources/saved_games/monopoly" directory.
+   * The file is then parsed to create and return a {@code BoardGame} instance.
+   *
+   * @param gameName the name of the board game file (without extension) to read and load
+   * @return the {@code BoardGame} instance created from the loaded file
+   * @throws IOException if an I/O error occurs while reading the board game file
+   */
+  private static BoardGame readBoardGameFromSelectedFile(String gameName) throws IOException {
+    BoardGameFileReaderGson reader = new BoardGameFileReaderGson();
+    return reader.readBoardGame(
+        Paths.get("src/main/resources/saved_games/monopoly", gameName + ".json"));
+  }
+
+  /**
+   * Initializes and returns the UI for the Monopoly game.
+   *
+   * <p>This method creates a new instance of {@code MonopolyGameUI}, sets up a controller for the
+   * game, and registers the UI as an observer for the game state. It also logs essential
+   * information about the current player and their position during initialization and starts the
+   * game using the controller.
+   *
+   * @param boardGame the {@code BoardGame} instance representing the Monopoly game, containing the
+   *     game's state and logic
+   * @return a {@code MonopolyGameUI} instance that serves as the user interface for the Monopoly
+   *     game
+   */
+  private MonopolyGameUI getMonopolyGameUI(BoardGame boardGame) {
+    // Create view and controller
+    MonopolyGameUI gameUI = new MonopolyGameUI(boardGame, primaryStage);
+    MonopolyController controller = new MonopolyController(boardGame);
+    gameUI.setController(controller);
+    gameUI.setBoardGame(boardGame);
+    LOGGER.info(
+        "Game loaded successfully"
+            + boardGame.getCurrentPlayer().getName()
+            + " "
+            + boardGame.getCurrentPlayer().getCurrentPosition());
+    // Register UI as observer
+    boardGame.addObserver(gameUI);
+
+    // Load game state and start
+    controller.startGame();
+    return gameUI;
+  }
+
+  /**
+   * Creates a new scene for the provided game UI and sets it on the primary stage.
+   *
+   * <p>This method creates a JavaFX {@code Scene} using the given {@code BorderPane} as the root
+   * layout. It configures the scene with specific dimensions and applies the required stylesheets
+   * to it. Finally, the scene is set to the application's primary stage, and the stage is
+   * displayed.
+   *
+   * @param gameUI the {@code BorderPane} that serves as the root layout for the scene
+   */
+  private void createAndSetScene(BorderPane gameUI) {
+
+    Scene scene = new Scene(gameUI, 1200, 800);
+    scene
+        .getStylesheets()
+        .addAll(
+            getClass().getResource("/styles.css").toExternalForm(),
+            getClass().getResource("/monopoly.css").toExternalForm());
+    primaryStage.setScene(scene);
+    primaryStage.show();
+  }
+
+  /**
+   * Converts the given {@code Color} object to a hexadecimal string representation.
+   *
+   * <p>The returned string is in the format "#RRGGBB", where RR, GG, and BB are the hexadecimal
+   * values of the red, green, and blue color components, scaled to a range of 0–255 and represented
+   * as two-digit uppercase hexadecimal numbers.
+   *
+   * @param c the {@code Color} instance to be converted to a hexadecimal string; it should have
+   *     red, green, and blue components in the range 0.0 to 1.0
+   * @return a string representing the hexadecimal color code, such as "#FFFFFF" for white
+   */
+  private String toHexString(Color c) {
+    return String.format(
+        "#%02X%02X%02X",
+        (int) (c.getRed() * 255), (int) (c.getGreen() * 255), (int) (c.getBlue() * 255));
+  }
 }

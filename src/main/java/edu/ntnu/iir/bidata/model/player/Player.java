@@ -3,6 +3,7 @@ package edu.ntnu.iir.bidata.model.player;
 import edu.ntnu.iir.bidata.model.tile.core.Tile;
 import lombok.Getter;
 import lombok.Setter;
+import java.util.Objects;
 
 /**
  * Class that handles the movements of a specific player.
@@ -63,6 +64,21 @@ public class Player {
    */
   public int getCurrentPosition() {
     return currentTile != null ? currentTile.getId() : -1;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null || getClass() != obj.getClass()) return false;
+    Player other = (Player) obj;
+    return Objects.equals(name, other.name) &&
+           Objects.equals(currentTile, other.currentTile) &&
+           skipNextTurn == other.skipNextTurn;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, currentTile, skipNextTurn);
   }
 
 }
