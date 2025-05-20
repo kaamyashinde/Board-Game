@@ -12,6 +12,10 @@ import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersMenuUI;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson;
 import edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI;
 import edu.ntnu.iir.bidata.view.monopoly.MonopolyMenuUI;
+import edu.ntnu.iir.bidata.model.utils.DefaultGameMediator;
+import edu.ntnu.iir.bidata.model.utils.GameMediator;
+import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson;
+import edu.ntnu.iir.bidata.controller.MonopolyController;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -29,7 +33,7 @@ import javafx.scene.Scene;
 public class JavaFXBoardGameLauncher extends Application {
 
   private static final Logger LOGGER = Logger.getLogger(JavaFXBoardGameLauncher.class.getName());
-  private static JavaFXBoardGameLauncher instance;
+  private static volatile JavaFXBoardGameLauncher instance;
 
   /**
    * Enum representing the different types of games available
@@ -53,6 +57,13 @@ public class JavaFXBoardGameLauncher extends Application {
    * Get the singleton instance of the launcher
    */
   public static JavaFXBoardGameLauncher getInstance() {
+    if (instance == null) {
+      synchronized (JavaFXBoardGameLauncher.class) {
+        if (instance == null) {
+          instance = new JavaFXBoardGameLauncher();
+        }
+      }
+    }
     return instance;
   }
 
@@ -141,10 +152,19 @@ public class JavaFXBoardGameLauncher extends Application {
     LOGGER.info("Initializing Monopoly game with players: " + players);
     try {
       Board board = MonopolyBoardFactory.createBoard();
-        BoardGame boardGame = new BoardGame(board, 2);
+      BoardGame boardGame = new BoardGame(board, 2);
       players.forEach(player -> boardGame.addPlayer(player.getName()));
       boardGame.setPlayers(new ArrayList<>(players)); // Cast to List<Player> if needed
-      MonopolyGameUI monopolyGameUI = new MonopolyGameUI(boardGame, stage);
+
+      // Dependency injection wiring
+      GameMediator mediator = new DefaultGameMediator();
+      MonopolyController controller = new MonopolyController(
+        boardGame,
+        new BoardGameFileWriterGson(),
+        new BoardGameFileReaderGson(),
+        mediator
+      );
+      MonopolyGameUI monopolyGameUI = new MonopolyGameUI(boardGame, stage, controller, mediator);
       stage.setScene(monopolyGameUI.getScene());
       stage.show();
     } catch (Exception e) {
