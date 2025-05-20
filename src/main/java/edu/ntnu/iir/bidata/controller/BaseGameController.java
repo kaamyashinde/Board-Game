@@ -21,6 +21,7 @@ public abstract class BaseGameController {
   @Getter @Setter protected int currentPlayerIndex = 0;
   protected List<String> playerNames;
   @Getter @Setter protected boolean diceRolled = false;
+
   protected BaseGameController(BoardGame boardGame) {
     this.boardGame = boardGame;
     LOGGER.info("BaseGameController initialized");
@@ -56,7 +57,8 @@ public abstract class BaseGameController {
   /** Saves a board game to be opened later. */
   public void saveGame(String gameName, boolean isMonopoly) {
     BoardGameFileWriterGson writer = new BoardGameFileWriterGson();
-    String newPath = GAME_PATH + (isMonopoly ? "monopoly/" : "snakesandladder/") + gameName + ".json";
+    String newPath =
+        GAME_PATH + (isMonopoly ? "monopoly/" : "snakesandladder/") + gameName + ".json";
     Path savePath = Path.of(newPath);
     try {
       writer.writeBoardGame(boardGame, savePath, isMonopoly);
@@ -66,9 +68,11 @@ public abstract class BaseGameController {
   }
 
   /** Loads a board game from a file. */
-  public BoardGame loadGame(String gameName) {
+  public BoardGame loadGame(String gameName, boolean isMonopoly) {
     BoardGameFileReaderGson reader = new BoardGameFileReaderGson();
-    Path savePath = Path.of(GAME_PATH + gameName + ".json");
+    String newPath =
+        GAME_PATH + (isMonopoly ? "monopoly/" : "snakesandladder/") + gameName + ".json";
+    Path savePath = Path.of(newPath);
     try {
       boardGame = reader.readBoardGame(savePath);
       LOGGER.info("Game loaded successfully");
