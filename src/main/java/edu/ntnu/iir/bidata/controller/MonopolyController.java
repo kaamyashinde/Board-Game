@@ -127,6 +127,7 @@ public class MonopolyController extends BaseGameController {
         SimpleMonopolyPlayer currentPlayer = (SimpleMonopolyPlayer) boardGame.getCurrentPlayer();
         if (currentPlayer.isInJail()) {
             awaitingJailAction = true;
+            boardGame.notifyObservers();
             return;
         }
         if (!gameStarted) {

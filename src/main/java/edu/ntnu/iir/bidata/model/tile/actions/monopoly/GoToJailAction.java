@@ -40,4 +40,8 @@ public class GoToJailAction implements TileAction {
     public String getDescription() {
         return "Go to Jail";
     }
+
+    public int getJailTileId() {
+        return jailTileId;
+    }
 }

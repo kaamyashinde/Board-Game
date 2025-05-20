@@ -8,6 +8,8 @@ import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.model.player.SimpleMonopolyPlayer;
 import edu.ntnu.iir.bidata.model.tile.core.Tile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.PropertyTile;
+import edu.ntnu.iir.bidata.model.tile.actions.monopoly.GoToJailAction;
+import edu.ntnu.iir.bidata.filehandling.boardgame.TileActionTypeAdapterFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,6 +30,7 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
         new GsonBuilder()
             .setPrettyPrinting()
             .registerTypeAdapter(Tile.class, new TileSerializer())
+            .registerTypeAdapterFactory(new TileActionTypeAdapterFactory())
             .create();
   }
 
@@ -83,6 +86,9 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
         tileData.put("group", propertyTile.getGroup());
         tileData.put(
             "owner", propertyTile.getOwner() != null ? propertyTile.getOwner().getName() : null);
+      }
+      if (tile.getAction() != null) {
+        tileData.put("action", gson.toJsonTree(tile.getAction()));
       }
       tilesData.put(String.valueOf(tile.getId()), tileData);
     }

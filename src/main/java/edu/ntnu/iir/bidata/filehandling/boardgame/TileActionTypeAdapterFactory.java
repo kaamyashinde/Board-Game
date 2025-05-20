@@ -13,6 +13,8 @@ import edu.ntnu.iir.bidata.model.tile.actions.movement.EntryPointAction;
 import edu.ntnu.iir.bidata.model.tile.actions.movement.HopFiveStepsAction;
 import edu.ntnu.iir.bidata.model.tile.actions.snakeandladder.LadderAction;
 import edu.ntnu.iir.bidata.model.tile.actions.snakeandladder.SnakeAction;
+import edu.ntnu.iir.bidata.model.tile.actions.monopoly.GoToJailAction;
+import edu.ntnu.iir.bidata.model.tile.actions.monopoly.CollectMoneyAction;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -37,6 +39,8 @@ public class TileActionTypeAdapterFactory implements TypeAdapterFactory {
 
                 if (value instanceof GoToTileAction) {
                     jsonObject.addProperty("targetTileId", ((GoToTileAction) value).getTargetTileId());
+                } else if (value instanceof GoToJailAction) {
+                    jsonObject.addProperty("jailTileId", ((GoToJailAction) value).getJailTileId());
                 } else if (value instanceof LadderAction) {
                     jsonObject.addProperty("topTileId", ((LadderAction) value).getTopTileId());
                 } else if (value instanceof SnakeAction) {
@@ -49,6 +53,8 @@ public class TileActionTypeAdapterFactory implements TypeAdapterFactory {
                     // For SwitchPositionAction, we need to handle the List<Player> reference
                     // This assumes Player has proper serialization
                     jsonObject.add("allPlayers", gson.toJsonTree(((SwitchPositionAction) value).getAllPlayers()));
+                } else if (value instanceof CollectMoneyAction) {
+                    // No extra fields needed
                 }
                 // SafeSpotAction, LoseTurnAction, and HopFiveStepsAction don't need extra fields
 
@@ -66,6 +72,9 @@ public class TileActionTypeAdapterFactory implements TypeAdapterFactory {
                 switch (type) {
                     case "GoToTileAction":
                         return (T) new GoToTileAction(jsonObject.get("targetTileId").getAsInt());
+                    case "GoToJailAction":
+                        int jailTileId = jsonObject.has("jailTileId") ? jsonObject.get("jailTileId").getAsInt() : 10;
+                        return (T) new GoToJailAction(jailTileId);
                     case "LadderAction":
                         return (T) new LadderAction(jsonObject.get("topTileId").getAsInt());
                     case "SnakeAction":
@@ -81,6 +90,8 @@ public class TileActionTypeAdapterFactory implements TypeAdapterFactory {
                         return (T) new LoseTurnAction();
                     case "HopFiveStepsAction":
                         return (T) new HopFiveStepsAction();
+                    case "CollectMoneyAction":
+                        return (T) new CollectMoneyAction();
                     default:
                         throw new JsonParseException("Unknown TileAction type: " + type);
                 }
