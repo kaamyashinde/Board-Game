@@ -182,8 +182,10 @@ public class JavaFXBoardGameLauncher extends Application {
   private void showSnakesAndLaddersGameBoard(Stage stage, List<Player> players) {
     LOGGER.info("Initializing Snakes and Ladders game with players: " + players);
     try {
-      // Create view first
-      SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(stage, players);
+      // Create mediator
+      GameMediator mediator = new DefaultGameMediator();
+      // Create view first, pass mediator
+      SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(stage, players, mediator);
 
       // Create model
       Board board = BoardFactory.createSnakesAndLaddersBoard(100, players);
@@ -194,7 +196,8 @@ public class JavaFXBoardGameLauncher extends Application {
 
       boardGame.addObserver(gameUI);
 
-      SnakesAndLaddersController controller = new SnakesAndLaddersController(boardGame);
+      // Pass mediator to controller
+      SnakesAndLaddersController controller = new SnakesAndLaddersController(boardGame, mediator);
       gameUI.setController(controller);
 
       controller.setPlayerNames(players.stream().map(Player::getName).toList());
@@ -222,7 +225,8 @@ public class JavaFXBoardGameLauncher extends Application {
       
       // Create view and controller
       SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(stage, players);
-      SnakesAndLaddersController controller = new SnakesAndLaddersController(boardGame);
+      GameMediator mediator = new DefaultGameMediator();
+      SnakesAndLaddersController controller = new SnakesAndLaddersController(boardGame, mediator);
       gameUI.setController(controller);
       gameUI.setBoardGame(boardGame);
       

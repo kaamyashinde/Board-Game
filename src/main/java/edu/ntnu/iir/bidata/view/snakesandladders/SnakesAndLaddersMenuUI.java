@@ -7,6 +7,8 @@ import edu.ntnu.iir.bidata.view.common.BoardManagementUI;
 import edu.ntnu.iir.bidata.view.common.CommonButtons;
 import edu.ntnu.iir.bidata.view.common.JavaFXBoardGameLauncher;
 import edu.ntnu.iir.bidata.view.common.PlayerSelectionUI;
+import edu.ntnu.iir.bidata.model.utils.DefaultGameMediator;
+import edu.ntnu.iir.bidata.model.utils.GameMediator;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -244,10 +246,12 @@ public class SnakesAndLaddersMenuUI {
    * Never reuse a previous instance or its root node.
    */
   private SnakesAndLaddersGameUI getSnakesAndLaddersGameUI(String gameName, BoardGame boardGame) {
+    // Create mediator
+    GameMediator mediator = new DefaultGameMediator();
     // Create view and controller (always new instance)
     SnakesAndLaddersGameUI gameUI =
-        new SnakesAndLaddersGameUI(primaryStage, boardGame.getPlayers());
-    SnakesAndLaddersController controller = new SnakesAndLaddersController(boardGame);
+        new SnakesAndLaddersGameUI(primaryStage, boardGame.getPlayers(), mediator);
+    SnakesAndLaddersController controller = new SnakesAndLaddersController(boardGame, mediator);
     gameUI.setLoadedGame(true, gameName);
     gameUI.setController(controller);
     gameUI.setBoardGame(boardGame);

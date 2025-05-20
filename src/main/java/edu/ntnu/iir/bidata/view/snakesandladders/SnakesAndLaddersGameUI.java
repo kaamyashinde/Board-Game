@@ -31,6 +31,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import edu.ntnu.iir.bidata.model.utils.GameMediator;
+import edu.ntnu.iir.bidata.model.utils.DefaultGameMediator;
 
 public class SnakesAndLaddersGameUI implements Observer {
 
@@ -57,27 +59,47 @@ public class SnakesAndLaddersGameUI implements Observer {
   private boolean isLoadedGame = false;
   private String loadedGameName = null;
   private BorderPane root;
+  private GameMediator mediator;
 
   /**
    * Constructor that receives the selected players from the menu
    *
    * @param primaryStage The primary stage
    * @param playerNames List of player names selected in the menu
+   * @param mediator The game mediator
    */
-  public SnakesAndLaddersGameUI(Stage primaryStage, List<Player> playerNames) {
+  public SnakesAndLaddersGameUI(Stage primaryStage, List<Player> playerNames, GameMediator mediator) {
     LOGGER.info("Initializing Snakes and Ladders Game UI with players: " + playerNames);
     this.primaryStage = primaryStage;
     this.playerNames = playerNames;
-
+    this.mediator = mediator;
+    if (this.mediator instanceof DefaultGameMediator m) {
+      m.register((sender, event) -> {
+        if ("nextPlayer".equals(event)) {
+          javafx.application.Platform.runLater(() -> {
+            updateCurrentPlayerIndicator(controller.getCurrentSnakesAndLaddersPlayerName());
+          });
+        }
+      });
+    }
     // If no players were passed, add a default player
     if (this.playerNames == null || this.playerNames.isEmpty()) {
       LOGGER.warning("No players provided, adding default player");
       this.playerNames = new ArrayList<>();
       this.playerNames.add(new Player("Player 1"));
     }
-
     setupGamePage();
     initializePlayerPositions();
+  }
+
+  /**
+   * Constructor for backward compatibility
+   *
+   * @param primaryStage The primary stage
+   * @param playerNames List of player names selected in the menu
+   */
+  public SnakesAndLaddersGameUI(Stage primaryStage, List<Player> playerNames) {
+    this(primaryStage, playerNames, null);
   }
 
   /**

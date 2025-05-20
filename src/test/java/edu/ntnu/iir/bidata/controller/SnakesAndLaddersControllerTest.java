@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
+import edu.ntnu.iir.bidata.model.utils.GameMediator;
 
 class SnakesAndLaddersControllerTest {
     private SnakesAndLaddersController controller;
@@ -45,7 +46,12 @@ class SnakesAndLaddersControllerTest {
         initializeBoard(board);
         dice = new Dice(1); // One die for Snakes and Ladders
         boardGame = new BoardGame(board, dice);
-        controller = new SnakesAndLaddersController(boardGame);
+        // Use a mediator that advances the player
+        controller = new SnakesAndLaddersController(boardGame, (sender, event) -> {
+            if ("nextPlayer".equals(event)) {
+                ((SnakesAndLaddersController)sender).nextSnakesAndLaddersPlayer();
+            }
+        });
         playerNames = Arrays.asList("Player1", "Player2");
         
         // Add players to the game
