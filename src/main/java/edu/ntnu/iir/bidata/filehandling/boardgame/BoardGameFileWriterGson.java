@@ -10,7 +10,9 @@ import edu.ntnu.iir.bidata.model.tile.core.Tile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.PropertyTile;
 import edu.ntnu.iir.bidata.model.tile.actions.monopoly.GoToJailAction;
 import edu.ntnu.iir.bidata.filehandling.boardgame.TileActionTypeAdapterFactory;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -52,7 +54,9 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
       writeMonopolyGameToJson(boardGame, path);
     } else {
       String json = gson.toJson(boardGame);
-      Files.writeString(path, json);
+      try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+        writer.write(json);
+      }
     }
   }
 
@@ -119,6 +123,8 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
 
     // Convert to JSON and write to file
     String json = gson.toJson(simplifiedGame);
-    Files.writeString(path, json);
+    try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+      writer.write(json);
+    }
   }
 }
