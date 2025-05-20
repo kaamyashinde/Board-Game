@@ -349,6 +349,9 @@ private MonopolyGameUI getMonopolyGameUI(BoardGame boardGame, boolean startNew) 
   MonopolyController controller = new MonopolyController(boardGame);
   ui.setController(controller);
   boardGame.addObserver(ui);
+  // Set player names in controller after loading
+  List<String> playerNames = boardGame.getPlayers().stream().map(p -> p.getName()).toList();
+  controller.setPlayerNames(playerNames);
   if (startNew) controller.startGame();
   return ui;
 }
