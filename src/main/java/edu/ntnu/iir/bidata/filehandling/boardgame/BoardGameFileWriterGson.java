@@ -74,6 +74,9 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
       Map<String, Object> tileData = new HashMap<>();
       tileData.put("id", tile.getId());
       tileData.put("type", tile.getClass().getSimpleName());
+      if (tile.getNextTile() != null) {
+        tileData.put("nextTileId", tile.getNextTile().getId());
+      }
       if (tile instanceof PropertyTile propertyTile) {
         tileData.put("price", propertyTile.getPrice());
         tileData.put("rent", propertyTile.getRent());
