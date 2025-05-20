@@ -217,9 +217,9 @@ public class MonopolyMenuUI {
                   BoardGame boardGame = readBoardGameFromSelectedFile(gameName);
                   MonopolyGameUI gameUI = getMonopolyGameUI(boardGame);
                   // Create and set the scene
-                  createAndSetScene(gameUI.getRoot());
+                  createAndSetScene(gameUI);
                 } catch (Exception e) {
-                  LOGGER.log(Level.SEVERE, "Error loading Snakes and Ladders game", e);
+                  LOGGER.log(Level.SEVERE, "Error loading Monopoly game", e);
                 }
               }
             });
@@ -331,17 +331,11 @@ public class MonopolyMenuUI {
    *
    * @param gameUI the {@code BorderPane} that serves as the root layout for the scene
    */
-  private void createAndSetScene(BorderPane gameUI) {
-
-    Scene scene = new Scene(gameUI, 1200, 800);
-    scene
-        .getStylesheets()
-        .addAll(
-            getClass().getResource("/styles.css").toExternalForm(),
-            getClass().getResource("/monopoly.css").toExternalForm());
-    primaryStage.setScene(scene);
+  private void createAndSetScene(MonopolyGameUI gameUI) {
+    primaryStage.setScene(gameUI.getScene());
     primaryStage.show();
   }
+  
 
   /**
    * Converts the given {@code Color} object to a hexadecimal string representation.

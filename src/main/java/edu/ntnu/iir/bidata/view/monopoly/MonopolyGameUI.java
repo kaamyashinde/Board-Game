@@ -365,6 +365,6 @@ public class MonopolyGameUI extends JavaFXGameUI {
   }
 
   public BorderPane getRoot() {
-    return root;
+    return mainLayout;
   }
 }
