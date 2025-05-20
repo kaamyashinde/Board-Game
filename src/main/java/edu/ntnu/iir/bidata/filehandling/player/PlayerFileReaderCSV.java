@@ -3,6 +3,8 @@ package edu.ntnu.iir.bidata.filehandling.player;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 
 import edu.ntnu.iir.bidata.model.player.Player;
@@ -33,6 +35,28 @@ public class PlayerFileReaderCSV implements PlayerFileReader {
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to read players from CSV file", e);
+        }
+        return players;
+    }
+
+    /**
+     * Reads all players from a CSV input stream (one name per line).
+     * This method is useful for reading from resources or other input sources.
+     *
+     * @param inputStream the input stream containing CSV data
+     * @return a list of Player objects
+     */
+    public java.util.List<Player> readPlayersFromInputStream(InputStream inputStream) {
+        java.util.List<Player> players = new java.util.ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.trim().isEmpty()) {
+                    players.add(new Player(line.trim()));
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read players from input stream", e);
         }
         return players;
     }

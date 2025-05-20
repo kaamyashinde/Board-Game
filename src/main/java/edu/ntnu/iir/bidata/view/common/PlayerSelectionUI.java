@@ -1,5 +1,6 @@
 package edu.ntnu.iir.bidata.view.common;
 
+import java.io.InputStream;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -22,12 +23,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * UI for player selection, including loading players from CSV files
+ * UI for player selection, including loading players from CSV files and selecting which ones to use
  */
 public class PlayerSelectionUI {
   private final Stage stage;
-  private final ObservableList<String> playersList = FXCollections.observableArrayList();
-  private final ListView<String> playersListView = new ListView<>(playersList);
+  private final ObservableList<String> availablePlayersList = FXCollections.observableArrayList();
+  private final ObservableList<String> selectedPlayersList = FXCollections.observableArrayList();
+  private final ListView<String> availablePlayersListView = new ListView<>(availablePlayersList);
+  private final ListView<String> selectedPlayersListView = new ListView<>(selectedPlayersList);
   private Label statusLabel;
 
   /**
@@ -50,16 +53,52 @@ public class PlayerSelectionUI {
     root.setPadding(new Insets(20));
     root.getStyleClass().add("player-selection-root");
 
-    // Main player list
+    // Main content
     VBox centerContent = new VBox(15);
     centerContent.setAlignment(Pos.CENTER);
 
-    Button csvLoadButton = createStyledButton("load from CSV File", 200, 50);
-    Button csvSaveButton = createStyledButton("save to CSV File", 200, 50);
+    // CSV Load button
+    Button csvLoadButton = createStyledButton("Load Available Players from CSV", 250, 50);
+    centerContent.getChildren().add(csvLoadButton);
 
-    playersListView.setPrefHeight(300);
-    playersListView.setMaxWidth(300);
-    playersListView.setCellFactory(lv -> new PlayerListCell());
+    // Two-column layout for available and selected players
+    HBox playersContainer = new HBox(20);
+    playersContainer.setAlignment(Pos.CENTER);
+
+    // Available players section
+    VBox availableSection = new VBox(10);
+    availableSection.setAlignment(Pos.CENTER);
+
+    Label availableLabel = new Label("Available Players");
+    availableLabel.getStyleClass().add("player-selection-section-label");
+
+    availablePlayersListView.setPrefHeight(200);
+    availablePlayersListView.setPrefWidth(200);
+    availablePlayersListView.setCellFactory(lv -> new PlayerListCell());
+
+    Button addPlayerButton = createStyledButton("Add Manual Player", 150, 40);
+    Button selectPlayerButton = createStyledButton("Select →", 100, 40);
+
+    availableSection.getChildren().addAll(availableLabel, availablePlayersListView, addPlayerButton, selectPlayerButton);
+
+    // Selected players section
+    VBox selectedSection = new VBox(10);
+    selectedSection.setAlignment(Pos.CENTER);
+
+    Label selectedLabel = new Label("Selected Players");
+    selectedLabel.getStyleClass().add("player-selection-section-label");
+
+    selectedPlayersListView.setPrefHeight(200);
+    selectedPlayersListView.setPrefWidth(200);
+    selectedPlayersListView.setCellFactory(lv -> new PlayerListCell());
+
+    Button removePlayerButton = createStyledButton("← Remove", 100, 40);
+    Button clearAllButton = createStyledButton("Clear All", 100, 40);
+
+    selectedSection.getChildren().addAll(selectedLabel, selectedPlayersListView, removePlayerButton, clearAllButton);
+
+    playersContainer.getChildren().addAll(availableSection, selectedSection);
+    centerContent.getChildren().add(playersContainer);
 
     // Player limit indicators
     HBox limitLabels = new HBox(30);
@@ -67,8 +106,7 @@ public class PlayerSelectionUI {
 
     StackPane maxPlayersPane = new StackPane();
     maxPlayersPane.setPrefSize(200, 50);
-    maxPlayersPane.getStyleClass().addAll("player-selection-title-pane","player-selection-limit-warning");
-
+    maxPlayersPane.getStyleClass().addAll("player-selection-title-pane", "player-selection-limit-warning");
     Label maxPlayersLabel = new Label("MAX 5 PLAYERS");
     maxPlayersLabel.getStyleClass().add("player-selection-title-label");
     maxPlayersPane.getChildren().add(maxPlayersLabel);
@@ -81,30 +119,21 @@ public class PlayerSelectionUI {
     minPlayersPane.getChildren().add(minPlayersLabel);
 
     limitLabels.getChildren().addAll(maxPlayersPane, minPlayersPane);
+    centerContent.getChildren().add(limitLabels);
 
-    // Player management controls
-    HBox playerControls = new HBox(20);
-    playerControls.setAlignment(Pos.CENTER);
-
-    Button addPlayerButton = createStyledButton("ADD", 120, 50);
-    Button removePlayerButton = createStyledButton("REMOVE", 120, 50);
-
-    playerControls.getChildren().addAll(addPlayerButton, removePlayerButton);
-
-    // Status label for messages
-    statusLabel = new Label();
+    // Status label
+    statusLabel = new Label("Load players from CSV or add manually");
     statusLabel.getStyleClass().add("player-selection-status-label");
-
-    // Add everything to the center content
-    centerContent.getChildren().addAll(csvLoadButton, csvSaveButton, playersListView, limitLabels, playerControls, statusLabel);
+    centerContent.getChildren().add(statusLabel);
 
     root.setCenter(centerContent);
 
     // Button actions
     csvLoadButton.setOnAction(e -> loadPlayersFromCSV());
-    csvSaveButton.setOnAction(e -> savePlayersToCSV());
     addPlayerButton.setOnAction(e -> showAddPlayerDialog());
-    removePlayerButton.setOnAction(e -> showRemovePlayerDialog());
+    selectPlayerButton.setOnAction(e -> selectPlayer());
+    removePlayerButton.setOnAction(e -> removeSelectedPlayer());
+    clearAllButton.setOnAction(e -> clearAllSelectedPlayers());
 
     // Done button at the bottom
     Button doneButton = createStyledButton("DONE", 150, 40);
@@ -115,7 +144,7 @@ public class PlayerSelectionUI {
     bottomBox.setPadding(new Insets(20, 0, 0, 0));
     root.setBottom(bottomBox);
 
-    Scene scene = new Scene(root, 500, 600);
+    Scene scene = new Scene(root, 600, 700);
     scene.getStylesheets().add(getClass().getResource("/common.css").toExternalForm());
     stage.setScene(scene);
   }
@@ -127,67 +156,77 @@ public class PlayerSelectionUI {
    */
   public List<String> showAndWait() {
     stage.showAndWait();
-    return new ArrayList<>(playersList);
+    return new ArrayList<>(selectedPlayersList);
   }
 
   private void loadPlayersFromCSV() {
-    FileChooser fileChooser = new FileChooser();
-    fileChooser.setTitle("Select Players CSV File");
-    fileChooser.getExtensionFilters().add(
-        new FileChooser.ExtensionFilter("CSV Files", "*.csv")
-    );
+    try {
+      // Load from the built-in CSV file in resources folder
+      String resourcePath = "/saved_players/saved_players.csv";
+      InputStream inputStream = getClass().getResourceAsStream(resourcePath);
 
-    File file = fileChooser.showOpenDialog(stage);
-    if (file != null) {
-      try {
-        java.util.List<edu.ntnu.iir.bidata.model.player.Player> loadedPlayers =
-            new edu.ntnu.iir.bidata.filehandling.player.PlayerFileReaderCSV().readPlayers(file.toPath());
-        int count = 0;
-        for (edu.ntnu.iir.bidata.model.player.Player player : loadedPlayers) {
-          String name = player.getName();
-          if (!name.isEmpty() && !playersList.contains(name) && count < 5) {
-            playersList.add(name);
-            count++;
-          }
-        }
-        statusLabel.setText("Loaded " + count + " players from CSV");
-      } catch (Exception e) {
-        statusLabel.setText("Error loading CSV: " + e.getMessage());
+      if (inputStream == null) {
+        statusLabel.setText("Error: Built-in players file not found!");
+        return;
       }
+
+      // Use the new method to read directly from InputStream
+      java.util.List<edu.ntnu.iir.bidata.model.player.Player> loadedPlayers =
+          new edu.ntnu.iir.bidata.filehandling.player.PlayerFileReaderCSV().readPlayersFromInputStream(inputStream);
+
+      // Clear existing available players
+      availablePlayersList.clear();
+
+      // Add all loaded players to available list
+      for (edu.ntnu.iir.bidata.model.player.Player player : loadedPlayers) {
+        String name = player.getName();
+        if (!name.isEmpty() && !availablePlayersList.contains(name)) {
+          availablePlayersList.add(name);
+        }
+      }
+
+      inputStream.close();
+      statusLabel.setText("Loaded " + availablePlayersList.size() + " available players. Select the ones you want to play with.");
+
+    } catch (Exception e) {
+      statusLabel.setText("Error loading built-in CSV: " + e.getMessage());
     }
   }
 
-  private void savePlayersToCSV() {
-    if (playersList.isEmpty()) {
-      statusLabel.setText("No players to save!");
-      return;
-    }
-    FileChooser fileChooser = new FileChooser();
-    fileChooser.setTitle("Save Players to CSV File");
-    fileChooser.getExtensionFilters().add(
-        new FileChooser.ExtensionFilter("CSV Files", "*.csv")
-    );
-    File file = fileChooser.showSaveDialog(stage);
-    if (file != null) {
-      try {
-        java.util.List<edu.ntnu.iir.bidata.model.player.Player> playersToSave = new java.util.ArrayList<>();
-        for (String name : playersList) {
-          playersToSave.add(new edu.ntnu.iir.bidata.model.player.Player(name));
-        }
-        new edu.ntnu.iir.bidata.filehandling.player.PlayerFileWriterCSV().writePlayers(playersToSave, file.toPath());
-        statusLabel.setText("Saved " + playersList.size() + " players to CSV");
-      } catch (Exception e) {
-        statusLabel.setText("Error saving CSV: " + e.getMessage());
+  private void selectPlayer() {
+    String selectedPlayer = availablePlayersListView.getSelectionModel().getSelectedItem();
+    if (selectedPlayer != null) {
+      if (selectedPlayersList.size() >= 5) {
+        statusLabel.setText("Maximum 5 players allowed!");
+        return;
       }
+      if (!selectedPlayersList.contains(selectedPlayer)) {
+        selectedPlayersList.add(selectedPlayer);
+        statusLabel.setText("Added " + selectedPlayer + " to selected players");
+      } else {
+        statusLabel.setText(selectedPlayer + " is already selected!");
+      }
+    } else {
+      statusLabel.setText("Please select a player from the available list first!");
     }
+  }
+
+  private void removeSelectedPlayer() {
+    String selectedPlayer = selectedPlayersListView.getSelectionModel().getSelectedItem();
+    if (selectedPlayer != null) {
+      selectedPlayersList.remove(selectedPlayer);
+      statusLabel.setText("Removed " + selectedPlayer + " from selected players");
+    } else {
+      statusLabel.setText("Please select a player from the selected list first!");
+    }
+  }
+
+  private void clearAllSelectedPlayers() {
+    selectedPlayersList.clear();
+    statusLabel.setText("Cleared all selected players");
   }
 
   private void showAddPlayerDialog() {
-    if (playersList.size() >= 5) {
-      statusLabel.setText("Maximum 5 players allowed!");
-      return;
-    }
-
     Stage addDialog = new Stage();
     addDialog.initOwner(stage);
     addDialog.initModality(Modality.APPLICATION_MODAL);
@@ -198,7 +237,6 @@ public class PlayerSelectionUI {
     layout.setAlignment(Pos.CENTER);
     layout.getStyleClass().add("player-selection-root");
 
-    // Layout similar to the wireframe
     StackPane titlePane = new StackPane();
     titlePane.setPrefSize(250, 50);
     titlePane.getStyleClass().add("player-selection-title-pane");
@@ -210,10 +248,8 @@ public class PlayerSelectionUI {
     nameBox.setAlignment(Pos.CENTER_LEFT);
 
     Circle marker = new Circle(10, Color.DARKGREEN);
-
     Label nameLabel = new Label("NAME:");
     nameLabel.getStyleClass().add("bold-label");
-
     TextField nameField = new TextField();
     nameField.setPrefWidth(200);
 
@@ -225,14 +261,16 @@ public class PlayerSelectionUI {
 
     addButton.setOnAction(e -> {
       String name = nameField.getText().trim();
-      if (!name.isEmpty() && !playersList.contains(name)) {
-        playersList.add(name);
-        statusLabel.setText("Added player: " + name);
-        addDialog.close();
-      } else if (name.isEmpty()) {
-        statusLabel.setText("Player name cannot be empty!");
+      if (!name.isEmpty()) {
+        if (!availablePlayersList.contains(name)) {
+          availablePlayersList.add(name);
+          statusLabel.setText("Added " + name + " to available players");
+          addDialog.close();
+        } else {
+          statusLabel.setText("Player " + name + " already exists in available players!");
+        }
       } else {
-        statusLabel.setText("Player name already exists!");
+        statusLabel.setText("Player name cannot be empty!");
       }
     });
 
@@ -240,64 +278,6 @@ public class PlayerSelectionUI {
     scene.getStylesheets().add(getClass().getResource("/common.css").toExternalForm());
     addDialog.setScene(scene);
     addDialog.showAndWait();
-  }
-
-  private void showRemovePlayerDialog() {
-    if (playersList.isEmpty()) {
-      statusLabel.setText("No players to remove!");
-      return;
-    }
-
-    Stage removeDialog = new Stage();
-    removeDialog.initOwner(stage);
-    removeDialog.initModality(Modality.APPLICATION_MODAL);
-    removeDialog.setTitle("Remove Player");
-
-    VBox layout = new VBox(20);
-    layout.setPadding(new Insets(20));
-    layout.setAlignment(Pos.CENTER);
-    layout.getStyleClass().add("player-selection-root");
-
-    // Layout similar to the wireframe
-    StackPane titlePane = new StackPane();
-    titlePane.setPrefSize(250, 50);
-    titlePane.getStyleClass().add("player-selection-title-pane");
-    Label titleLabel = new Label("Remove Player");
-    titleLabel.getStyleClass().add("player-selection-title-label");
-    titlePane.getChildren().add(titleLabel);
-
-    Label questionLabel = new Label("Which Player would you like to remove?");
-    questionLabel.setStyle("-fx-font-weight: bold;");
-
-    Circle marker = new Circle(10, Color.DARKGREEN);
-
-    ComboBox<String> playerComboBox = new ComboBox<>(playersList);
-    playerComboBox.setPrefWidth(200);
-    if (!playersList.isEmpty()) {
-      playerComboBox.setValue(playersList.get(0));
-    }
-
-    HBox selectionBox = new HBox(10);
-    selectionBox.setAlignment(Pos.CENTER);
-    selectionBox.getChildren().addAll(marker, playerComboBox);
-
-    Button removeButton = createStyledButton("REMOVE", 120, 40);
-
-    layout.getChildren().addAll(titlePane, questionLabel, selectionBox, removeButton);
-
-    removeButton.setOnAction(e -> {
-      String selected = playerComboBox.getValue();
-      if (selected != null) {
-        playersList.remove(selected);
-        statusLabel.setText("Removed player: " + selected);
-        removeDialog.close();
-      }
-    });
-
-    Scene scene = new Scene(layout, 350, 250);
-    scene.getStylesheets().add(getClass().getResource("/common.css").toExternalForm());
-    removeDialog.setScene(scene);
-    removeDialog.showAndWait();
   }
 
   private Button createStyledButton(String text, int width, int height) {
