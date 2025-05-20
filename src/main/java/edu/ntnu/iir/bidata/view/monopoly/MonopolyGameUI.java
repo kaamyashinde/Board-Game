@@ -58,13 +58,15 @@ public class MonopolyGameUI extends JavaFXGameUI {
   protected BoardGame boardGame;
 
   @Setter private MonopolyController controller;
+  private final edu.ntnu.iir.bidata.model.utils.GameMediator mediator;
   private BorderPane root;
 
-  public MonopolyGameUI(BoardGame boardGame, Stage primaryStage) {
+  public MonopolyGameUI(BoardGame boardGame, Stage primaryStage, MonopolyController controller, edu.ntnu.iir.bidata.model.utils.GameMediator mediator) {
     super(boardGame);
     this.boardGame = boardGame;
     this.primaryStage = primaryStage;
-    this.controller = new MonopolyController(boardGame);
+    this.controller = controller;
+    this.mediator = mediator;
     this.mainLayout = new BorderPane();
     this.boardPane = new GridPane();
     this.playerInfoPanel = new VBox(10);
@@ -74,6 +76,19 @@ public class MonopolyGameUI extends JavaFXGameUI {
     List<String> playerNames = boardGame.getPlayers().stream().map(Player::getName).toList();
     controller.setPlayerNames(playerNames);
     setupUI();
+
+    // Register mediator listener to update UI on nextPlayer event
+    if (mediator instanceof edu.ntnu.iir.bidata.model.utils.DefaultGameMediator m) {
+      m.register((sender, event) -> {
+        if ("nextPlayer".equals(event)) {
+          javafx.application.Platform.runLater(() -> {
+            updatePlayerInfoPanel();
+            updatePlayerTokens();
+            updateRollDiceButtonState();
+          });
+        }
+      });
+    }
   }
 
   private void setupUI() {
