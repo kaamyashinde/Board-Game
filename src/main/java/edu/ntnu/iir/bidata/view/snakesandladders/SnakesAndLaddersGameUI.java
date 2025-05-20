@@ -246,8 +246,8 @@ public class SnakesAndLaddersGameUI implements Observer {
   private void initializePlayerPositions() {
     LOGGER.info("Initializing player positions");
     for (Player player : playerNames) {
-      // Move token to starting position
-      movePlayerToken(player.getName(), 0);
+      int position = player.getCurrentPosition(); // Use the actual position
+      movePlayerToken(player.getName(), position);
     }
   }
 
