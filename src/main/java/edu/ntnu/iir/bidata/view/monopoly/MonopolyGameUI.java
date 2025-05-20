@@ -275,7 +275,13 @@ public class MonopolyGameUI extends JavaFXGameUI {
   }
 
   public void setBoardGame(BoardGame boardGame) {
+    // Remove this UI as observer from the old boardGame if needed
+    if (this.boardGame != null) {
+      this.boardGame.removeObserver(this);
+    }
     this.boardGame = boardGame;
+    // Register as observer to the new boardGame
+    this.boardGame.addObserver(this);
     initializeBoard();
     update();
   }

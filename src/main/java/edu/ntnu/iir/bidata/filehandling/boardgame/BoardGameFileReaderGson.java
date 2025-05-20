@@ -30,6 +30,7 @@ public class BoardGameFileReaderGson implements BoardGameFileReader {
     .setPrettyPrinting()
     .registerTypeAdapter(Tile.class, new TileSerializer())
     .registerTypeAdapter(Board.class, new BoardDeserializer()) // Register custom deserializer
+    .registerTypeAdapterFactory(new PlayerTypeAdapterFactory()) // Register custom player deserializer
     .create();
   }
 
