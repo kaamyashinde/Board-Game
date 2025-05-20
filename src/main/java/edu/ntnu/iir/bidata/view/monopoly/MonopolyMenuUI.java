@@ -215,9 +215,12 @@ public class MonopolyMenuUI {
               if (!gameName.isEmpty()) {
                 try {
                   BoardGame boardGame = readBoardGameFromSelectedFile(gameName);
-                  MonopolyGameUI gameUI = getMonopolyGameUI(boardGame);
-                  // Create and set the scene
+                  MonopolyGameUI gameUI = getMonopolyGameUI(boardGame, false);
                   createAndSetScene(gameUI);
+
+                 // MonopolyGameUI gameUI = getMonopolyGameUI(boardGame);
+                  // Create and set the scene
+                 // createAndSetScene(gameUI);
                 } catch (Exception e) {
                   LOGGER.log(Level.SEVERE, "Error loading Monopoly game", e);
                 }
@@ -331,11 +334,25 @@ public class MonopolyMenuUI {
    *
    * @param gameUI the {@code BorderPane} that serves as the root layout for the scene
    */
-  private void createAndSetScene(MonopolyGameUI gameUI) {
-    primaryStage.setScene(gameUI.getScene());
-    primaryStage.show();
-  }
-  
+ // signature change + body
+private void createAndSetScene(MonopolyGameUI gameUI) {
+  primaryStage.setScene(gameUI.getScene());
+  primaryStage.show();
+}
+
+  /**
+ * @param boardGame    loaded or fresh game state
+ * @param startNew     if true → controller.startGame(), else skip startGame()
+ */
+private MonopolyGameUI getMonopolyGameUI(BoardGame boardGame, boolean startNew) {
+  MonopolyGameUI ui = new MonopolyGameUI(boardGame, primaryStage);
+  MonopolyController controller = new MonopolyController(boardGame);
+  ui.setController(controller);
+  boardGame.addObserver(ui);
+  if (startNew) controller.startGame();
+  return ui;
+}
+
 
   /**
    * Converts the given {@code Color} object to a hexadecimal string representation.
