@@ -14,7 +14,7 @@ public class BoardDeserializer implements JsonDeserializer<Board> {
         throws JsonParseException {
 
         JsonObject boardObject = json.getAsJsonObject();
-        int boardSize = boardObject.has("sizeOfBoard") ? boardObject.get("sizeOfBoard").getAsInt() : 0;
+        int boardSize = boardObject.has("boardSize") ? boardObject.get("boardSize").getAsInt() : 0;
 
         Board board = new Board(boardSize);
 
