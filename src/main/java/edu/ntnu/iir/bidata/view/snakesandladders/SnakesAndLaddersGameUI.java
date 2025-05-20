@@ -88,8 +88,11 @@ public class SnakesAndLaddersGameUI implements Observer {
   public void setController(SnakesAndLaddersController controller) {
     LOGGER.info("Setting game controller");
     this.controller = controller;
-    controller.setPlayerNames(
-        playerNames.stream().map(Player::getName).collect(Collectors.toList()));
+    // Only set player names if this is NOT a loaded game
+    if (!isLoadedGame) {
+      controller.setPlayerNames(
+          playerNames.stream().map(Player::getName).collect(Collectors.toList()));
+    }
     updateCurrentPlayerIndicator(controller.getCurrentSnakesAndLaddersPlayerName());
 
     // Create top bar with back button and game controls
@@ -194,7 +197,8 @@ public class SnakesAndLaddersGameUI implements Observer {
       playerLabel.getStyleClass().add("snl-player-name-label");
 
       // Position label
-      Label posLabel = new Label("at position: 0");
+      int actualPosition = playerNames.get(i).getCurrentPosition();
+      Label posLabel = new Label("at position: " + actualPosition);
       playerPositionLabels.put(playerName, posLabel);
 
       Circle token = createPlayerToken(i + 1, playerName);
@@ -452,49 +456,6 @@ public class SnakesAndLaddersGameUI implements Observer {
     this.boardGame.addObserver(this);
   }
 
-  private void handleBackToMainMenu() {
-    if (isLoadedGame && loadedGameName != null) {
-      // Auto-save loaded games
-      try {
-        // controller.saveGame(loadedGameName);
-        JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
-      } catch (Exception e) {
-        LOGGER.log(Level.SEVERE, "Error auto-saving game", e);
-        statusLabel.setText("Error saving game: " + e.getMessage());
-      }
-    } else {
-      // For new games, ask if user wants to save
-      Dialog<ButtonType> dialog = new Dialog<>();
-      dialog.setTitle("Save Game");
-      dialog.setHeaderText("Would you like to save this game before returning to the main menu?");
-      dialog.setContentText("Choose an option:");
-
-      ButtonType saveButtonType = new ButtonType("Save Game");
-      ButtonType dontSaveButton = new ButtonType("Don't Save");
-      ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-
-      dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, dontSaveButton, cancelButton);
-
-      dialog
-          .showAndWait()
-          .ifPresent(
-              response -> {
-                if (response == saveButtonType) {
-                  // handleSaveGame();
-                  // Wait a bit for the save to complete before returning to main menu
-                  PauseTransition pause = new PauseTransition(Duration.millis(500));
-                  pause.setOnFinished(
-                      event -> {
-                        JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
-                      });
-                  pause.play();
-                } else if (response == dontSaveButton) {
-                  JavaFXBoardGameLauncher.getInstance().showMainMenu(primaryStage);
-                }
-                // If cancel, do nothing and stay on the game screen
-              });
-    }
-  }
 
   public BorderPane getRoot() {
     return root;

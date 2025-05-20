@@ -248,6 +248,7 @@ public class SnakesAndLaddersMenuUI {
     SnakesAndLaddersGameUI gameUI =
         new SnakesAndLaddersGameUI(primaryStage, boardGame.getPlayers());
     SnakesAndLaddersController controller = new SnakesAndLaddersController(boardGame);
+    gameUI.setLoadedGame(true, gameName);
     gameUI.setController(controller);
     gameUI.setBoardGame(boardGame);
     LOGGER.info(
@@ -260,7 +261,6 @@ public class SnakesAndLaddersMenuUI {
 
     // Load game state and start
     controller.loadSnakesAndLadderGame(gameName);
-    controller.startGame();
     return gameUI;
   }
 
