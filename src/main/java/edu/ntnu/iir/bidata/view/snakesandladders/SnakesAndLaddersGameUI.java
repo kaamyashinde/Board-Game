@@ -232,14 +232,6 @@ public class SnakesAndLaddersGameUI implements Observer {
     bottomBox.getChildren().add(diceBox);
     root.setBottom(bottomBox);
 
-    Scene scene = new Scene(root, 1200, 800);
-    scene
-        .getStylesheets()
-        .addAll(
-            getClass().getResource("/styles.css").toExternalForm(),
-            getClass().getResource("/snakesandladders.css").toExternalForm());
-    primaryStage.setScene(scene);
-    primaryStage.show();
   }
 
   /** Initialize all player positions to the starting position */
