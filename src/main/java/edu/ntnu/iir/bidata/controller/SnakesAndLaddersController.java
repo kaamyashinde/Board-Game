@@ -81,8 +81,28 @@ public class SnakesAndLaddersController extends BaseGameController {
     return boardGame.getCurrentPlayer().getName();
   }
 
-  public int getLastDiceRoll() {
+  public int[] getLastDiceRolls() {
+    return boardGame.getCurrentDiceValues();
+  }
+
+  public int getLastDiceSum() {
     int[] values = boardGame.getCurrentDiceValues();
+    int sum = 0;
+    if (values != null) {
+      for (int v : values) sum += v;
+    }
+    return sum;
+  }
+
+  public void rollDice() {
+    boardGame.getDice().rollAllDice();
+    diceRolled = true;
+    LOGGER.info("Dice rolled: " + java.util.Arrays.toString(boardGame.getCurrentDiceValues()));
+  }
+
+  // For backward compatibility
+  public int getLastDiceRoll() {
+    int[] values = getLastDiceRolls();
     return (values != null && values.length > 0) ? values[0] : 0;
   }
 
@@ -147,12 +167,6 @@ public class SnakesAndLaddersController extends BaseGameController {
       }
     }
     return 0;
-  }
-
-  public void rollDiceForSnakesAndLadders() {
-    boardGame.getDice().rollAllDice();
-    diceRolled = true;
-    LOGGER.info("Dice rolled: " + boardGame.getCurrentDiceValues()[0]);
   }
 
   public void loadSnakesAndLadderGame(String savePath) {

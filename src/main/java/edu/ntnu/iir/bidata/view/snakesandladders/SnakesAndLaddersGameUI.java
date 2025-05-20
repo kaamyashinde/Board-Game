@@ -261,16 +261,15 @@ public class SnakesAndLaddersGameUI implements Observer {
 
     String currentPlayer = controller.getCurrentSnakesAndLaddersPlayerName();
 
-    controller.rollDiceForSnakesAndLadders();
-    int roll = controller.getLastDiceRoll();
-    diceView.setValue(roll);
-
-    statusLabel.setText(currentPlayer + " rolled a " + roll + "!");
-
+    controller.rollDice();
+    int[] rolls = controller.getLastDiceRolls();
+    int sum = controller.getLastDiceSum();
+    diceView.setValues(rolls.length > 0 ? rolls[0] : 1, rolls.length > 1 ? rolls[1] : (rolls.length > 0 ? rolls[0] : 1));
+    statusLabel.setText(currentPlayer + " rolled a " + (rolls.length > 0 ? rolls[0] : 1) + " and " + (rolls.length > 1 ? rolls[1] : (rolls.length > 0 ? rolls[0] : 1)) + "! (Total: " + sum + ")");
     PauseTransition pause = new PauseTransition(Duration.millis(800));
     pause.setOnFinished(
         event -> {
-          SnakesAndLaddersController.MoveResult result = controller.movePlayer(currentPlayer, roll);
+          SnakesAndLaddersController.MoveResult result = controller.movePlayer(currentPlayer, sum);
 
           // Update the player position immediately after the move
           updatePlayerPosition(currentPlayer);

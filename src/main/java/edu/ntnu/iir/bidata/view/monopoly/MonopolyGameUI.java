@@ -12,6 +12,7 @@ import edu.ntnu.iir.bidata.model.tile.core.monopoly.JailTile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.PropertyTile;
 import edu.ntnu.iir.bidata.view.common.CommonButtons;
 import edu.ntnu.iir.bidata.view.common.JavaFXGameUI;
+import edu.ntnu.iir.bidata.view.common.DiceView;
 import java.util.*;
 import java.util.logging.Logger;
 import javafx.geometry.Insets;
@@ -52,7 +53,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
   private final GridPane boardPane;
   private final VBox playerInfoPanel;
   private final HBox gameControls;
-  private final Label diceLabel = new Label("Dice: -");
+  private final DiceView diceView = new DiceView();
   private final Stage primaryStage;
   protected BoardGame boardGame;
 
@@ -116,7 +117,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
     initializeBoard();
 
     // Add dice label and roll button to game controls
-    diceLabel.getStyleClass().add("monopoly-dice-label");
+    diceView.getStyleClass().add("monopoly-dice-view");
 
     rollDiceButton.getStyleClass().add("monopoly-roll-dice-button");
     rollDiceButton.setOnAction(e -> handleRollDice());
@@ -155,7 +156,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
             jailRollButton,
             jailPayButton,
             saveButton,
-            diceLabel);
+            diceView);
 
     // Add stylesheets
     getScene().getStylesheets().add(getClass().getResource("/monopoly.css").toExternalForm());
@@ -177,12 +178,15 @@ public class MonopolyGameUI extends JavaFXGameUI {
   private void handleRollDice() {
     controller.handlePlayerMove();
     // Show dice value
-    int[] diceValues = getBoardGame().getCurrentDiceValues();
-    if (diceValues != null && diceValues.length > 0) {
-      diceLabel.setText("Dice: " + Arrays.toString(diceValues));
+    int[] diceValues = controller.getLastDiceRolls();
+    if (diceValues != null && diceValues.length == 2) {
+      diceView.setValues(diceValues[0], diceValues[1]);
+    } else if (diceValues != null && diceValues.length == 1) {
+      diceView.setValues(diceValues[0], diceValues[0]);
     } else {
-      diceLabel.setText("Dice: -");
+      diceView.setValues(1, 1);
     }
+    // Optionally, display the sum somewhere if needed
   }
 
   private void handleBuyProperty() {
