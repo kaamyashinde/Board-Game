@@ -2,6 +2,7 @@ package edu.ntnu.iir.bidata.view.snakesandladders;
 
 import edu.ntnu.iir.bidata.controller.SnakesAndLaddersController;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson;
+import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson;
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.view.common.BoardManagementUI;
 import edu.ntnu.iir.bidata.view.common.CommonButtons;
@@ -251,7 +252,12 @@ public class SnakesAndLaddersMenuUI {
     // Create view and controller (always new instance)
     SnakesAndLaddersGameUI gameUI =
         new SnakesAndLaddersGameUI(primaryStage, boardGame.getPlayers(), mediator);
-    SnakesAndLaddersController controller = new SnakesAndLaddersController(boardGame, mediator);
+    SnakesAndLaddersController controller = new SnakesAndLaddersController(
+      boardGame,
+      new BoardGameFileWriterGson(),
+      new BoardGameFileReaderGson(),
+      mediator
+    );
     gameUI.setLoadedGame(true, gameName);
     gameUI.setController(controller);
     gameUI.setBoardGame(boardGame);

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import edu.ntnu.iir.bidata.Inject;
 
 /**
  * Implementation of the BoardGameFileWriter interface using Gson for JSON serialization. This class
@@ -27,6 +28,7 @@ import java.util.Map;
 public class BoardGameFileWriterGson implements BoardGameFileWriter {
   private final Gson gson;
 
+  @Inject
   public BoardGameFileWriterGson() {
     this.gson =
         new GsonBuilder()

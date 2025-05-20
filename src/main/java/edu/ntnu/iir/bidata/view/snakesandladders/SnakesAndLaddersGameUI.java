@@ -33,6 +33,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import edu.ntnu.iir.bidata.model.utils.GameMediator;
 import edu.ntnu.iir.bidata.model.utils.DefaultGameMediator;
+import edu.ntnu.iir.bidata.Inject;
 
 public class SnakesAndLaddersGameUI implements Observer {
 
@@ -61,13 +62,7 @@ public class SnakesAndLaddersGameUI implements Observer {
   private BorderPane root;
   private GameMediator mediator;
 
-  /**
-   * Constructor that receives the selected players from the menu
-   *
-   * @param primaryStage The primary stage
-   * @param playerNames List of player names selected in the menu
-   * @param mediator The game mediator
-   */
+  @Inject
   public SnakesAndLaddersGameUI(Stage primaryStage, List<Player> playerNames, GameMediator mediator) {
     LOGGER.info("Initializing Snakes and Ladders Game UI with players: " + playerNames);
     this.primaryStage = primaryStage;

@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import edu.ntnu.iir.bidata.filehandling.boardgame.TileActionTypeAdapterFactory;
+import edu.ntnu.iir.bidata.Inject;
 
 /**
  * Class to read a board game from a JSON file using Gson.
@@ -26,6 +27,7 @@ import edu.ntnu.iir.bidata.filehandling.boardgame.TileActionTypeAdapterFactory;
 public class BoardGameFileReaderGson implements BoardGameFileReader {
   private final Gson gson;
 
+  @Inject
   public BoardGameFileReaderGson() {
     this.gson = new GsonBuilder()
     .setPrettyPrinting()

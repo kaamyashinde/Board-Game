@@ -26,6 +26,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import lombok.Setter;
+import edu.ntnu.iir.bidata.Inject;
 
 /** JavaFX UI implementation for the Monopoly game. */
 public class MonopolyGameUI extends JavaFXGameUI {
@@ -61,6 +62,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
   private final edu.ntnu.iir.bidata.model.utils.GameMediator mediator;
   private BorderPane root;
 
+  @Inject
   public MonopolyGameUI(BoardGame boardGame, Stage primaryStage, MonopolyController controller, edu.ntnu.iir.bidata.model.utils.GameMediator mediator) {
     super(boardGame);
     this.boardGame = boardGame;

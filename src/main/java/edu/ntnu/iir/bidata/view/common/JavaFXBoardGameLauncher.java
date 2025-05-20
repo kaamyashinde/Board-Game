@@ -197,7 +197,12 @@ public class JavaFXBoardGameLauncher extends Application {
       boardGame.addObserver(gameUI);
 
       // Pass mediator to controller
-      SnakesAndLaddersController controller = new SnakesAndLaddersController(boardGame, mediator);
+      SnakesAndLaddersController controller = new SnakesAndLaddersController(
+        boardGame,
+        new BoardGameFileWriterGson(),
+        new BoardGameFileReaderGson(),
+        mediator
+      );
       gameUI.setController(controller);
 
       controller.setPlayerNames(players.stream().map(Player::getName).toList());
@@ -226,7 +231,12 @@ public class JavaFXBoardGameLauncher extends Application {
       // Create view and controller
       SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(stage, players);
       GameMediator mediator = new DefaultGameMediator();
-      SnakesAndLaddersController controller = new SnakesAndLaddersController(boardGame, mediator);
+      SnakesAndLaddersController controller = new SnakesAndLaddersController(
+        boardGame,
+        new BoardGameFileWriterGson(),
+        new BoardGameFileReaderGson(),
+        mediator
+      );
       gameUI.setController(controller);
       gameUI.setBoardGame(boardGame);
       

@@ -26,6 +26,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import lombok.Getter;
+import edu.ntnu.iir.bidata.Inject;
 
 /**
  * Represents the UI for the Monopoly game main menu.
@@ -55,6 +56,7 @@ public class MonopolyMenuUI {
    * @param onStartGame a callback function that accepts a list of selected players' names and
    *     triggers the start of the game
    */
+  @Inject
   public MonopolyMenuUI(Stage primaryStage, Consumer<List<String>> onStartGame) {
     this.primaryStage = primaryStage;
     this.onStartGame = onStartGame;

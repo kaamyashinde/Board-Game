@@ -21,6 +21,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import edu.ntnu.iir.bidata.Inject;
 
 /**
  * UI for player selection, including loading players from CSV files and selecting which ones to use
@@ -38,6 +39,7 @@ public class PlayerSelectionUI {
    *
    * @param owner The owner stage for this dialog
    */
+  @Inject
   public PlayerSelectionUI(Stage owner) {
     this.stage = new Stage();
     stage.initOwner(owner);
