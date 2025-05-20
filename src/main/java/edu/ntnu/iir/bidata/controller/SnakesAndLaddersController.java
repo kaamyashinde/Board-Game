@@ -155,31 +155,8 @@ public class SnakesAndLaddersController extends BaseGameController {
     LOGGER.info("Dice rolled: " + boardGame.getCurrentDiceValues()[0]);
   }
 
-  public void loadSnakesAndLadderGame(String savePath, SnakesAndLaddersGameUI ui) {
-
-      this.boardGame = this.loadGame(savePath);
-    System.out.println(boardGame);
-    /*try {
-      Path path = Paths.get(savePath);
-      this.boardGame = this.loadGame(savePath);
-      BoardGame loadedGame = boardGameReader.readBoardGame(path);
-      // Update the current controller's state
-      this.boardGame = loadedGame;
-      this.gameStarted = true;
-      // Update player positions from the loaded game
-      for (Player player : loadedGame.getPlayers()) {
-        updateSnakesAndLaddersPosition(player.getName(), player.getCurrentPosition());
-      }
-      // Set the current player index from the loaded game
-      boardGame.setCurrentPlayerIndex(loadedGame.getCurrentPlayerIndex());
-      if (ui != null) {
-        ui.setBoardGame(loadedGame);
-        ui.refreshUIFromBoardGame();
-      }
-      LOGGER.info("Game loaded from: " + savePath);
-    } catch (IOException e) {
-      LOGGER.severe("Failed to load game: " + e.getMessage());
-    }*/
+  public void loadSnakesAndLadderGame(String savePath) {
+      this.boardGame = this.loadGame(savePath, false );
   }
 
   public void updateSnakesAndLaddersPosition(String playerName, int position) {

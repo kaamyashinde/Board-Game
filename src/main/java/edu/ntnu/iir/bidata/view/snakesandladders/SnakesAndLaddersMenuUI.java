@@ -252,7 +252,7 @@ public class SnakesAndLaddersMenuUI {
     boardGame.addObserver(gameUI);
 
     // Load game state and start
-    controller.loadSnakesAndLadderGame(gameName, gameUI);
+    controller.loadSnakesAndLadderGame(gameName);
     controller.startGame();
     return gameUI;
   }

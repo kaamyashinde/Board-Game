@@ -212,7 +212,7 @@ public class JavaFXBoardGameLauncher extends Application {
       boardGame.addObserver(gameUI);
       
       // Load game state and start
-      controller.loadSnakesAndLadderGame(gameName, gameUI);
+      controller.loadSnakesAndLadderGame(gameName);
       controller.startGame();
       
       // Create and set the scene
