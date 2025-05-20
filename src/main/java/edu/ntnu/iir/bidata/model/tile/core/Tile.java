@@ -17,7 +17,7 @@ import lombok.Setter;
 public class Tile {
 
   private final int id;
-  private final TileAction action;
+  private TileAction action;
   private Tile nextTile;
 
   /**
@@ -95,6 +95,15 @@ public class Tile {
    */
   public void setNextTile(Tile nextTile) {
     this.nextTile = nextTile;
+  }
+
+  /**
+   * Sets the action for this tile.
+   *
+   * @param action The new action for this tile
+   */
+  public void setAction(TileAction action) {
+    this.action = action;
   }
 
   /**
