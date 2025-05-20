@@ -132,6 +132,11 @@ public class SnakesAndLaddersMenuUI {
   }
 
   private void createAndSetScene(BorderPane gameUI) {
+    // SAFETY: Always ensure the root node is not already attached to another scene
+    if (gameUI.getScene() != null) {
+      // Detach from previous scene to avoid IllegalArgumentException
+      gameUI.getScene().setRoot(new Pane());
+    }
     Scene scene = new Scene(gameUI, 1200, 800);
     scene
         .getStylesheets()
@@ -227,8 +232,6 @@ public class SnakesAndLaddersMenuUI {
     }
   }
 
-
-
   private static BoardGame readBoardGameFromSelectedFile(String gameName) throws IOException {
     BoardGameFileReaderGson reader = new BoardGameFileReaderGson();
     BoardGame boardGame =
@@ -236,8 +239,12 @@ public class SnakesAndLaddersMenuUI {
     return boardGame;
   }
 
+  /**
+   * Always creates a new SnakesAndLaddersGameUI instance for each new game/scene.
+   * Never reuse a previous instance or its root node.
+   */
   private SnakesAndLaddersGameUI getSnakesAndLaddersGameUI(String gameName, BoardGame boardGame) {
-    // Create view and controller
+    // Create view and controller (always new instance)
     SnakesAndLaddersGameUI gameUI =
         new SnakesAndLaddersGameUI(primaryStage, boardGame.getPlayers());
     SnakesAndLaddersController controller = new SnakesAndLaddersController(boardGame);
@@ -265,8 +272,4 @@ public class SnakesAndLaddersMenuUI {
       playerCountLabel.getStyleClass().add("snl-player-count-label");
     }
   }
-
-
-
-
 }
