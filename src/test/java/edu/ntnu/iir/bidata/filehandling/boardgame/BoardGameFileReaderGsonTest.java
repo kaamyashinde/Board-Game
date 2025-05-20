@@ -6,11 +6,13 @@ import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson;
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.dice.Dice;
+import edu.ntnu.iir.bidata.model.player.SimpleMonopolyPlayer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -49,5 +51,31 @@ public class BoardGameFileReaderGsonTest {
         assertEquals(monopolyBoardGame.getDice(), readBoardGame.getDice());
         assertEquals(monopolyBoardGame.getCurrentPlayerIndex(), readBoardGame.getCurrentPlayerIndex());
         assertEquals(monopolyBoardGame.getPlayers(), readBoardGame.getPlayers());
-            }
+    }
+
+    @Test
+    public void testPlayerCurrentTileRestoration() {
+        Board monopolyBoard = MonopolyBoardFactory.createBoard();
+        Dice dice = new Dice(2);
+        BoardGame boardGame = new BoardGame(monopolyBoard, dice);
+
+        // Use SimpleMonopolyPlayer for Monopoly
+        SimpleMonopolyPlayer alice = new SimpleMonopolyPlayer("Alice");
+        SimpleMonopolyPlayer bob = new SimpleMonopolyPlayer("Bob");
+        boardGame.setPlayers(List.of(alice, bob));
+        alice.setCurrentTile(monopolyBoard.getTile(5));
+        bob.setCurrentTile(monopolyBoard.getTile(10));
+
+        // Write to file
+        assertDoesNotThrow(() -> boardGameFileWriterGson.writeBoardGame(boardGame, testFilePath, true));
+
+        // Read back
+        BoardGame loaded = assertDoesNotThrow(() -> boardGameFileReaderGson.readBoardGame(testFilePath));
+
+        // Check player positions
+        assertEquals(5, loaded.getPlayers().get(0).getCurrentTile().getId());
+        assertEquals(10, loaded.getPlayers().get(1).getCurrentTile().getId());
+        assertSame(loaded.getBoard().getTile(5), loaded.getPlayers().get(0).getCurrentTile());
+        assertSame(loaded.getBoard().getTile(10), loaded.getPlayers().get(1).getCurrentTile());
+    }
 } 

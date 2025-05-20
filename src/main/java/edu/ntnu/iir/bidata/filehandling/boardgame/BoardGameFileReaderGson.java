@@ -63,6 +63,23 @@ public class BoardGameFileReaderGson implements BoardGameFileReader {
 
       // Second pass: establish connections
       connectTilesFromBoardGameJsonFile(tilesObject, tileMap);
+
+      // Third pass: set each player's currentTile to the correct Tile instance from the board
+      if (jsonObject.has("players")) {
+        for (var playerElement : jsonObject.getAsJsonArray("players")) {
+          JsonObject playerObj = playerElement.getAsJsonObject();
+          if (playerObj.has("currentTile")) {
+            JsonObject currentTileObj = playerObj.getAsJsonObject("currentTile");
+            int tileId = currentTileObj.get("id").getAsInt();
+            // Find the player in the boardGame's player list by name
+            String playerName = playerObj.get("name").getAsString();
+            boardGame.getPlayers().stream()
+                .filter(p -> p.getName().equals(playerName))
+                .findFirst()
+                .ifPresent(p -> p.setCurrentTile(boardGame.getBoard().getTile(tileId)));
+          }
+        }
+      }
     }
 
     return boardGame;

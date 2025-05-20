@@ -96,6 +96,10 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
       playerData.put("name", player.getName());
       playerData.put("money", ((SimpleMonopolyPlayer) player).getMoney());
       playerData.put("position", player.getCurrentTile().getId());
+      // Write currentTile as an object for compatibility with the reader
+      Map<String, Object> currentTileObj = new HashMap<>();
+      currentTileObj.put("id", player.getCurrentTile().getId());
+      playerData.put("currentTile", currentTileObj);
       playersData.add(playerData);
     }
     simplifiedGame.put("players", playersData);
