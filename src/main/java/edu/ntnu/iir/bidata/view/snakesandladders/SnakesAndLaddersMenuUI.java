@@ -42,7 +42,6 @@ public class SnakesAndLaddersMenuUI {
   /** -- GETTER -- Get the list of selected players */
   @Getter private List<String> selectedPlayers = new ArrayList<>();
   @Getter private Map<String, String> selectedPlayerTokens = new java.util.HashMap<>();
-  @Getter private String selectedDifficulty = "normal"; // Default difficulty
 
   private Label playerCountLabel;
 
@@ -95,11 +94,11 @@ public class SnakesAndLaddersMenuUI {
     logoStack.setPadding(new Insets(10, 20, 10, 10));
     logoStack.setAlignment(Pos.TOP_LEFT);
     Color[] greens = {
-      Color.web("#006400"),
-      Color.web("#008000"),
-      Color.web("#00A000"),
-      Color.web("#4caf50"),
-      Color.web("#bdebc8")
+        Color.web("#006400"),
+        Color.web("#008000"),
+        Color.web("#00A000"),
+        Color.web("#4caf50"),
+        Color.web("#bdebc8")
     };
     int[] heights = {40, 30, 40, 20, 30, 20, 40, 30, 20, 40, 30};
     for (int i = 0; i < 11; i++) {
@@ -126,17 +125,6 @@ public class SnakesAndLaddersMenuUI {
     // Choose The Players button
     Button choosePlayersBtn = setUpCenterBoxChoosePlayersBtn();
 
-    // Difficulty selection
-    HBox difficultyBox = new HBox(10);
-    difficultyBox.setAlignment(Pos.CENTER);
-    Label difficultyLabel = new Label("Select Difficulty:");
-    difficultyLabel.getStyleClass().add("snl-player-count-label");
-    ComboBox<String> difficultyComboBox = new ComboBox<>();
-    difficultyComboBox.getItems().addAll("Easy", "Normal", "Hard");
-    difficultyComboBox.setValue("Normal");
-    difficultyComboBox.setOnAction(e -> selectedDifficulty = difficultyComboBox.getValue().toLowerCase());
-    difficultyBox.getChildren().addAll(difficultyLabel, difficultyComboBox);
-
     // Player count label
     playerCountLabel = new Label("No players selected");
     playerCountLabel.getStyleClass().add("snl-player-count-label");
@@ -145,7 +133,7 @@ public class SnakesAndLaddersMenuUI {
     Button startGameBtn = setUpCenterBoxStartGameBtn();
     centerBox
         .getChildren()
-        .addAll(startGameBtn, playerCountLabel, titlePane, choosePlayersBtn, difficultyBox, boardButtons);
+        .addAll(startGameBtn, playerCountLabel, titlePane, choosePlayersBtn, boardButtons);
     return centerBox;
   }
 
@@ -231,7 +219,6 @@ public class SnakesAndLaddersMenuUI {
                 try {
                   BoardGame boardGame = readBoardGameFromSelectedFile(gameName);
                   SnakesAndLaddersGameUI gameUI = getSnakesAndLaddersGameUI(gameName, boardGame);
-                  gameUI.setDifficulty(selectedDifficulty);
                   // Create and set the scene
                   createAndSetScene(gameUI.getRoot());
                 } catch (Exception e) {
@@ -268,15 +255,14 @@ public class SnakesAndLaddersMenuUI {
     GameMediator mediator = new DefaultGameMediator();
     // Create view and controller (always new instance)
     SnakesAndLaddersController controller = new SnakesAndLaddersController(
-      boardGame,
-      new BoardGameFileWriterGson(),
-      new BoardGameFileReaderGson(),
-      mediator
+        boardGame,
+        new BoardGameFileWriterGson(),
+        new BoardGameFileReaderGson(),
+        mediator
     );
     SnakesAndLaddersGameUI gameUI =
         new SnakesAndLaddersGameUI(boardGame, primaryStage, controller, boardGame.getPlayers(), mediator);
     gameUI.setLoadedGame(true, gameName);
-    gameUI.setDifficulty(selectedDifficulty);
     LOGGER.info(
         "Game loaded successfully"
             + boardGame.getCurrentPlayer().getName()
