@@ -43,6 +43,18 @@ public class SimpleMonopolyPlayer extends Player {
     }
 
     /**
+     * Constructor for the SimpleMonopolyPlayer class with name and token image.
+     * 
+     * @param name The name of the player.
+     * @param tokenImage The image path or name for the player's token.
+     */
+    public SimpleMonopolyPlayer(String name, String tokenImage) {
+        super(name, tokenImage);
+        this.money = 1500;
+        this.ownedProperties = new ArrayList<>();
+    }
+
+    /**
      * No-argument constructor for Gson deserialization.
      */
     public SimpleMonopolyPlayer() {
