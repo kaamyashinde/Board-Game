@@ -119,21 +119,24 @@ public class SnakesAndLaddersMenuUI {
     centerBox.setPadding(new Insets(40, 0, 0, 0));
 
     StackPane titlePane = setUpCenterBoxTitleLabel();
-
     HBox boardButtons = setUpCenterBoxBrdBtns();
-
-    // Choose The Players button
     Button choosePlayersBtn = setUpCenterBoxChoosePlayersBtn();
-
-    // Player count label
     playerCountLabel = new Label("No players selected");
     playerCountLabel.getStyleClass().add("snl-player-count-label");
 
-    // START button
-    Button startGameBtn = setUpCenterBoxStartGameBtn();
-    centerBox
-        .getChildren()
-        .addAll(startGameBtn, playerCountLabel, titlePane, choosePlayersBtn, boardButtons);
+    // Level buttons
+    Button easyBtn = createMenuButton("Level: Easy");
+    Button mediumBtn = createMenuButton("Level: Medium");
+    Button hardBtn = createMenuButton("Level: Hard");
+
+    easyBtn.setOnAction(e -> startGameWithLevel("easy", "/snakes_and_ladders_easy.jpg"));
+    mediumBtn.setOnAction(e -> startGameWithLevel("medium", "/snakes_and_ladders_board.jpeg"));
+    hardBtn.setOnAction(e -> startGameWithLevel("hard", "/snakes_and_ladders_hard_board.png"));
+
+    HBox levelButtons = new HBox(20, easyBtn, mediumBtn, hardBtn);
+    levelButtons.setAlignment(Pos.CENTER);
+
+    centerBox.getChildren().addAll(levelButtons, playerCountLabel, titlePane, choosePlayersBtn, boardButtons);
     return centerBox;
   }
 
@@ -184,20 +187,6 @@ public class SnakesAndLaddersMenuUI {
     Button choosePlayersBtn = createMenuButton("Choose The Players");
     choosePlayersBtn.setOnAction(e -> openPlayerSelection());
     return choosePlayersBtn;
-  }
-
-  private Button setUpCenterBoxStartGameBtn() {
-    Button startGameBtn = createMenuButton("START");
-    startGameBtn.setOnAction(
-        e -> {
-          if (!selectedPlayers.isEmpty()) {
-            if (onStartGame != null) onStartGame.accept(new PlayerSelectionResult(selectedPlayers, selectedPlayerTokens));
-          } else {
-            playerCountLabel.setText("Please select at least one player!");
-            playerCountLabel.setStyle("-fx-text-fill: red;");
-          }
-        });
-    return startGameBtn;
   }
 
   private Button createMenuButton(String text) {
@@ -283,5 +272,33 @@ public class SnakesAndLaddersMenuUI {
       playerCountLabel.setText(selectedPlayers.size() + " player(s) selected");
       playerCountLabel.getStyleClass().add("snl-player-count-label");
     }
+  }
+
+  private void startGameWithLevel(String level, String imagePath) {
+    if (selectedPlayers.isEmpty()) {
+      playerCountLabel.setText("Please select at least one player!");
+      playerCountLabel.setStyle("-fx-text-fill: red;");
+      return;
+    }
+    List<edu.ntnu.iir.bidata.model.player.Player> players = selectedPlayers.stream()
+      .map(name -> new edu.ntnu.iir.bidata.model.player.Player(name, selectedPlayerTokens.get(name)))
+      .toList();
+    edu.ntnu.iir.bidata.model.tile.config.TileConfiguration config = new edu.ntnu.iir.bidata.model.tile.config.TileConfiguration(level);
+    edu.ntnu.iir.bidata.model.board.Board board = edu.ntnu.iir.bidata.model.board.BoardFactory.createSnakesAndLaddersBoard(100, players, config);
+    edu.ntnu.iir.bidata.model.BoardGame boardGame = new edu.ntnu.iir.bidata.model.BoardGame(board, 2);
+    boardGame.setPlayers(players);
+    edu.ntnu.iir.bidata.model.utils.GameMediator mediator = new edu.ntnu.iir.bidata.model.utils.DefaultGameMediator();
+    edu.ntnu.iir.bidata.controller.SnakesAndLaddersController controller = new edu.ntnu.iir.bidata.controller.SnakesAndLaddersController(
+      boardGame,
+      new edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson(),
+      new edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson(),
+      mediator
+    );
+    edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI gameUI =
+      new edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI(boardGame, primaryStage, controller, players, mediator, imagePath);
+    boardGame.addObserver(gameUI);
+    controller.setPlayerNames(players.stream().map(edu.ntnu.iir.bidata.model.player.Player::getName).toList());
+    controller.startGame();
+    createAndSetScene(gameUI.getRoot());
   }
 }
