@@ -55,6 +55,12 @@ public class BoardGameFileReaderGson implements BoardGameFileReader {
     BoardGame boardGame = gson.fromJson(jsonObject, BoardGame.class);
     System.out.println("Board size after deserialization: " + boardGame.getBoard().getSizeOfBoard());
 
+    // Set the level if present
+    if (jsonObject.has("level")) {
+      boardGame.setLevel(jsonObject.get("level").getAsString());
+    } else {
+      boardGame.setLevel("medium");
+    }
 
     String memberNameBoard = "board";
     // Then, reconstruct the tile connections

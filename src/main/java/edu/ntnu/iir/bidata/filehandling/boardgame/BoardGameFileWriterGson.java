@@ -55,7 +55,10 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
     if (isMonopoly) {
       writeMonopolyGameToJson(boardGame, path);
     } else {
-      String json = gson.toJson(boardGame);
+      // Parse to JSON tree, add 'level', then write
+      com.google.gson.JsonObject jsonObject = gson.toJsonTree(boardGame).getAsJsonObject();
+      jsonObject.addProperty("level", boardGame.getLevel());
+      String json = gson.toJson(jsonObject);
       try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
         writer.write(json);
       }
