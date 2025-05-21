@@ -1,10 +1,49 @@
-/* Center blank tiles */
-.blank-tile {
-  -fx-fill: #F0F0F0;  /* Very light gray for center blank tiles */
-  -fx-background-color: #F0F0F0;
-  -fx-stroke: #E0E0E0;
+/* Center area with Monopoly logo/text */
+.monopoly-center-area {
+  -fx-fill: #FFEBE0;  /* Faint peach color */
+  -fx-background-color: #FFEBE0;
+  -fx-stroke: #E0D0C8;
   -fx-stroke-width: 1;
-  -fx-opacity: 0.7;
+  -fx-arc-width: 15;
+  -fx-arc-height: 15;
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 4, 0, 0, 1);
+}
+
+.monopoly-center-text {
+  -fx-font-family: 'Impact', 'Arial Black', sans-serif;
+  -fx-font-size: 28px;
+  -fx-font-weight: bold;
+  -fx-fill: #C12026;  /* Classic Monopoly red */
+  -fx-rotate: -30;  /* Rotate text diagonally */
+  -fx-effect: dropshadow(gaussian, #FFFFFF, 2, 0, 0, 0);
+  -fx-text-alignment: center;
+  -fx-stroke: #871518;  /* Darker red for text outline */
+  -fx-stroke-width: 0.5;
+}
+
+/* Alternative style options that can be enabled by adding these classes */
+.monopoly-center-text-classic {
+  -fx-font-family: 'Kabel', 'Futura', 'Arial Rounded MT Bold', sans-serif;
+  -fx-font-size: 32px;
+  -fx-font-weight: bold;
+  -fx-fill: #C12026;
+  -fx-rotate: 0;  /* No rotation */
+  -fx-letter-spacing: 0.1em;
+}
+
+.monopoly-center-area-classic {
+  -fx-fill: #F5F5DC;  /* Beige color similar to the classic board */
+  -fx-background-color: #F5F5DC;
+  -fx-stroke: #D4AF37;  /* Gold border */
+  -fx-stroke-width: 2;
+}
+
+/* Animation for text if desired - can be applied by adding this class */
+.monopoly-text-animated {
+  -fx-font-size: 30px;
+  -fx-scale-x: 1.05;
+  -fx-scale-y: 1.05;
+  -fx-transition: all 0.3s ease;
 }/* Special tile styles */
 .go-tile {
   -fx-fill: #90EE90;  /* Light green */

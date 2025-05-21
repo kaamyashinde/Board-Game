@@ -347,15 +347,31 @@ public class MonopolyGameUI extends JavaFXGameUI {
       tilePanes.put(tileIndex, tilePane);
       tileIndex++;
     }
-    // Fill the center with blank tiles
-    for (int row = 1; row < gridDim - 1; row++) {
-      for (int col = 1; col < gridDim - 1; col++) {
-        Rectangle blank = new Rectangle(70, 70);
-        blank.getStyleClass().add("blank-tile");
-        StackPane blankPane = new StackPane(blank);
-        boardPane.add(blankPane, col, row);
-      }
+
+    // Create a center area with MONOPOLY text
+    if (gridDim > 3) {
+      // Create a pane spanning the entire center area
+      StackPane centerArea = new StackPane();
+
+      // Create background rectangle
+      Rectangle centerRect = new Rectangle(
+          (gridDim - 2) * 70 + (gridDim - 3) * 5, // Width accounting for tile sizes and gaps
+          (gridDim - 2) * 70 + (gridDim - 3) * 5  // Height accounting for tile sizes and gaps
+      );
+      centerRect.getStyleClass().add("monopoly-center-area");
+
+      // Create MONOPOLY text
+      javafx.scene.text.Text monopolyText = new javafx.scene.text.Text("MONOPOLY");
+      monopolyText.getStyleClass().add("monopoly-center-text");
+
+      centerArea.getChildren().addAll(centerRect, monopolyText);
+
+      // Add to center of grid, spanning the appropriate number of cells
+      boardPane.add(centerArea, 1, 1, gridDim - 2, gridDim - 2);
+      GridPane.setHalignment(centerArea, javafx.geometry.HPos.CENTER);
+      GridPane.setValignment(centerArea, javafx.geometry.VPos.CENTER);
     }
+
     updatePlayerInfoPanel();
     updatePlayerTokens();
     updateRollDiceButtonState();
