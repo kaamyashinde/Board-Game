@@ -60,19 +60,19 @@ public class BoardManagementUI {
     VBox layout = new VBox(20);
     layout.setPadding(new Insets(20));
     layout.setAlignment(Pos.CENTER);
-    layout.setStyle("-fx-background-color: #f5fff5; -fx-background-radius: 20;");
+    layout.getStyleClass().add("player-selection-root");
 
     // Create the green title bar
     StackPane titlePane = new StackPane();
     titlePane.setPrefSize(300, 50);
-    titlePane.setStyle("-fx-background-color: #BDEBC8; -fx-background-radius: 15;");
+    titlePane.getStyleClass().add("player-selection-title-pane");
     Label titleLabel = new Label("Remove Board");
-    titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+    titleLabel.getStyleClass().add("player-selection-title-label");
     titlePane.getChildren().add(titleLabel);
 
     // Question label
     Label questionLabel = new Label("Which board would you like to remove?");
-    questionLabel.setStyle("-fx-font-weight: bold;");
+    questionLabel.getStyleClass().add("bold-label");
 
     // Board selection with green circle marker
     HBox selectionBox = new HBox(10);
@@ -106,6 +106,7 @@ public class BoardManagementUI {
     });
 
     Scene scene = new Scene(layout, 350, 200);
+    scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
     removeDialog.setScene(scene);
     removeDialog.showAndWait();
   }
@@ -154,13 +155,7 @@ public class BoardManagementUI {
     Button button = new Button(text);
     button.setPrefWidth(width);
     button.setPrefHeight(height);
-    button.setStyle(
-        "-fx-background-color: #BDEBC8; " +
-            "-fx-text-fill: black; " +
-            "-fx-font-size: 16px; " +
-            "-fx-background-radius: 25; " +
-            "-fx-padding: 10;"
-    );
+    button.getStyleClass().add("player-selection-button");
     return button;
   }
 
