@@ -7,11 +7,13 @@ import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson;
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI;
+import edu.ntnu.iir.bidata.model.utils.GameMediator;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.logging.Logger;
+import edu.ntnu.iir.bidata.Inject;
 
 /** Controller class specifically for Snakes and Ladders game logic. */
 public class SnakesAndLaddersController extends BaseGameController {
@@ -26,12 +28,15 @@ public class SnakesAndLaddersController extends BaseGameController {
   private final BoardGameFileReader boardGameReader;
   private boolean gameStarted = false;
   private BoardGame boardGame;
+  private final GameMediator mediator;
 
-  public SnakesAndLaddersController(BoardGame boardGame) {
+  @Inject
+  public SnakesAndLaddersController(BoardGame boardGame, BoardGameFileWriter boardGameWriter, BoardGameFileReader boardGameReader, GameMediator mediator) {
     super(boardGame);
     this.boardGame = boardGame;
-    this.boardGameWriter = new BoardGameFileWriterGson();
-    this.boardGameReader = new BoardGameFileReaderGson();
+    this.boardGameWriter = boardGameWriter;
+    this.boardGameReader = boardGameReader;
+    this.mediator = mediator;
     LOGGER.info("SnakesAndLaddersController initialized");
   }
 
@@ -74,7 +79,8 @@ public class SnakesAndLaddersController extends BaseGameController {
       return;
     }
 
-    nextSnakesAndLaddersPlayer();
+    // Use mediator to notify next player
+    mediator.notify(this, "nextPlayer");
   }
 
   public String getCurrentSnakesAndLaddersPlayerName() {

@@ -26,6 +26,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import lombok.Setter;
+import edu.ntnu.iir.bidata.Inject;
 
 /** JavaFX UI implementation for the Monopoly game. */
 public class MonopolyGameUI extends JavaFXGameUI {
@@ -58,13 +59,16 @@ public class MonopolyGameUI extends JavaFXGameUI {
   protected BoardGame boardGame;
 
   @Setter private MonopolyController controller;
+  private final edu.ntnu.iir.bidata.model.utils.GameMediator mediator;
   private BorderPane root;
 
-  public MonopolyGameUI(BoardGame boardGame, Stage primaryStage) {
-    super(boardGame);
+  @Inject
+  public MonopolyGameUI(BoardGame boardGame, Stage primaryStage, MonopolyController controller, edu.ntnu.iir.bidata.model.utils.GameMediator mediator) {
+    super(boardGame, primaryStage);
     this.boardGame = boardGame;
     this.primaryStage = primaryStage;
-    this.controller = new MonopolyController(boardGame);
+    this.controller = controller;
+    this.mediator = mediator;
     this.mainLayout = new BorderPane();
     this.boardPane = new GridPane();
     this.playerInfoPanel = new VBox(10);
@@ -74,89 +78,80 @@ public class MonopolyGameUI extends JavaFXGameUI {
     List<String> playerNames = boardGame.getPlayers().stream().map(Player::getName).toList();
     controller.setPlayerNames(playerNames);
     setupUI();
+
+    // Register mediator listener to update UI on nextPlayer event
+    if (mediator instanceof edu.ntnu.iir.bidata.model.utils.DefaultGameMediator m) {
+      m.register((sender, event) -> {
+        if ("nextPlayer".equals(event)) {
+          javafx.application.Platform.runLater(() -> {
+            updatePlayerInfoPanel();
+            updatePlayerTokens();
+            updateRollDiceButtonState();
+          });
+        }
+      });
+    }
   }
 
-  private void setupUI() {
-    Button backButton;
-    Button saveButton;
+  public void setupUI() {
     root = new BorderPane();
     root.setPadding(new Insets(25));
     root.setPrefWidth(1100);
     root.setPrefHeight(750);
 
-    // Configure board pane
+    // --- Top bar: Back and Save buttons ---
+    HBox topBar = new HBox(10);
+    topBar.setPadding(new Insets(10));
+    topBar.setAlignment(Pos.CENTER_LEFT);
+    Button backButton = CommonButtons.backToMainMenu(primaryStage, true, controller);
+    backButton.getStyleClass().add("monopoly-back-button");
+    Button saveButton = CommonButtons.saveGameBtn(true, controller, actionLabel);
+    saveButton.getStyleClass().add("game-control-button");
+    topBar.getChildren().addAll(backButton, saveButton);
+    root.setTop(topBar);
+
+    // --- Center: Board ---
     boardPane.setHgap(5);
     boardPane.setVgap(5);
     boardPane.setPadding(new Insets(15));
     boardPane.getStyleClass().add("monopoly-board-pane");
+    root.setCenter(boardPane);
 
-    // Configure player info panel
+    // --- Right: Player info panel ---
     playerInfoPanel.setPadding(new Insets(15));
     playerInfoPanel.getStyleClass().add("monopoly-player-info-panel");
     playerInfoPanel.setPrefWidth(220);
+    root.setRight(playerInfoPanel);
 
-    // Configure game controls
-    gameControls.setPadding(new Insets(15));
-    gameControls.setAlignment(Pos.CENTER);
-    gameControls.getStyleClass().add("monopoly-game-controls");
-
-    // Add components to main layout
-    mainLayout.setCenter(boardPane);
-    mainLayout.setRight(playerInfoPanel);
-    mainLayout.setBottom(gameControls);
+    // --- Bottom bar: Game controls ---
+    HBox controls = new HBox(10);
+    controls.setPadding(new Insets(15));
+    controls.setAlignment(Pos.CENTER);
+    controls.getStyleClass().add("monopoly-game-controls");
+    rollDiceButton.getStyleClass().add("monopoly-roll-dice-button");
+    rollDiceButton.setOnAction(e -> handleRollDice());
+    buyButton.getStyleClass().add("monopoly-buy-button");
+    buyButton.setOnAction(e -> handleBuyProperty());
+    skipButton.getStyleClass().add("monopoly-skip-button");
+    skipButton.setOnAction(e -> handleSkipAction());
+    payRentButton.getStyleClass().add("monopoly-pay-rent-button");
+    payRentButton.setOnAction(e -> handlePayRent());
+    jailRollButton.getStyleClass().add("monopoly-jail-roll-button");
+    jailRollButton.setOnAction(e -> handleJailRoll());
+    jailPayButton.getStyleClass().add("monopoly-jail-pay-button");
+    jailPayButton.setOnAction(e -> handleJailPay());
+    diceView.getStyleClass().add("monopoly-dice-view");
+    controls.getChildren().addAll(diceView, rollDiceButton, buyButton, skipButton, payRentButton, jailRollButton, jailPayButton);
+    root.setBottom(controls);
 
     // Set the root of the existing scene
-    getScene().setRoot(mainLayout);
+    getScene().setRoot(root);
 
-    primaryStage.setWidth(1300);
-    primaryStage.setHeight(850);
-    primaryStage.setMinWidth(1300);
-    primaryStage.setMinHeight(850);
+    primaryStage.setMinWidth(900);
+    primaryStage.setMinHeight(600);
 
     // Initialize the board
     initializeBoard();
-
-    // Add dice label and roll button to game controls
-    diceView.getStyleClass().add("monopoly-dice-view");
-
-    rollDiceButton.getStyleClass().add("monopoly-roll-dice-button");
-    rollDiceButton.setOnAction(e -> handleRollDice());
-
-    buyButton.getStyleClass().add("monopoly-buy-button");
-    buyButton.setOnAction(e -> handleBuyProperty());
-
-    skipButton.getStyleClass().add("monopoly-skip-button");
-    skipButton.setOnAction(e -> handleSkipAction());
-
-    payRentButton.getStyleClass().add("monopoly-pay-rent-button");
-    payRentButton.setOnAction(e -> handlePayRent());
-
-    jailRollButton.getStyleClass().add("monopoly-jail-roll-button");
-    jailRollButton.setOnAction(e -> handleJailRoll());
-
-    jailPayButton.getStyleClass().add("monopoly-jail-pay-button");
-    jailPayButton.setOnAction(e -> handleJailPay());
-
-    backButton = CommonButtons.backToMainMenu(primaryStage, true, controller);
-    backButton.getStyleClass().add("monopoly-back-button");
-
-    actionLabel.getStyleClass().add("monopoly-action-label");
-
-    saveButton = CommonButtons.saveGameBtn(true, controller, actionLabel);
-    saveButton.getStyleClass().add("game-control-button");
-
-    gameControls.getChildren().add(backButton);
-    gameControls
-        .getChildren()
-        .addAll(
-            rollDiceButton,
-            buyButton,
-            skipButton,
-            payRentButton,
-            jailRollButton,
-            jailPayButton,
-            saveButton,
-            diceView);
 
     // Add stylesheets
     getScene().getStylesheets().add(getClass().getResource("/monopoly.css").toExternalForm());
@@ -282,7 +277,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
   @Override
   public Scene getScene() {
-    return super.getScene();
+    return primaryStage.getScene();
   }
 
   public void setBoardGame(BoardGame boardGame) {
@@ -383,5 +378,12 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
   public BorderPane getRoot() {
     return mainLayout;
+  }
+
+  @Override
+  public void refreshUIFromBoardGame() {
+    updatePlayerInfoPanel();
+    updatePlayerTokens();
+    updateRollDiceButtonState();
   }
 }

@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import edu.ntnu.iir.bidata.Inject;
+
 /**
  * UI for board management operations including adding, loading and removing board configurations
  */
@@ -32,6 +34,7 @@ public class BoardManagementUI {
    *
    * @param ownerStage The owner stage for this dialog
    */
+  @Inject
   public BoardManagementUI(Stage ownerStage) {
     this.ownerStage = ownerStage;
     // For demo purposes, add some sample boards

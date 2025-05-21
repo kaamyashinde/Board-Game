@@ -18,6 +18,8 @@ import java.nio.file.Paths;
 import java.util.stream.Collectors;
 import java.io.IOException;
 import java.io.File;
+import edu.ntnu.iir.bidata.model.utils.GameMediator;
+import edu.ntnu.iir.bidata.Inject;
 
 /**
  * Controller class specifically for Monopoly game logic.
@@ -34,11 +36,14 @@ public class MonopolyController extends BaseGameController {
     private boolean awaitingJailAction = false;
     private boolean jailRolledSix = false;
     private boolean diceRolled = false;
+    private final GameMediator mediator;
 
-    public MonopolyController(BoardGame boardGame) {
+    @Inject
+    public MonopolyController(BoardGame boardGame, BoardGameFileWriter boardGameWriter, BoardGameFileReader boardGameReader, GameMediator mediator) {
         super(boardGame);
-        this.boardGameWriter = new BoardGameFileWriterGson();
-        this.boardGameReader = new BoardGameFileReaderGson();
+        this.boardGameWriter = boardGameWriter;
+        this.boardGameReader = boardGameReader;
+        this.mediator = mediator;
         LOGGER.info("MonopolyController initialized");
     }
 
@@ -108,7 +113,7 @@ public class MonopolyController extends BaseGameController {
             currentPlayer.setInJail(false);
         }
         awaitingJailAction = false;
-        nextPlayer();
+        mediator.notify(this, "nextPlayer");
     }
 
     public void handleJailPay() {
@@ -120,7 +125,7 @@ public class MonopolyController extends BaseGameController {
             // Not enough money, do nothing
         }
         awaitingJailAction = false;
-        nextPlayer();
+        mediator.notify(this, "nextPlayer");
     }
 
     @Override
@@ -172,12 +177,12 @@ public class MonopolyController extends BaseGameController {
             currentTile.getAction().executeAction(currentPlayer, currentTile);
             // If the player is now in jail, end their turn immediately
             if (currentPlayer.isInJail()) {
-                nextPlayer();
+                mediator.notify(this, "nextPlayer");
                 return;
             }
         }
         // No action needed, move to next player
-        nextPlayer();
+        mediator.notify(this, "nextPlayer");
     }
 
     public boolean isAwaitingPlayerAction() {
@@ -195,6 +200,7 @@ public class MonopolyController extends BaseGameController {
         awaitingPlayerAction = false;
         pendingPropertyTile = null;
         nextPlayer();
+        mediator.notify(this, "nextPlayer");
     }
 
     public void skipActionForCurrentPlayer() {
@@ -202,6 +208,7 @@ public class MonopolyController extends BaseGameController {
         awaitingPlayerAction = false;
         pendingPropertyTile = null;
         nextPlayer();
+        mediator.notify(this, "nextPlayer");
     }
 
     public boolean isAwaitingRentAction() {
@@ -219,6 +226,7 @@ public class MonopolyController extends BaseGameController {
         awaitingRentAction = false;
         pendingRentPropertyTile = null;
         nextPlayer();
+        mediator.notify(this, "nextPlayer");
     }
 
     public int[] getLastDiceRolls() {

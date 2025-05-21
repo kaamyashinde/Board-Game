@@ -2,7 +2,10 @@ package edu.ntnu.iir.bidata.view.monopoly;
 
 import edu.ntnu.iir.bidata.controller.MonopolyController;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson;
+import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson;
 import edu.ntnu.iir.bidata.model.BoardGame;
+import edu.ntnu.iir.bidata.model.utils.DefaultGameMediator;
+import edu.ntnu.iir.bidata.model.utils.GameMediator;
 import edu.ntnu.iir.bidata.view.common.CommonButtons;
 import edu.ntnu.iir.bidata.view.common.JavaFXBoardGameLauncher;
 import edu.ntnu.iir.bidata.view.common.PlayerSelectionUI;
@@ -23,6 +26,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import lombok.Getter;
+import edu.ntnu.iir.bidata.Inject;
 
 /**
  * Represents the UI for the Monopoly game main menu.
@@ -52,6 +56,7 @@ public class MonopolyMenuUI {
    * @param onStartGame a callback function that accepts a list of selected players' names and
    *     triggers the start of the game
    */
+  @Inject
   public MonopolyMenuUI(Stage primaryStage, Consumer<List<String>> onStartGame) {
     this.primaryStage = primaryStage;
     this.onStartGame = onStartGame;
@@ -217,10 +222,6 @@ public class MonopolyMenuUI {
                   BoardGame boardGame = readBoardGameFromSelectedFile(gameName);
                   MonopolyGameUI gameUI = getMonopolyGameUI(boardGame, false);
                   createAndSetScene(gameUI);
-
-                 // MonopolyGameUI gameUI = getMonopolyGameUI(boardGame);
-                  // Create and set the scene
-                 // createAndSetScene(gameUI);
                 } catch (Exception e) {
                   LOGGER.log(Level.SEVERE, "Error loading Monopoly game", e);
                 }
@@ -306,11 +307,15 @@ public class MonopolyMenuUI {
    *     game
    */
   private MonopolyGameUI getMonopolyGameUI(BoardGame boardGame) {
-    // Create view and controller
-    MonopolyGameUI gameUI = new MonopolyGameUI(boardGame, primaryStage);
-    MonopolyController controller = new MonopolyController(boardGame);
-    gameUI.setController(controller);
-    gameUI.setBoardGame(boardGame);
+    // Dependency injection wiring
+    GameMediator mediator = new DefaultGameMediator();
+    MonopolyController controller = new MonopolyController(
+      boardGame,
+      new BoardGameFileWriterGson(),
+      new BoardGameFileReaderGson(),
+      mediator
+    );
+    MonopolyGameUI gameUI = new MonopolyGameUI(boardGame, primaryStage, controller, mediator);
     LOGGER.info(
         "Game loaded successfully"
             + boardGame.getCurrentPlayer().getName()
@@ -334,28 +339,31 @@ public class MonopolyMenuUI {
    *
    * @param gameUI the {@code BorderPane} that serves as the root layout for the scene
    */
- // signature change + body
-private void createAndSetScene(MonopolyGameUI gameUI) {
-  primaryStage.setScene(gameUI.getScene());
-  primaryStage.show();
-}
+  private void createAndSetScene(MonopolyGameUI gameUI) {
+    primaryStage.setScene(gameUI.getScene());
+    primaryStage.show();
+  }
 
   /**
- * @param boardGame    loaded or fresh game state
- * @param startNew     if true → controller.startGame(), else skip startGame()
- */
-private MonopolyGameUI getMonopolyGameUI(BoardGame boardGame, boolean startNew) {
-  MonopolyGameUI ui = new MonopolyGameUI(boardGame, primaryStage);
-  MonopolyController controller = new MonopolyController(boardGame);
-  ui.setController(controller);
-  boardGame.addObserver(ui);
-  // Set player names in controller after loading
-  List<String> playerNames = boardGame.getPlayers().stream().map(p -> p.getName()).toList();
-  controller.setPlayerNames(playerNames);
-  if (startNew) controller.startGame();
-  return ui;
-}
-
+   * @param boardGame    loaded or fresh game state
+   * @param startNew     if true → controller.startGame(), else skip startGame()
+   */
+  private MonopolyGameUI getMonopolyGameUI(BoardGame boardGame, boolean startNew) {
+    GameMediator mediator = new DefaultGameMediator();
+    MonopolyController controller = new MonopolyController(
+      boardGame,
+      new BoardGameFileWriterGson(),
+      new BoardGameFileReaderGson(),
+      mediator
+    );
+    MonopolyGameUI gameUI = new MonopolyGameUI(boardGame, primaryStage, controller, mediator);
+    boardGame.addObserver(gameUI);
+    // Set player names in controller after loading
+    List<String> playerNames = boardGame.getPlayers().stream().map(p -> p.getName()).toList();
+    controller.setPlayerNames(playerNames);
+    if (startNew) controller.startGame();
+    return gameUI;
+  }
 
   /**
    * Converts the given {@code Color} object to a hexadecimal string representation.

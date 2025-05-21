@@ -10,13 +10,16 @@ import edu.ntnu.iir.bidata.model.tile.core.Tile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.PropertyTile;
 import edu.ntnu.iir.bidata.model.tile.actions.monopoly.GoToJailAction;
 import edu.ntnu.iir.bidata.filehandling.boardgame.TileActionTypeAdapterFactory;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import edu.ntnu.iir.bidata.Inject;
 
 /**
  * Implementation of the BoardGameFileWriter interface using Gson for JSON serialization. This class
@@ -25,6 +28,7 @@ import java.util.Map;
 public class BoardGameFileWriterGson implements BoardGameFileWriter {
   private final Gson gson;
 
+  @Inject
   public BoardGameFileWriterGson() {
     this.gson =
         new GsonBuilder()
@@ -52,7 +56,9 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
       writeMonopolyGameToJson(boardGame, path);
     } else {
       String json = gson.toJson(boardGame);
-      Files.writeString(path, json);
+      try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+        writer.write(json);
+      }
     }
   }
 
@@ -119,6 +125,8 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
 
     // Convert to JSON and write to file
     String json = gson.toJson(simplifiedGame);
-    Files.writeString(path, json);
+    try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+      writer.write(json);
+    }
   }
 }
