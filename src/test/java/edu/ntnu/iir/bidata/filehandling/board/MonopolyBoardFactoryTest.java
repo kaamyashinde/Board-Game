@@ -52,4 +52,34 @@ class MonopolyBoardFactoryTest {
         // Clean up the temporary file
         Files.deleteIfExists(tempFilePath);
     }
+
+    @Test
+    void testBoard28Configuration() {
+        Board board = MonopolyBoardFactory.createBoard28();
+        assertEquals(28, board.getSizeOfBoard());
+        // Check special tiles
+        assertTrue(board.getTile(0) instanceof GoTile);
+        assertTrue(board.getTile(7).getAction() instanceof edu.ntnu.iir.bidata.model.tile.actions.monopoly.GoToJailAction);
+        assertTrue(board.getTile(14) instanceof FreeParkingTile);
+        assertTrue(board.getTile(21) instanceof JailTile);
+        // Check that all tiles are not null
+        for (int i = 0; i < 28; i++) {
+            assertNotNull(board.getTile(i));
+        }
+    }
+
+    @Test
+    void testBoard32Configuration() {
+        Board board = MonopolyBoardFactory.createBoard32();
+        assertEquals(32, board.getSizeOfBoard());
+        // Check special tiles
+        assertTrue(board.getTile(0) instanceof GoTile);
+        assertTrue(board.getTile(8).getAction() instanceof edu.ntnu.iir.bidata.model.tile.actions.monopoly.GoToJailAction);
+        assertTrue(board.getTile(16) instanceof FreeParkingTile);
+        assertTrue(board.getTile(24) instanceof JailTile);
+        // Check that all tiles are not null
+        for (int i = 0; i < 32; i++) {
+            assertNotNull(board.getTile(i));
+        }
+    }
 } 
