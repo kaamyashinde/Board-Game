@@ -10,7 +10,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -23,7 +22,8 @@ import java.util.Map;
 import edu.ntnu.iir.bidata.Inject;
 
 /**
- * UI for player selection, including loading players from CSV files and selecting which ones to use
+ * UI for player selection, including loading players from CSV files and selecting which ones to use.
+ * Simplified layout with more intuitive workflow.
  */
 public class PlayerSelectionUI {
   private final Stage stage;
@@ -34,7 +34,7 @@ public class PlayerSelectionUI {
   private Label statusLabel;
   private final Map<String, String> playerTokenMap = new HashMap<>(); // player name -> token image
   private final List<String> availableTokens = new ArrayList<>(
-    List.of("token_blue.png", "token_green.png", "token_purple.png", "token_red.png", "token_yellow.png")
+      List.of("token_blue.png", "token_green.png", "token_purple.png", "token_red.png", "token_yellow.png")
   );
 
   /**
@@ -62,9 +62,20 @@ public class PlayerSelectionUI {
     VBox centerContent = new VBox(15);
     centerContent.setAlignment(Pos.CENTER);
 
+    // Top buttons section - CSV Load and Add Manual Player grouped together
+    VBox topButtonsSection = new VBox(15);
+    topButtonsSection.setAlignment(Pos.CENTER);
+
     // CSV Load button
     Button csvLoadButton = createStyledButton("Load Available Players from CSV", 250, 50);
-    centerContent.getChildren().add(csvLoadButton);
+    csvLoadButton.setOnAction(e -> loadPlayersFromCSV());
+
+    // Add manual player button (moved up)
+    Button addPlayerButton = createStyledButton("Add Manual Player", 250, 50);
+    addPlayerButton.setOnAction(e -> showAddPlayerDialog());
+
+    topButtonsSection.getChildren().addAll(csvLoadButton, addPlayerButton);
+    centerContent.getChildren().add(topButtonsSection);
 
     // Two-column layout for available and selected players
     HBox playersContainer = new HBox(20);
@@ -76,15 +87,13 @@ public class PlayerSelectionUI {
 
     Label availableLabel = new Label("Available Players");
     availableLabel.getStyleClass().add("player-selection-section-label");
+    availableLabel.getStyleClass().add("bold-label");
 
     availablePlayersListView.setPrefHeight(200);
     availablePlayersListView.setPrefWidth(200);
     availablePlayersListView.setCellFactory(lv -> new PlayerListCell());
 
-    Button addPlayerButton = createStyledButton("Add Manual Player", 150, 40);
-    Button selectPlayerButton = createStyledButton("Select →", 100, 40);
-
-    availableSection.getChildren().addAll(availableLabel, availablePlayersListView, addPlayerButton, selectPlayerButton);
+    availableSection.getChildren().addAll(availableLabel, availablePlayersListView);
 
     // Selected players section
     VBox selectedSection = new VBox(10);
@@ -92,18 +101,32 @@ public class PlayerSelectionUI {
 
     Label selectedLabel = new Label("Selected Players");
     selectedLabel.getStyleClass().add("player-selection-section-label");
+    selectedLabel.getStyleClass().add("bold-label");
 
     selectedPlayersListView.setPrefHeight(200);
     selectedPlayersListView.setPrefWidth(200);
     selectedPlayersListView.setCellFactory(lv -> new PlayerListCell());
 
-    Button removePlayerButton = createStyledButton("← Remove", 100, 40);
-    Button clearAllButton = createStyledButton("Clear All", 100, 40);
-
-    selectedSection.getChildren().addAll(selectedLabel, selectedPlayersListView, removePlayerButton, clearAllButton);
+    selectedSection.getChildren().addAll(selectedLabel, selectedPlayersListView);
 
     playersContainer.getChildren().addAll(availableSection, selectedSection);
     centerContent.getChildren().add(playersContainer);
+
+    // Control buttons in a row
+    HBox controlButtons = new HBox(30);
+    controlButtons.setAlignment(Pos.CENTER);
+
+    Button selectPlayerButton = createStyledButton("Select →", 100, 40);
+    selectPlayerButton.setOnAction(e -> selectPlayer());
+
+    Button removePlayerButton = createStyledButton("← Remove", 100, 40);
+    removePlayerButton.setOnAction(e -> removeSelectedPlayer());
+
+    Button clearAllButton = createStyledButton("Clear All", 100, 40);
+    clearAllButton.setOnAction(e -> clearAllSelectedPlayers());
+
+    controlButtons.getChildren().addAll(selectPlayerButton, removePlayerButton, clearAllButton);
+    centerContent.getChildren().add(controlButtons);
 
     // Player limit indicators
     HBox limitLabels = new HBox(30);
@@ -131,14 +154,12 @@ public class PlayerSelectionUI {
     statusLabel.getStyleClass().add("player-selection-status-label");
     centerContent.getChildren().add(statusLabel);
 
-    root.setCenter(centerContent);
+    // Add instructions text
+    Label instructionsLabel = new Label("Press on the players you want and click \"Select\" to choose them for the game");
+    instructionsLabel.getStyleClass().add("player-selection-instructions-label");
+    centerContent.getChildren().add(instructionsLabel);
 
-    // Button actions
-    csvLoadButton.setOnAction(e -> loadPlayersFromCSV());
-    addPlayerButton.setOnAction(e -> showAddPlayerDialog());
-    selectPlayerButton.setOnAction(e -> selectPlayer());
-    removePlayerButton.setOnAction(e -> removeSelectedPlayer());
-    clearAllButton.setOnAction(e -> clearAllSelectedPlayers());
+    root.setCenter(centerContent);
 
     // Done button at the bottom
     Button doneButton = createStyledButton("DONE", 150, 40);
@@ -152,6 +173,19 @@ public class PlayerSelectionUI {
     Scene scene = new Scene(root, 600, 700);
     scene.getStylesheets().add(getClass().getResource("/common.css").toExternalForm());
     stage.setScene(scene);
+
+    // Add double-click functionality for quicker selection
+    availablePlayersListView.setOnMouseClicked(event -> {
+      if (event.getClickCount() == 2) {
+        selectPlayer();
+      }
+    });
+
+    selectedPlayersListView.setOnMouseClicked(event -> {
+      if (event.getClickCount() == 2) {
+        removeSelectedPlayer();
+      }
+    });
   }
 
   /**
