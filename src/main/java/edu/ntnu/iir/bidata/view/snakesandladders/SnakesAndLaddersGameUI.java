@@ -402,8 +402,8 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
         }
         playerLayer.getChildren().add(token);
       }
-      token.setTranslateX(-TILE_SIZE);
-      token.setTranslateY(TILE_SIZE * gridSize);
+      token.setTranslateX(-TILE_SIZE + 20);
+      token.setTranslateY((TILE_SIZE * gridSize) - 50);
       return;
     }
 
