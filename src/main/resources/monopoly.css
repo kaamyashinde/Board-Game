@@ -243,6 +243,56 @@
 }
 
 /* Property color indicators */
+/* Group 0 - Brown */
+.property-group-0 {
+  -fx-fill: #8B4513;
+  -fx-background-color: #8B4513;
+}
+
+/* Group 1 - Light Blue */
+.property-group-1 {
+  -fx-fill: #87CEEB;
+  -fx-background-color: #87CEEB;
+}
+
+/* Group 2 - Pink */
+.property-group-2 {
+  -fx-fill: #FF69B4;
+  -fx-background-color: #FF69B4;
+}
+
+/* Group 3 - Orange */
+.property-group-3 {
+  -fx-fill: #FFA500;
+  -fx-background-color: #FFA500;
+}
+
+/* Additional colors for larger boards */
+/* Group 4 - Red */
+.property-group-4 {
+  -fx-fill: #FF0000;
+  -fx-background-color: #FF0000;
+}
+
+/* Group 5 - Yellow */
+.property-group-5 {
+  -fx-fill: #FFD700;
+  -fx-background-color: #FFD700;
+}
+
+/* Group 6 - Green */
+.property-group-6 {
+  -fx-fill: #008000;
+  -fx-background-color: #008000;
+}
+
+/* Group 7 - Blue */
+.property-group-7 {
+  -fx-fill: #0000FF;
+  -fx-background-color: #0000FF;
+}
+
+/* Legacy color classes for backward compatibility */
 .property-color-brown {
   -fx-fill: #8B4513;
 }
