@@ -185,8 +185,12 @@ public class PlayerSelectionUI {
       // Add all loaded players to available list
       for (edu.ntnu.iir.bidata.model.player.Player player : loadedPlayers) {
         String name = player.getName();
+        String token = player.getTokenImage();
         if (!name.isEmpty() && !availablePlayersList.contains(name)) {
           availablePlayersList.add(name);
+          if (token != null && !token.isEmpty()) {
+            playerTokenMap.put(name, token);
+          }
         }
       }
 

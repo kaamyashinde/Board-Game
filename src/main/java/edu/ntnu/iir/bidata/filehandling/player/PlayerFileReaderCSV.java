@@ -15,7 +15,10 @@ public class PlayerFileReaderCSV implements PlayerFileReader {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath.toFile()))) {
             String line = reader.readLine();
             if (line != null && !line.isEmpty()) {
-                return new Player(line.trim());
+                String[] parts = line.split(",", 2);
+                String name = parts[0].trim();
+                String tokenImage = parts.length > 1 ? parts[1].trim() : null;
+                return new Player(name, tokenImage);
             }
             return null;
         } catch (IOException e) {
@@ -30,7 +33,10 @@ public class PlayerFileReaderCSV implements PlayerFileReader {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (!line.trim().isEmpty()) {
-                    players.add(new Player(line.trim()));
+                    String[] parts = line.split(",", 2);
+                    String name = parts[0].trim();
+                    String tokenImage = parts.length > 1 ? parts[1].trim() : null;
+                    players.add(new Player(name, tokenImage));
                 }
             }
         } catch (IOException e) {
@@ -52,7 +58,10 @@ public class PlayerFileReaderCSV implements PlayerFileReader {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (!line.trim().isEmpty()) {
-                    players.add(new Player(line.trim()));
+                    String[] parts = line.split(",", 2);
+                    String name = parts[0].trim();
+                    String tokenImage = parts.length > 1 ? parts[1].trim() : null;
+                    players.add(new Player(name, tokenImage));
                 }
             }
         } catch (IOException e) {

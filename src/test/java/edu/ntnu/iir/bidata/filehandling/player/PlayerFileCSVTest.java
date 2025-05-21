@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class PlayerFileCSVTest {
     @Test
     void testWriteAndReadPlayer() throws Exception {
-        Player player = new Player("Arne");
+        Player player = new Player("Arne", "token_red.png");
         Path tempFile = Files.createTempFile("test-player", ".csv");
 
         // Write player
@@ -23,6 +23,7 @@ class PlayerFileCSVTest {
 
         assertNotNull(loaded);
         assertEquals(player.getName(), loaded.getName());
+        assertEquals(player.getTokenImage(), loaded.getTokenImage());
 
         Files.deleteIfExists(tempFile);
     }
