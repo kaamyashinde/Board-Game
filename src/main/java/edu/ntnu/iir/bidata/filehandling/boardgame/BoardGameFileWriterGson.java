@@ -116,6 +116,7 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
       currentTileObj.put("id", player.getCurrentTile().getId());
       playerData.put("currentTile", currentTileObj);
       playerData.put("playerType", "MONOPOLY");
+      playerData.put("tokenImage", player.getTokenImage());
       playersData.add(playerData);
     }
     simplifiedGame.put("players", playersData);
