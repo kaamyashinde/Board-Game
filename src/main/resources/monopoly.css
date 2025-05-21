@@ -1,0 +1,147 @@
+/* MonopolyGameUI Styles */
+.monopoly-main-layout {
+  -fx-background-color: #f0f0f0;
+}
+
+.monopoly-board-pane {
+  -fx-hgap: 2;
+  -fx-vgap: 2;
+  -fx-padding: 10;
+  -fx-background-color: white;
+  -fx-border-color: #cccccc;
+  -fx-border-width: 1;
+}
+
+.monopoly-player-info-panel {
+  -fx-padding: 10;
+  -fx-background-color: white;
+  -fx-border-color: #cccccc;
+  -fx-border-width: 1;
+  -fx-pref-width: 200;
+}
+
+.monopoly-game-controls {
+  -fx-padding: 10;
+  -fx-alignment: center;
+  -fx-background-color: white;
+  -fx-border-color: #cccccc;
+  -fx-border-width: 1;
+}
+
+.monopoly-dice-label {
+  -fx-font-size: 18px;
+  -fx-font-weight: bold;
+  -fx-padding: 0 10 0 0;
+}
+
+.monopoly-roll-dice-button {
+  -fx-font-size: 16px;
+  -fx-font-weight: bold;
+  -fx-background-color: #4CAF50;
+  -fx-text-fill: white;
+}
+
+.monopoly-buy-button {
+  -fx-font-size: 16px;
+  -fx-font-weight: bold;
+  -fx-background-color: #2196F3;
+  -fx-text-fill: white;
+}
+
+.monopoly-skip-button {
+  -fx-font-size: 16px;
+  -fx-font-weight: bold;
+  -fx-background-color: #FF9800;
+  -fx-text-fill: white;
+}
+
+.monopoly-pay-rent-button {
+  -fx-font-size: 16px;
+  -fx-font-weight: bold;
+  -fx-background-color: #E53935;
+  -fx-text-fill: white;
+}
+
+.monopoly-jail-roll-button {
+  -fx-font-size: 16px;
+  -fx-font-weight: bold;
+  -fx-background-color: #4CAF50;
+  -fx-text-fill: white;
+}
+
+.monopoly-jail-pay-button {
+  -fx-font-size: 16px;
+  -fx-font-weight: bold;
+  -fx-background-color: #FFD600;
+  -fx-text-fill: black;
+}
+
+.monopoly-back-button {
+  -fx-font-size: 16px;
+  -fx-font-weight: bold;
+  -fx-background-color: #f7e6c7;
+  -fx-text-fill: #3b3b6d;
+}
+
+.monopoly-action-label {
+  -fx-font-size: 14px;
+  -fx-font-weight: bold;
+  -fx-text-fill: #333;
+}
+
+.monopoly-player-box {
+  -fx-padding: 20;
+  -fx-background-color: white;
+  -fx-border-color: #cccccc;
+  -fx-border-width: 1;
+}
+
+.monopoly-player-name {
+  -fx-font-weight: bold;
+}
+
+.monopoly-tile {
+  -fx-arc-width: 10;
+  -fx-arc-height: 10;
+}
+
+.monopoly-tile-label {
+  -fx-font-size: 12px;
+  -fx-font-weight: bold;
+  -fx-wrap-text: true;
+}
+
+/* MonopolyMenuUI Styles */
+.monopoly-menu-root {
+  -fx-background-color: #f7f7f0;
+}
+
+.monopoly-back-button {
+  -fx-background-color: #f7e6c7;
+  -fx-font-weight: bold;
+}
+
+.monopoly-title-pane {
+  -fx-background-color: #f7e6c7;
+  -fx-background-radius: 20;
+}
+
+.monopoly-title-label {
+  -fx-font-size: 30px;
+  -fx-font-family: serif;
+  -fx-font-weight: bold;
+}
+
+.monopoly-menu-button {
+  -fx-background-color: #f7e6c7;
+  -fx-font-size: 18px;
+  -fx-font-weight: bold;
+  -fx-background-radius: 20;
+  -fx-padding: 10 40;
+  -fx-text-fill: #3b3b6d;
+}
+
+.monopoly-player-count-label {
+  -fx-font-size: 14px;
+  -fx-text-fill: #3b3b6d;
+}

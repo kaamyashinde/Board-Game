@@ -4,21 +4,13 @@
 }
 
 .board-background {
-    -fx-fill: #e8f5e9;
-    -fx-stroke: #4caf50;
-    -fx-stroke-width: 3;
-    -fx-arc-width: 20;
-    -fx-arc-height: 20;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 5);
+    -fx-fill: #f0f0f0;
 }
 
 .board-tile {
-    -fx-stroke: #333333;
+    -fx-fill: white;
+    -fx-stroke: #cccccc;
     -fx-stroke-width: 1;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);
-    -fx-cursor: hand;
-    -fx-arc-width: 10;
-    -fx-arc-height: 10;
 }
 
 .board-tile:hover {
@@ -27,36 +19,25 @@
 }
 
 .board-tile-start {
-    -fx-fill: #81c784;
-    -fx-stroke: #4caf50;
-    -fx-stroke-width: 2;
+    -fx-fill: #e6ffe6;
 }
 
 .board-tile-special {
-    -fx-fill: #64b5f6;
-    -fx-stroke: #2196f3;
-    -fx-stroke-width: 2;
+    -fx-fill: #fff0e6;
 }
 
 .board-tile-regular {
-    -fx-fill: #ffffff;
+    -fx-fill: white;
 }
 
 .tile-number {
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-fill: #333333;
-    -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.8), 1, 0, 0, 1);
+    -fx-font-size: 12px;
+    -fx-fill: #666666;
 }
 
 .tile-action-text {
-    -fx-font-size: 12px;
-    -fx-fill: #ffffff;
-    -fx-font-weight: bold;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 2, 0, 0, 2);
-    -fx-text-alignment: center;
-    -fx-wrap-text: true;
-    -fx-max-width: 60;
+    -fx-font-size: 10px;
+    -fx-fill: #333333;
 }
 
 .dice {
@@ -74,9 +55,8 @@
 }
 
 .player-token {
-    -fx-stroke: #000000;
-    -fx-stroke-width: 2;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 2);
+    -fx-stroke: black;
+    -fx-stroke-width: 1;
 }
 
 .player-token:hover {
@@ -84,19 +64,27 @@
 }
 
 .player-token-1 {
-    -fx-fill: #ef5350;
+    -fx-fill: #ff0000;
 }
 
 .player-token-2 {
-    -fx-fill: #42a5f5;
+    -fx-fill: #0000ff;
 }
 
 .player-token-3 {
-    -fx-fill: #66bb6a;
+    -fx-fill: #00ff00;
 }
 
 .player-token-4 {
-    -fx-fill: #ffa726;
+    -fx-fill: #ffff00;
+}
+
+.player-token-5 {
+    -fx-fill: #ff00ff;
+}
+
+.player-token-6 {
+    -fx-fill: #00ffff;
 }
 
 .player-info-panel {
@@ -175,4 +163,105 @@
     -fx-font-size: 14px;
     -fx-text-fill: #4caf50;
     -fx-font-weight: bold;
+}
+
+.game-control-button {
+    -fx-background-color: #4caf50;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 15;
+    -fx-background-radius: 5;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 3, 0, 0, 1);
+}
+
+.game-control-button:hover {
+    -fx-background-color: #388e3c;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 2);
+}
+
+.game-control-button:pressed {
+    -fx-background-color: #2e7d32;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);
+}
+
+.game-control-button:disabled {
+    -fx-background-color: #bdbdbd;
+    -fx-effect: none;
+}
+
+/* Monopoly-specific styles */
+.monopoly-tile {
+    -fx-fill: white;
+    -fx-stroke: #333333;
+    -fx-stroke-width: 2;
+}
+
+.property-info-panel {
+    -fx-background-color: #f8f8f8;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-padding: 10;
+}
+
+.money-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #006400;
+}
+
+.properties-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #333333;
+}
+
+.monopoly-control-button {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 8 16;
+    -fx-background-radius: 4;
+}
+
+.monopoly-control-button:hover {
+    -fx-background-color: #45a049;
+}
+
+.monopoly-control-button:pressed {
+    -fx-background-color: #3d8b40;
+}
+
+/* Property color indicators */
+.property-color-brown {
+    -fx-fill: #8B4513;
+}
+
+.property-color-lightblue {
+    -fx-fill: #87CEEB;
+}
+
+.property-color-pink {
+    -fx-fill: #FF69B4;
+}
+
+.property-color-orange {
+    -fx-fill: #FFA500;
+}
+
+.property-color-red {
+    -fx-fill: #FF0000;
+}
+
+.property-color-yellow {
+    -fx-fill: #FFD700;
+}
+
+.property-color-green {
+    -fx-fill: #008000;
+}
+
+.property-color-blue {
+    -fx-fill: #0000FF;
 } 

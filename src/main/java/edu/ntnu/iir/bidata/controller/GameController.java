@@ -1,8 +1,12 @@
 package edu.ntnu.iir.bidata.controller;
 
-import edu.ntnu.iir.bidata.model.NewBoardGame;
-import edu.ntnu.iir.bidata.model.Player;
-import edu.ntnu.iir.bidata.model.tile.TileAction;
+import edu.ntnu.iir.bidata.model.BoardGame;
+import edu.ntnu.iir.bidata.model.tile.core.TileAction;
+import edu.ntnu.iir.bidata.model.game.GameState;
+import edu.ntnu.iir.bidata.model.player.Player;
+import edu.ntnu.iir.bidata.model.Observable;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +20,7 @@ import lombok.Setter;
 public class GameController {
 
   private static final Logger LOGGER = Logger.getLogger(GameController.class.getName());
-  private final NewBoardGame boardGame;
+  private final BoardGame boardGame;
   // Snakes and Ladders specific data
   private final int[][] snakes = {
       {99, 41}, {95, 75}, {89, 86}, {78, 15}, {38, 2}, {29, 11}
@@ -24,23 +28,24 @@ public class GameController {
   private final int[][] ladders = {
       {3, 36}, {8, 12}, {14, 26}, {31, 73}, {59, 80}, {83, 97}, {90, 92}
   };
-  private boolean gameStarted = false;
   // For Snakes and Ladders specific logic
   private final Map<String, Integer> playerPositions = new HashMap<>();
+  // For Ludo specific logic
+  private final int diceValue = 1;
+  private boolean gameStarted = false;
   @Setter
   @Getter
   private int currentPlayerIndex = 0;
   private List<String> playerNames;
-  // For Ludo specific logic
-  private final int diceValue = 1;
   @Setter
   @Getter
   private boolean diceRolled = false;
   @Getter
   @Setter
   private boolean movingPiece = false;
+  private boolean isPaused = false;
 
-  public GameController(NewBoardGame boardGame) {
+  public GameController(BoardGame boardGame) {
     this.boardGame = boardGame;
     LOGGER.info("GameController initialized");
   }
@@ -141,7 +146,7 @@ public class GameController {
     if (!boardGame.isGameOver()) {
       Player currentPlayer = boardGame.getCurrentPlayer();
       // Handle turn logic here
-    } else if (boardGame instanceof NewBoardGame) {
+    } else if (boardGame instanceof BoardGame) {
       // For Snakes and Ladders specific turn management
       String currentPlayer = playerNames.get(currentPlayerIndex);
       // Handle turn logic here
@@ -229,7 +234,7 @@ public class GameController {
 
   public void rollDice() {
     LOGGER.info("Rolling dice");
-    NewBoardGame.MoveResult result = boardGame.makeMoveWithResult();
+    BoardGame.MoveResult result = boardGame.makeMoveWithResult();
     if (result != null) {
       LOGGER.info("Dice rolled: " + result.diceValues);
     }
@@ -238,7 +243,7 @@ public class GameController {
   public void movePlayer() {
     Player currentPlayer = boardGame.getCurrentPlayer();
     int oldPosition = currentPlayer.getCurrentPosition();
-    NewBoardGame.MoveResult result = boardGame.makeMoveWithResult();
+    BoardGame.MoveResult result = boardGame.makeMoveWithResult();
     if (result != null) {
       LOGGER.info(String.format("Player %s moved from position %d to %d",
           currentPlayer.getName(), oldPosition, result.posAfterMove));
@@ -259,9 +264,9 @@ public class GameController {
     return player;
   }
 
-  public NewBoardGame.MoveResult makeMove() {
+  public BoardGame.MoveResult makeMove() {
     LOGGER.info("Making move for current player");
-    NewBoardGame.MoveResult result = boardGame.makeMoveWithResult();
+    BoardGame.MoveResult result = boardGame.makeMoveWithResult();
     if (result != null) {
       LOGGER.info(String.format("Player %s moved from %d to %d (after action: %d). Action: %s",
           result.playerName, result.prevPos, result.posAfterMove, result.posAfterAction,
@@ -274,4 +279,21 @@ public class GameController {
     LOGGER.info("Handling tile action: " + action);
     // Handle the tile action
   }
+
+  public void pauseGame() {
+    isPaused = true;
+    LOGGER.info("Game paused");
+  }
+
+  public void resumeGame() {
+    isPaused = false;
+    LOGGER.info("Game resumed");
+  }
+
+  public boolean isPaused() {
+    return isPaused;
+  }
+
+
+
 }

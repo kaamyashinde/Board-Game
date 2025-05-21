@@ -1,107 +1,151 @@
 package edu.ntnu.iir.bidata.model.board;
 
 import edu.ntnu.iir.bidata.model.exception.GameException;
-import edu.ntnu.iir.bidata.model.tile.*;
+import edu.ntnu.iir.bidata.model.player.Player;
+import edu.ntnu.iir.bidata.model.tile.actions.base.GoToTileAction;
+import edu.ntnu.iir.bidata.model.tile.actions.base.SafeSpotAction;
+import edu.ntnu.iir.bidata.model.tile.actions.game.LoseTurnAction;
+import edu.ntnu.iir.bidata.model.tile.actions.game.SwitchPositionAction;
+import edu.ntnu.iir.bidata.model.tile.actions.movement.EntryPointAction;
+import edu.ntnu.iir.bidata.model.tile.actions.movement.HopFiveStepsAction;
+import edu.ntnu.iir.bidata.model.tile.config.TileConfiguration;
+import edu.ntnu.iir.bidata.model.tile.core.TileAction;
+import edu.ntnu.iir.bidata.model.tile.core.TileFactory;
 import java.util.List;
-import edu.ntnu.iir.bidata.model.Player;
+
 public class BoardFactory {
 
-    /**
-     * Creates a standard board with the same logic as the old NewBoardGame.initializeBoard().
-     * @param boardSize The size of the board.
-     * @param players The player list (needed for SwitchPositionAction).
-     * @return A fully initialized Board.
-     */
-    public static Board createStandardBoard(int boardSize, List<Player> players) {
-        Board board = new Board(boardSize);
+  /**
+   * Creates a standard board with the same logic as the old NewBoardGame.initializeBoard().
+   *
+   * @param boardSize The size of the board.
+   * @param players   The player list (needed for SwitchPositionAction).
+   * @return A fully initialized Board.
+   */
+  public static Board createStandardBoard(int boardSize, List<Player> players) {
+    Board board = new Board(boardSize);
 
-        // Add tiles and actions
-        for (int i = 0; i < board.getSizeOfBoard(); i++) {
-            TileAction action = null;
-            if (i == 3) {
-                action = new HopFiveStepsAction();
-            } else if (i == 7) {
-                action = new GoToTileAction(12);
-            } else if (i == 5) {
-                action = new LoseTurnAction();
-            } else if (i == 15) {
-                action = new SwitchPositionAction(players);
-            }
-            if (!board.addTile(i, action)) {
-                throw new GameException("Failed to add tile at position " + i);
-            }
-        }
-
-        // Connect tiles
-        for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
-            board.connectTiles(i, board.getTile(i + 1));
-        }
-
-        // Validate connections
-        for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
-            if (!board.isValidTileConnection(i, i + 1)) {
-                throw new GameException("Invalid tile connection between tiles " + i + " and " + (i + 1));
-            }
-        }
-
-        return board;
+    // Add tiles and actions
+    for (int i = 0; i < board.getSizeOfBoard(); i++) {
+      TileAction action = null;
+      if (i == 3) {
+        action = new HopFiveStepsAction();
+      } else if (i == 7) {
+        action = new GoToTileAction(12);
+      } else if (i == 5) {
+        action = new LoseTurnAction();
+      } else if (i == 15) {
+        action = new SwitchPositionAction(players);
+      }
+      if (!board.addTile(i, action)) {
+        throw new GameException("Failed to add tile at position " + i);
+      }
     }
 
-    /**
-     * Creates a Snakes and Ladders board using TileFactory and TileConfiguration.
-     * @param boardSize The size of the board (typically 100 for Snakes and Ladders).
-     * @param players The player list.
-     * @return A fully initialized Snakes and Ladders Board.
-     */
-    public static Board createSnakesAndLaddersBoard(int boardSize, List<Player> players) {
-        Board board = new Board(boardSize);
-        TileConfiguration config = new TileConfiguration();
-        TileFactory tileFactory = new TileFactory(players, config);
-
-        // Add tiles with snakes, ladders, etc.
-        for (int i = 0; i < board.getSizeOfBoard(); i++) {
-            if (!board.addTile(i, tileFactory.createTile(i).getAction())) {
-                throw new GameException("Failed to add tile at position " + i);
-            }
-        }
-        // Connect tiles
-        for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
-            board.connectTiles(i, board.getTile(i + 1));
-        }
-        // Validate connections
-        for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
-            if (!board.isValidTileConnection(i, i + 1)) {
-                throw new GameException("Invalid tile connection between tiles " + i + " and " + (i + 1));
-            }
-        }
-        return board;
+    // Connect tiles
+    for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
+      board.connectTiles(i, board.getTile(i + 1));
     }
 
-    /**
-     * Creates a Ludo board. For now, this is a simple linear board with no special actions.
-     * @param boardSize The size of the board (can be 52 or 56 for classic Ludo, or any value for now).
-     * @param players The player list.
-     * @return A fully initialized Ludo Board.
-     */
-    public static Board createLudoBoard(int boardSize, List<Player> players) {
-        Board board = new Board(boardSize);
-        // Add plain tiles (no special actions for now)
-        for (int i = 0; i < board.getSizeOfBoard(); i++) {
-            if (!board.addTile(i, null)) {
-                throw new GameException("Failed to add tile at position " + i);
-            }
-        }
-        // Connect tiles
-        for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
-            board.connectTiles(i, board.getTile(i + 1));
-        }
-        // Validate connections
-        for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
-            if (!board.isValidTileConnection(i, i + 1)) {
-                throw new GameException("Invalid tile connection between tiles " + i + " and " + (i + 1));
-            }
-        }
-        return board;
+    // Validate connections
+    for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
+      if (!board.isValidTileConnection(i, i + 1)) {
+        throw new GameException("Invalid tile connection between tiles " + i + " and " + (i + 1));
+      }
     }
+
+    return board;
+  }
+
+  /**
+   * Creates a Snakes and Ladders board using TileFactory and TileConfiguration.
+   *
+   * @param boardSize The size of the board (typically 100 for Snakes and Ladders).
+   * @param players   The player list.
+   * @return A fully initialized Snakes and Ladders Board.
+   */
+  public static Board createSnakesAndLaddersBoard(int boardSize, List<Player> players) {
+    Board board = new Board(boardSize);
+    TileConfiguration config = new TileConfiguration();
+    TileFactory tileFactory = new TileFactory(players, config);
+
+    // Add tiles with snakes, ladders, etc.
+    for (int i = 0; i < board.getSizeOfBoard(); i++) {
+      if (!board.addTile(i, tileFactory.createTile(i).getAction())) {
+        throw new GameException("Failed to add tile at position " + i);
+      }
+    }
+    // Connect tiles
+    for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
+      board.connectTiles(i, board.getTile(i + 1));
+    }
+    // Validate connections
+    for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
+      if (!board.isValidTileConnection(i, i + 1)) {
+        throw new GameException("Invalid tile connection between tiles " + i + " and " + (i + 1));
+      }
+    }
+    return board;
+  }
+
+  /**
+   * Creates a Ludo board with the standard 52-tile layout including home areas, safe spots, and
+   * entry points for each player.
+   *
+   * @param players The list of players (2-4 players supported).
+   * @return A fully initialized Ludo Board.
+   * @throws GameException if invalid number of players or board creation fails.
+   */
+  public static Board createLudoBoard(List<Player> players) {
+    if (players.size() < 2 || players.size() > 4) {
+      throw new GameException("Ludo requires 2-4 players");
+    }
+
+    // Standard Ludo board has 52 tiles in the main track
+    final int MAIN_TRACK_SIZE = 52;
+    Board board = new Board(MAIN_TRACK_SIZE);
+
+    // Add tiles with their respective actions
+    for (int i = 0; i < MAIN_TRACK_SIZE; i++) {
+      TileAction action = null;
+
+      // Safe spots (every 13th tile)
+      if (i % 13 == 0) {
+        action = new SafeSpotAction();
+      }
+
+      // Entry points for each player
+      if (i == 0) { // Red player entry
+        action = new EntryPointAction(players.get(0));
+      } else if (i == 13) { // Green player entry
+        action = new EntryPointAction(players.get(1));
+      } else if (i == 26 && players.size() > 2) { // Yellow player entry
+        action = new EntryPointAction(players.get(2));
+      } else if (i == 39 && players.size() > 3) { // Blue player entry
+        action = new EntryPointAction(players.get(3));
+      }
+
+      if (!board.addTile(i, action)) {
+        throw new GameException("Failed to add tile at position " + i);
+      }
+    }
+
+    // Connect tiles in the main track
+    for (int i = 0; i < MAIN_TRACK_SIZE - 1; i++) {
+      board.connectTiles(i, board.getTile(i + 1));
+    }
+    // Connect last tile to first tile to complete the loop
+    board.connectTiles(MAIN_TRACK_SIZE - 1, board.getTile(0));
+
+    // Validate connections
+    for (int i = 0; i < MAIN_TRACK_SIZE; i++) {
+      int nextTile = (i + 1) % MAIN_TRACK_SIZE;
+      if (!board.isValidTileConnection(i, nextTile)) {
+        throw new GameException("Invalid tile connection between tiles " + i + " and " + nextTile);
+      }
+    }
+
+    return board;
+  }
 
 }

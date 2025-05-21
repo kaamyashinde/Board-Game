@@ -8,7 +8,5 @@ public class GameException extends RuntimeException {
         super(message);
     }
 
-    public GameException(String message, Throwable cause) {
-        super(message, cause);
-    }
+
 } 
