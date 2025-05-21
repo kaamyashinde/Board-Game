@@ -393,7 +393,7 @@ public class PlayerSelectionUI {
   /**
    * Custom cell factory for the players list view
    */
-  private static class PlayerListCell extends ListCell<String> {
+  private class PlayerListCell extends ListCell<String> {
     @Override
     protected void updateItem(String item, boolean empty) {
       super.updateItem(item, empty);
@@ -405,7 +405,27 @@ public class PlayerSelectionUI {
         HBox container = new HBox(10);
         container.setAlignment(Pos.CENTER_LEFT);
 
-        Circle playerMarker = new Circle(10, Color.DARKGREEN);
+        // Default: white fill, black outline
+        Color fillColor = Color.WHITE;
+        Color strokeColor = Color.BLACK;
+
+        // Try to get the token color from playerTokenMap
+        String token = playerTokenMap.get(item);
+        if (token != null) {
+          switch (token) {
+            case "token_red.png" -> fillColor = Color.web("#e74c3c");
+            case "token_blue.png" -> fillColor = Color.web("#3498db");
+            case "token_green.png" -> fillColor = Color.web("#27ae60");
+            case "token_purple.png" -> fillColor = Color.web("#9b59b6");
+            case "token_yellow.png" -> fillColor = Color.web("#f1c40f");
+            default -> fillColor = Color.WHITE;
+          }
+        }
+
+        Circle playerMarker = new Circle(10, fillColor);
+        playerMarker.setStroke(strokeColor);
+        playerMarker.setStrokeWidth(2);
+
         Label nameLabel = new Label(item);
         nameLabel.getStyleClass().add("bold-label");
 
