@@ -42,6 +42,7 @@ public class SnakesAndLaddersMenuUI {
   /** -- GETTER -- Get the list of selected players */
   @Getter private List<String> selectedPlayers = new ArrayList<>();
   @Getter private Map<String, String> selectedPlayerTokens = new java.util.HashMap<>();
+  @Getter private String selectedDifficulty = "normal"; // Default difficulty
 
   private Label playerCountLabel;
 
@@ -125,6 +126,17 @@ public class SnakesAndLaddersMenuUI {
     // Choose The Players button
     Button choosePlayersBtn = setUpCenterBoxChoosePlayersBtn();
 
+    // Difficulty selection
+    HBox difficultyBox = new HBox(10);
+    difficultyBox.setAlignment(Pos.CENTER);
+    Label difficultyLabel = new Label("Select Difficulty:");
+    difficultyLabel.getStyleClass().add("snl-player-count-label");
+    ComboBox<String> difficultyComboBox = new ComboBox<>();
+    difficultyComboBox.getItems().addAll("Easy", "Normal", "Hard");
+    difficultyComboBox.setValue("Normal");
+    difficultyComboBox.setOnAction(e -> selectedDifficulty = difficultyComboBox.getValue().toLowerCase());
+    difficultyBox.getChildren().addAll(difficultyLabel, difficultyComboBox);
+
     // Player count label
     playerCountLabel = new Label("No players selected");
     playerCountLabel.getStyleClass().add("snl-player-count-label");
@@ -133,7 +145,7 @@ public class SnakesAndLaddersMenuUI {
     Button startGameBtn = setUpCenterBoxStartGameBtn();
     centerBox
         .getChildren()
-        .addAll(startGameBtn, playerCountLabel, titlePane, choosePlayersBtn, boardButtons);
+        .addAll(startGameBtn, playerCountLabel, titlePane, choosePlayersBtn, difficultyBox, boardButtons);
     return centerBox;
   }
 
@@ -219,6 +231,7 @@ public class SnakesAndLaddersMenuUI {
                 try {
                   BoardGame boardGame = readBoardGameFromSelectedFile(gameName);
                   SnakesAndLaddersGameUI gameUI = getSnakesAndLaddersGameUI(gameName, boardGame);
+                  gameUI.setDifficulty(selectedDifficulty);
                   // Create and set the scene
                   createAndSetScene(gameUI.getRoot());
                 } catch (Exception e) {
@@ -263,6 +276,7 @@ public class SnakesAndLaddersMenuUI {
     SnakesAndLaddersGameUI gameUI =
         new SnakesAndLaddersGameUI(boardGame, primaryStage, controller, boardGame.getPlayers(), mediator);
     gameUI.setLoadedGame(true, gameName);
+    gameUI.setDifficulty(selectedDifficulty);
     LOGGER.info(
         "Game loaded successfully"
             + boardGame.getCurrentPlayer().getName()
