@@ -18,16 +18,22 @@ public class Player {
   private String name;
   private Tile currentTile;
   private boolean skipNextTurn;
+  private String tokenImage; // Path or name of the token image
 
   /**
    * The constructor that initialises the players with their name and the board game they are
    * connected to.
    *
    * @param inputName the name of the player
-   * @param game      the instance of Board Game they are connected to todo
+   * @param tokenImage the image path or name for the player's token (optional)
    */
-  public Player(String inputName) {
+  public Player(String inputName, String tokenImage) {
     setName(inputName);
+    setTokenImage(tokenImage);
+  }
+
+  public Player(String inputName) {
+    this(inputName, null);
   }
 
   /**
@@ -73,12 +79,13 @@ public class Player {
     Player other = (Player) obj;
     return Objects.equals(name, other.name) &&
            Objects.equals(currentTile, other.currentTile) &&
-           skipNextTurn == other.skipNextTurn;
+           skipNextTurn == other.skipNextTurn &&
+           Objects.equals(tokenImage, other.tokenImage);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, currentTile, skipNextTurn);
+    return Objects.hash(name, currentTile, skipNextTurn, tokenImage);
   }
 
 }

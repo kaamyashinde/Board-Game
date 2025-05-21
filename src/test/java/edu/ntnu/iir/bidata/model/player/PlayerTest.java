@@ -30,6 +30,13 @@ class PlayerTest {
   }
 
   @Test
+  void testConstructorWithTokenImage() {
+    Player playerWithToken = new Player("TokenPlayer", "token_blue.png");
+    assertEquals("TokenPlayer", playerWithToken.getName());
+    assertEquals("token_blue.png", playerWithToken.getTokenImage());
+  }
+
+  @Test
   void testMove() {
     when(mockTile.getNextTile(3)).thenReturn(mockNextTile);
     player.move(3);
@@ -78,5 +85,22 @@ class PlayerTest {
     Tile newTile = mock(Tile.class);
     player.setCurrentTile(newTile);
     assertEquals(newTile, player.getCurrentTile());
+  }
+
+  @Test
+  void testTokenImageGetterAndSetter() {
+    player.setTokenImage("token_red.png");
+    assertEquals("token_red.png", player.getTokenImage());
+  }
+
+  @Test
+  void testEqualsAndHashCodeWithTokenImage() {
+    Player p1 = new Player("A", "token_green.png");
+    Player p2 = new Player("A", "token_green.png");
+    Player p3 = new Player("A", "token_yellow.png");
+    assertEquals(p1, p2);
+    assertEquals(p1.hashCode(), p2.hashCode());
+    assertNotEquals(p1, p3);
+    assertNotEquals(p1.hashCode(), p3.hashCode());
   }
 } 
