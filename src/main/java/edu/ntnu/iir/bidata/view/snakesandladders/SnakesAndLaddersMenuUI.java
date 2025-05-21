@@ -249,8 +249,15 @@ public class SnakesAndLaddersMenuUI {
         new BoardGameFileReaderGson(),
         mediator
     );
+    // Determine image path based on level
+    String level = boardGame.getLevel();
+    String imagePath = switch (level) {
+      case "easy" -> "/snakes_and_ladders_easy.jpg";
+      case "hard" -> "/snakes_and_ladders_hard_board.png";
+      default -> "/snakes_and_ladders_board.jpeg";
+    };
     SnakesAndLaddersGameUI gameUI =
-        new SnakesAndLaddersGameUI(boardGame, primaryStage, controller, boardGame.getPlayers(), mediator);
+        new SnakesAndLaddersGameUI(boardGame, primaryStage, controller, boardGame.getPlayers(), mediator, imagePath);
     gameUI.setLoadedGame(true, gameName);
     LOGGER.info(
         "Game loaded successfully"
@@ -287,6 +294,7 @@ public class SnakesAndLaddersMenuUI {
     edu.ntnu.iir.bidata.model.board.Board board = edu.ntnu.iir.bidata.model.board.BoardFactory.createSnakesAndLaddersBoard(100, players, config);
     edu.ntnu.iir.bidata.model.BoardGame boardGame = new edu.ntnu.iir.bidata.model.BoardGame(board, 2);
     boardGame.setPlayers(players);
+    boardGame.setLevel(level);
     edu.ntnu.iir.bidata.model.utils.GameMediator mediator = new edu.ntnu.iir.bidata.model.utils.DefaultGameMediator();
     edu.ntnu.iir.bidata.controller.SnakesAndLaddersController controller = new edu.ntnu.iir.bidata.controller.SnakesAndLaddersController(
       boardGame,
