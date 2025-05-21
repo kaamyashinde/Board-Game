@@ -34,6 +34,7 @@ public class BoardGame implements Observable {
   private boolean gameOver;
   private boolean gameInitialized;
   private int roundNumber = 1;
+  private String level = "medium";
 
   /**
    * Constructor for the NewBoardGame class.
@@ -317,11 +318,15 @@ public class BoardGame implements Observable {
            currentPlayerIndex == other.currentPlayerIndex &&
            gameOver == other.gameOver &&
            gameInitialized == other.gameInitialized &&
-           roundNumber == other.roundNumber;
+           roundNumber == other.roundNumber &&
+           level.equals(other.level);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(board, players, dice, currentPlayerIndex, gameOver, gameInitialized, roundNumber);
+    return Objects.hash(board, players, dice, currentPlayerIndex, gameOver, gameInitialized, roundNumber, level);
   }
+
+  public String getLevel() { return level; }
+  public void setLevel(String level) { this.level = (level == null ? "medium" : level); }
 }
