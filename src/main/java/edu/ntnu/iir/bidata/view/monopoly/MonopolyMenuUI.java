@@ -29,6 +29,8 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import lombok.Getter;
 import edu.ntnu.iir.bidata.Inject;
+import edu.ntnu.iir.bidata.model.board.MonopolyBoardFactory;
+import edu.ntnu.iir.bidata.model.player.SimpleMonopolyPlayer;
 
 /**
  * Represents the UI for the Monopoly game main menu.
@@ -136,17 +138,52 @@ public class MonopolyMenuUI {
     playerCountLabel.getStyleClass().add(monopolyPlayerCountLabelClass);
     centerBox.getChildren().add(playerCountLabel);
 
-    Button startGameBtn = createMenuButton("START");
+    Button startGameBtn = createMenuButton("Small board");
     startGameBtn.setOnAction(
         e -> {
           if (selectedPlayers.size() >= 2) {
-            if (onStartGame != null) onStartGame.accept(new PlayerSelectionResult(selectedPlayers, selectedPlayerTokens));
+            BoardGame boardGame = new BoardGame(MonopolyBoardFactory.createBoard(), 1);
+            boardGame.setPlayers((List) selectedPlayers.stream().map(name -> new SimpleMonopolyPlayer(name, selectedPlayerTokens.get(name))).toList());
+            MonopolyGameUI gameUI = getMonopolyGameUI(boardGame, true);
+            createAndSetScene(gameUI);
           } else {
             playerCountLabel.setText("Please select at least two players!");
             playerCountLabel.setStyle("-fx-text-fill: red;");
           }
         });
     centerBox.getChildren().add(startGameBtn);
+
+    // Medium board button
+    Button mediumBoardBtn = createMenuButton("Medium board");
+    mediumBoardBtn.setOnAction(
+        e -> {
+          if (selectedPlayers.size() >= 2) {
+            BoardGame boardGame = new BoardGame(MonopolyBoardFactory.createBoard28(), 1);
+            boardGame.setPlayers((List) selectedPlayers.stream().map(name -> new SimpleMonopolyPlayer(name, selectedPlayerTokens.get(name))).toList());
+            MonopolyGameUI gameUI = getMonopolyGameUI(boardGame, true);
+            createAndSetScene(gameUI);
+          } else {
+            playerCountLabel.setText("Please select at least two players!");
+            playerCountLabel.setStyle("-fx-text-fill: red;");
+          }
+        });
+    centerBox.getChildren().add(mediumBoardBtn);
+
+    // Large board button
+    Button largeBoardBtn = createMenuButton("Large board");
+    largeBoardBtn.setOnAction(
+        e -> {
+          if (selectedPlayers.size() >= 2) {
+            BoardGame boardGame = new BoardGame(MonopolyBoardFactory.createBoard32(), 1);
+            boardGame.setPlayers((List) selectedPlayers.stream().map(name -> new SimpleMonopolyPlayer(name, selectedPlayerTokens.get(name))).toList());
+            MonopolyGameUI gameUI = getMonopolyGameUI(boardGame, true);
+            createAndSetScene(gameUI);
+          } else {
+            playerCountLabel.setText("Please select at least two players!");
+            playerCountLabel.setStyle("-fx-text-fill: red;");
+          }
+        });
+    centerBox.getChildren().add(largeBoardBtn);
 
     root.setCenter(centerBox);
 
