@@ -136,7 +136,7 @@ public class SnakesAndLaddersMenuUI {
     HBox levelButtons = new HBox(20, easyBtn, mediumBtn, hardBtn);
     levelButtons.setAlignment(Pos.CENTER);
 
-    centerBox.getChildren().addAll(levelButtons, playerCountLabel, titlePane, choosePlayersBtn, boardButtons);
+    centerBox.getChildren().addAll( playerCountLabel, titlePane, choosePlayersBtn, boardButtons, levelButtons);
     return centerBox;
   }
 
