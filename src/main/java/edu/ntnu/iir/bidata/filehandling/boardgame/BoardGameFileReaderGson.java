@@ -81,7 +81,12 @@ public class BoardGameFileReaderGson implements BoardGameFileReader {
             boardGame.getPlayers().stream()
                 .filter(p -> p.getName().equals(playerName))
                 .findFirst()
-                .ifPresent(p -> p.setCurrentTile(boardGame.getBoard().getTile(tileId)));
+                .ifPresent(p -> {
+                  p.setCurrentTile(boardGame.getBoard().getTile(tileId));
+                  if (playerObj.has("tokenImage")) {
+                    p.setTokenImage(playerObj.get("tokenImage").getAsString());
+                  }
+                });
           }
         }
       }

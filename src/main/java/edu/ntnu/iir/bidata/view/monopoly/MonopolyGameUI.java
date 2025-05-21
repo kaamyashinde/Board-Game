@@ -27,6 +27,8 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import lombok.Setter;
 import edu.ntnu.iir.bidata.Inject;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 /** JavaFX UI implementation for the Monopoly game. */
 public class MonopolyGameUI extends JavaFXGameUI {
@@ -34,7 +36,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
   private static final int GRID_DIM = 6; // 6x6 grid for 20-tile Monopoly
   private static final int TILE_SIZE = 60;
   private final Map<Integer, StackPane> tilePanes = new HashMap<>();
-  private final Map<Player, Circle> playerTokens = new HashMap<>();
+  private final Map<Player, ImageView> playerTokens = new HashMap<>();
   private final Button rollDiceButton = new Button("Roll Dice");
   private final Button buyButton = new Button("Buy");
   private final Button skipButton = new Button("Skip");
@@ -244,18 +246,28 @@ public class MonopolyGameUI extends JavaFXGameUI {
   private void updatePlayerTokens() {
     // Remove all tokens
     for (StackPane pane : tilePanes.values()) {
-      pane.getChildren().removeIf(n -> n instanceof Circle);
+      pane.getChildren().removeIf(n -> n instanceof ImageView);
     }
     // Add tokens for each player
-    int colorIdx = 0;
-    Color[] tokenColors = {Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.PURPLE};
     for (Player player : getBoardGame().getPlayers()) {
       int pos = player.getCurrentTile() != null ? player.getCurrentTile().getId() : 0;
       StackPane tilePane = tilePanes.get(pos);
-      Circle token = new Circle(12, tokenColors[colorIdx % tokenColors.length]);
-      token.setStroke(Color.BLACK);
+      ImageView token = playerTokens.get(player);
+      if (token == null) {
+        String tokenImage = player.getTokenImage();
+        if (tokenImage != null && !tokenImage.isEmpty()) {
+          Image img = new Image(getClass().getResourceAsStream("/tokens/" + tokenImage));
+          token = new ImageView(img);
+          token.setFitWidth(32);
+          token.setFitHeight(48);
+        } else {
+          token = new ImageView();
+          token.setFitWidth(32);
+          token.setFitHeight(48);
+        }
+        playerTokens.put(player, token);
+      }
       tilePane.getChildren().add(token);
-      colorIdx++;
     }
   }
 

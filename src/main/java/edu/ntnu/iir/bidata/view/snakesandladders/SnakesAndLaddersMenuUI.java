@@ -10,10 +10,12 @@ import edu.ntnu.iir.bidata.view.common.JavaFXBoardGameLauncher;
 import edu.ntnu.iir.bidata.view.common.PlayerSelectionUI;
 import edu.ntnu.iir.bidata.model.utils.DefaultGameMediator;
 import edu.ntnu.iir.bidata.model.utils.GameMediator;
+import edu.ntnu.iir.bidata.view.common.PlayerSelectionResult;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,11 +36,12 @@ import lombok.Getter;
 public class SnakesAndLaddersMenuUI {
   private static final Logger LOGGER = Logger.getLogger(SnakesAndLaddersMenuUI.class.getName());
   private final Stage primaryStage;
-  private final Consumer<List<String>> onStartGame;
+  private final Consumer<PlayerSelectionResult> onStartGame;
   private final BoardManagementUI boardManagementUI;
 
   /** -- GETTER -- Get the list of selected players */
   @Getter private List<String> selectedPlayers = new ArrayList<>();
+  @Getter private Map<String, String> selectedPlayerTokens = new java.util.HashMap<>();
 
   private Label playerCountLabel;
 
@@ -48,7 +51,7 @@ public class SnakesAndLaddersMenuUI {
    * @param primaryStage The primary stage
    * @param onStartGame Consumer that accepts the list of selected players when starting the game
    */
-  public SnakesAndLaddersMenuUI(Stage primaryStage, Consumer<List<String>> onStartGame) {
+  public SnakesAndLaddersMenuUI(Stage primaryStage, Consumer<PlayerSelectionResult> onStartGame) {
     this.primaryStage = primaryStage;
     this.onStartGame = onStartGame;
     this.boardManagementUI = new BoardManagementUI(primaryStage);
@@ -188,7 +191,7 @@ public class SnakesAndLaddersMenuUI {
     startGameBtn.setOnAction(
         e -> {
           if (!selectedPlayers.isEmpty()) {
-            if (onStartGame != null) onStartGame.accept(selectedPlayers);
+            if (onStartGame != null) onStartGame.accept(new PlayerSelectionResult(selectedPlayers, selectedPlayerTokens));
           } else {
             playerCountLabel.setText("Please select at least one player!");
             playerCountLabel.setStyle("-fx-text-fill: red;");
@@ -219,7 +222,7 @@ public class SnakesAndLaddersMenuUI {
                   // Create and set the scene
                   createAndSetScene(gameUI.getRoot());
                 } catch (Exception e) {
-                  LOGGER.log(Level.SEVERE, "Error loading Snakes and Ladders game", e);
+                  LOGGER.log(Level.SEVERE, "Error loading Snakes and Ladders game");
                 }
               }
             });
@@ -228,9 +231,10 @@ public class SnakesAndLaddersMenuUI {
   private void openPlayerSelection() {
     PlayerSelectionUI playerSelection = new PlayerSelectionUI(primaryStage);
     List<String> players = playerSelection.showAndWait();
-
+    Map<String, String> tokens = playerSelection.getPlayerTokenMap();
     if (players != null && !players.isEmpty()) {
       this.selectedPlayers = players;
+      this.selectedPlayerTokens = tokens;
       updatePlayerCountLabel();
     }
   }

@@ -14,13 +14,12 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-
-import java.io.File;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import edu.ntnu.iir.bidata.Inject;
 
 /**
@@ -33,6 +32,10 @@ public class PlayerSelectionUI {
   private final ListView<String> availablePlayersListView = new ListView<>(availablePlayersList);
   private final ListView<String> selectedPlayersListView = new ListView<>(selectedPlayersList);
   private Label statusLabel;
+  private final Map<String, String> playerTokenMap = new HashMap<>(); // player name -> token image
+  private final List<String> availableTokens = new ArrayList<>(
+    List.of("token_blue.png", "token_green.png", "token_purple.png", "token_red.png", "token_yellow.png")
+  );
 
   /**
    * Creates a new player selection UI overlay.
@@ -182,8 +185,12 @@ public class PlayerSelectionUI {
       // Add all loaded players to available list
       for (edu.ntnu.iir.bidata.model.player.Player player : loadedPlayers) {
         String name = player.getName();
+        String token = player.getTokenImage();
         if (!name.isEmpty() && !availablePlayersList.contains(name)) {
           availablePlayersList.add(name);
+          if (token != null && !token.isEmpty()) {
+            playerTokenMap.put(name, token);
+          }
         }
       }
 
@@ -203,8 +210,13 @@ public class PlayerSelectionUI {
         return;
       }
       if (!selectedPlayersList.contains(selectedPlayer)) {
-        selectedPlayersList.add(selectedPlayer);
-        statusLabel.setText("Added " + selectedPlayer + " to selected players");
+        // Prompt for token selection if not already assigned
+        if (!playerTokenMap.containsKey(selectedPlayer)) {
+          showTokenSelectionDialog(selectedPlayer);
+        } else {
+          selectedPlayersList.add(selectedPlayer);
+          statusLabel.setText("Added " + selectedPlayer + " to selected players");
+        }
       } else {
         statusLabel.setText(selectedPlayer + " is already selected!");
       }
@@ -257,29 +269,137 @@ public class PlayerSelectionUI {
 
     nameBox.getChildren().addAll(marker, nameLabel, nameField);
 
+    // Token selection UI
+    Label tokenLabel = new Label("Select Token:");
+    tokenLabel.getStyleClass().add("bold-label");
+    ToggleGroup tokenGroup = new ToggleGroup();
+    HBox tokenBox = new HBox(10);
+    tokenBox.setAlignment(Pos.CENTER);
+    // Only exclude tokens already used by selected players
+    java.util.Set<String> usedTokens = new java.util.HashSet<>();
+    for (String selectedPlayer : selectedPlayersList) {
+      String usedToken = playerTokenMap.get(selectedPlayer);
+      if (usedToken != null) {
+        usedTokens.add(usedToken);
+      }
+    }
+    for (String token : availableTokens) {
+      if (!usedTokens.contains(token)) {
+        RadioButton rb = new RadioButton();
+        rb.setToggleGroup(tokenGroup);
+        ImageView iv = new ImageView(new Image(getClass().getResourceAsStream("/tokens/" + token)));
+        iv.setFitWidth(32);
+        iv.setFitHeight(48);
+        rb.setGraphic(iv);
+        rb.setUserData(token);
+        tokenBox.getChildren().add(rb);
+      }
+    }
+
     Button addButton = createStyledButton("ADD", 120, 40);
 
-    layout.getChildren().addAll(titlePane, nameBox, addButton);
+    layout.getChildren().addAll(titlePane, nameBox, tokenLabel, tokenBox, addButton);
 
     addButton.setOnAction(e -> {
       String name = nameField.getText().trim();
-      if (!name.isEmpty()) {
-        if (!availablePlayersList.contains(name)) {
-          availablePlayersList.add(name);
-          statusLabel.setText("Added " + name + " to available players");
-          addDialog.close();
-        } else {
-          statusLabel.setText("Player " + name + " already exists in available players!");
-        }
-      } else {
+      Toggle selectedToggle = tokenGroup.getSelectedToggle();
+      if (name.isEmpty()) {
         statusLabel.setText("Player name cannot be empty!");
+        return;
       }
+      if (selectedToggle == null) {
+        statusLabel.setText("Please select a token!");
+        return;
+      }
+      String token = (String) selectedToggle.getUserData();
+      if (availablePlayersList.contains(name)) {
+        statusLabel.setText("Player " + name + " already exists in available players!");
+        return;
+      }
+      // Only check for token conflict among selected players
+      for (String selectedPlayer : selectedPlayersList) {
+        String usedToken = playerTokenMap.get(selectedPlayer);
+        if (token.equals(usedToken)) {
+          statusLabel.setText("Token already taken!");
+          return;
+        }
+      }
+      availablePlayersList.add(name);
+      playerTokenMap.put(name, token);
+      statusLabel.setText("Added " + name + " to available players with token " + token);
+      addDialog.close();
     });
 
-    Scene scene = new Scene(layout, 350, 200);
+    Scene scene = new Scene(layout, 400, 300);
     scene.getStylesheets().add(getClass().getResource("/common.css").toExternalForm());
     addDialog.setScene(scene);
     addDialog.showAndWait();
+  }
+
+  private void showTokenSelectionDialog(String playerName) {
+    Stage tokenDialog = new Stage();
+    tokenDialog.initOwner(stage);
+    tokenDialog.initModality(Modality.APPLICATION_MODAL);
+    tokenDialog.setTitle("Select Token for " + playerName);
+
+    VBox layout = new VBox(20);
+    layout.setPadding(new Insets(20));
+    layout.setAlignment(Pos.CENTER);
+    layout.getStyleClass().add("player-selection-root");
+
+    Label tokenLabel = new Label("Select Token for " + playerName + ":");
+    tokenLabel.getStyleClass().add("bold-label");
+    ToggleGroup tokenGroup = new ToggleGroup();
+    HBox tokenBox = new HBox(10);
+    tokenBox.setAlignment(Pos.CENTER);
+    // Only exclude tokens already used by selected players
+    java.util.Set<String> usedTokens = new java.util.HashSet<>();
+    for (String selectedPlayer : selectedPlayersList) {
+      String usedToken = playerTokenMap.get(selectedPlayer);
+      if (usedToken != null) {
+        usedTokens.add(usedToken);
+      }
+    }
+    for (String token : availableTokens) {
+      if (!usedTokens.contains(token)) {
+        RadioButton rb = new RadioButton();
+        rb.setToggleGroup(tokenGroup);
+        ImageView iv = new ImageView(new Image(getClass().getResourceAsStream("/tokens/" + token)));
+        iv.setFitWidth(32);
+        iv.setFitHeight(48);
+        rb.setGraphic(iv);
+        rb.setUserData(token);
+        tokenBox.getChildren().add(rb);
+      }
+    }
+    Button selectButton = createStyledButton("SELECT", 120, 40);
+    layout.getChildren().addAll(tokenLabel, tokenBox, selectButton);
+
+    selectButton.setOnAction(e -> {
+      Toggle selectedToggle = tokenGroup.getSelectedToggle();
+      if (selectedToggle == null) {
+        statusLabel.setText("Please select a token!");
+        return;
+      }
+      String token = (String) selectedToggle.getUserData();
+      if (playerTokenMap.containsValue(token)) {
+        statusLabel.setText("Token already taken!");
+        return;
+      }
+      playerTokenMap.put(playerName, token);
+      selectedPlayersList.add(playerName);
+      statusLabel.setText("Added " + playerName + " to selected players with token " + token);
+      tokenDialog.close();
+    });
+
+    Scene scene = new Scene(layout, 400, 200);
+    scene.getStylesheets().add(getClass().getResource("/common.css").toExternalForm());
+    tokenDialog.setScene(scene);
+    tokenDialog.showAndWait();
+  }
+
+  public Map<String, String> getPlayerTokenMap() {
+    return new HashMap<>(playerTokenMap);
   }
 
   private Button createStyledButton(String text, int width, int height) {
@@ -293,7 +413,7 @@ public class PlayerSelectionUI {
   /**
    * Custom cell factory for the players list view
    */
-  private static class PlayerListCell extends ListCell<String> {
+  private class PlayerListCell extends ListCell<String> {
     @Override
     protected void updateItem(String item, boolean empty) {
       super.updateItem(item, empty);
@@ -305,7 +425,27 @@ public class PlayerSelectionUI {
         HBox container = new HBox(10);
         container.setAlignment(Pos.CENTER_LEFT);
 
-        Circle playerMarker = new Circle(10, Color.DARKGREEN);
+        // Default: white fill, black outline
+        Color fillColor = Color.WHITE;
+        Color strokeColor = Color.BLACK;
+
+        // Try to get the token color from playerTokenMap
+        String token = playerTokenMap.get(item);
+        if (token != null) {
+          switch (token) {
+            case "token_red.png" -> fillColor = Color.web("#e74c3c");
+            case "token_blue.png" -> fillColor = Color.web("#3498db");
+            case "token_green.png" -> fillColor = Color.web("#27ae60");
+            case "token_purple.png" -> fillColor = Color.web("#9b59b6");
+            case "token_yellow.png" -> fillColor = Color.web("#f1c40f");
+            default -> fillColor = Color.WHITE;
+          }
+        }
+
+        Circle playerMarker = new Circle(10, fillColor);
+        playerMarker.setStroke(strokeColor);
+        playerMarker.setStrokeWidth(2);
+
         Label nameLabel = new Label(item);
         nameLabel.getStyleClass().add("bold-label");
 

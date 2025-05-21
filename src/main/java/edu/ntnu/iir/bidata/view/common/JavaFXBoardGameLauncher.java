@@ -16,6 +16,7 @@ import edu.ntnu.iir.bidata.model.utils.DefaultGameMediator;
 import edu.ntnu.iir.bidata.model.utils.GameMediator;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson;
 import edu.ntnu.iir.bidata.controller.MonopolyController;
+import edu.ntnu.iir.bidata.view.common.PlayerSelectionResult;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -25,6 +26,7 @@ import javafx.stage.Stage;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import javafx.scene.Scene;
+import java.util.Map;
 
 /**
  * JavaFX application launcher for the board games UI. This class only handles UI navigation between
@@ -98,27 +100,32 @@ public class JavaFXBoardGameLauncher extends Application {
    * Converts selected player names to Player objects and shows the appropriate game board.
    *
    * @param stage The primary stage to show the game on
-   * @param selectedPlayerNames List of selected player names
+   * @param selection PlayerSelectionResult containing player names and token mapping
    * @param gameType The type of game to show (LUDO or SNAKES_AND_LADDERS)
    */
-  private void handlePlayerSelection(Stage stage, List<String> selectedPlayerNames, GameType gameType) {
+  private void handlePlayerSelection(Stage stage, PlayerSelectionResult selection, GameType gameType) {
     switch (gameType) {
       case SNAKES_AND_LADDERS -> {
-        // For Snakes and Ladders, use generic Player
-        List<Player> players = selectedPlayerNames.stream().map(Player::new).toList();
+        // For Snakes and Ladders, use generic Player with token image
+        List<Player> players = selection.playerNames.stream()
+          .map(name -> new Player(name, selection.playerTokens.get(name)))
+          .toList();
         showSnakesAndLaddersGameBoard(stage, players);
       }
       case MONOPOLY -> {
-        // For Monopoly, use SimpleMonopolyPlayer
-        List<SimpleMonopolyPlayer> players = selectedPlayerNames.stream()
-            .map(SimpleMonopolyPlayer::new)
-            .toList();
+        // For Monopoly, use SimpleMonopolyPlayer with token image
+        List<SimpleMonopolyPlayer> players = selection.playerNames.stream()
+          .map(name -> {
+            SimpleMonopolyPlayer p = new SimpleMonopolyPlayer(name);
+            p.setTokenImage(selection.playerTokens.get(name));
+            return p;
+          })
+          .toList();
         showMonopolyGameBoard(stage, players);
       }
     }
   }
 
-  //TODO: Make this into a more generic method
   /**
    * Displays the Snakes and Ladders game menu. This screen allows player selection and
    * configuration.
@@ -128,7 +135,7 @@ public class JavaFXBoardGameLauncher extends Application {
   public void showSnakesAndLaddersMenu(Stage stage) {
     LOGGER.info("Showing Snakes and Ladders menu");
     SnakesAndLaddersMenuUI menuUI = new SnakesAndLaddersMenuUI(stage,
-        selectedPlayerNames -> handlePlayerSelection(stage, selectedPlayerNames, GameType.SNAKES_AND_LADDERS));
+        selection -> handlePlayerSelection(stage, selection, GameType.SNAKES_AND_LADDERS));
   }
 
   /**
@@ -139,7 +146,7 @@ public class JavaFXBoardGameLauncher extends Application {
   public void showMonopolyMenu(Stage stage) {
     LOGGER.info("Showing Monopoly menu");
     MonopolyMenuUI menuUI = new MonopolyMenuUI(stage,
-        selectedPlayerNames -> handlePlayerSelection(stage, selectedPlayerNames, GameType.MONOPOLY));
+        selection -> handlePlayerSelection(stage, selection, GameType.MONOPOLY));
   }
 
   /**
