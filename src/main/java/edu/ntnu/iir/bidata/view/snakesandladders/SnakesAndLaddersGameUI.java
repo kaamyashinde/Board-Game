@@ -39,12 +39,9 @@ import edu.ntnu.iir.bidata.view.common.JavaFXGameUI;
 public class SnakesAndLaddersGameUI extends JavaFXGameUI {
 
   private static final Logger LOGGER = Logger.getLogger(SnakesAndLaddersGameUI.class.getName());
-  private final Map<String, Circle> playerTokenMap = new HashMap<>();
+  private final Map<String, ImageView> playerTokenMap = new HashMap<>();
   private final Map<String, Label> playerPositionLabels = new HashMap<>();
   private final int TILE_SIZE = 50;
-  private final Color[] PLAYER_COLORS = {
-    Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.PURPLE
-  };
   private int gridSize;
   private int boardSize;
   private DiceView localDiceView;
@@ -222,20 +219,42 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
       Label posLabel = new Label("at position: " + actualPosition);
       playerPositionLabels.put(playerName, posLabel);
 
-      Circle token = createPlayerToken(i + 1, playerName);
+      ImageView token = createPlayerToken(playerNames.get(i));
       playerTokenMap.put(playerName, token);
 
       HBox nameBox = new HBox(10);
       nameBox.setAlignment(Pos.CENTER_LEFT);
-      Circle colorIndicator = new Circle(8);
-      colorIndicator.setFill(PLAYER_COLORS[i % PLAYER_COLORS.length]);
-      colorIndicator.setStroke(Color.BLACK);
-      colorIndicator.setStrokeWidth(1);
-      nameBox.getChildren().addAll(colorIndicator, playerLabel);
+      nameBox.getChildren().addAll(token, playerLabel);
 
       playerBox.getChildren().addAll(nameBox, posLabel);
       playerPanel.getChildren().add(playerBox);
     }
+  }
+
+  /**
+   * Creates a player token as an ImageView using the player's token image
+   *
+   * @param player the Player object
+   * @return the ImageView representing the player token
+   */
+  private ImageView createPlayerToken(Player player) {
+    String tokenImage = player.getTokenImage();
+    ImageView tokenView;
+    if (tokenImage != null && !tokenImage.isEmpty()) {
+      Image img = new Image(getClass().getResourceAsStream("/tokens/" + tokenImage));
+      tokenView = new ImageView(img);
+      tokenView.setFitWidth(32);
+      tokenView.setFitHeight(48);
+    } else {
+      tokenView = new ImageView();
+      tokenView.setFitWidth(32);
+      tokenView.setFitHeight(48);
+    }
+    playerLayer.getChildren().add(tokenView);
+    // Place off-board at game start
+    tokenView.setTranslateX(-TILE_SIZE);
+    tokenView.setTranslateY(TILE_SIZE * gridSize);
+    return tokenView;
   }
 
   /**
@@ -244,7 +263,7 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
   private void initializePlayerPositions() {
     LOGGER.info("Initializing player positions");
     for (Player player : playerNames) {
-      int position = player.getCurrentPosition(); // Use the actual position
+      int position = player.getCurrentPosition();
       movePlayerToken(player.getName(), position);
     }
   }
@@ -295,28 +314,6 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
           rollDiceBtn.setDisable(false);
         });
     pause.play();
-  }
-
-  /**
-   * Creates a player token with the specified color
-   *
-   * @param playerNumber the player number (1-based)
-   * @param playerName the player's name
-   * @return the Circle representing the player token
-   */
-  private Circle createPlayerToken(int playerNumber, String playerName) {
-    Circle token = new Circle(10);
-    token.setFill(PLAYER_COLORS[(playerNumber - 1) % PLAYER_COLORS.length]);
-    token.setStroke(Color.BLACK);
-    token.setStrokeWidth(2);
-
-    // Always add token to playerLayer (above the board image)
-    playerLayer.getChildren().add(token);
-    // Place off-board at game start
-    token.setTranslateX(-TILE_SIZE); // left of the board
-    token.setTranslateY(TILE_SIZE * gridSize); // bottom aligned
-
-    return token;
   }
 
   /**
@@ -393,13 +390,12 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
    * @param position the board position (1-100)
    */
   private void movePlayerToken(String playerName, int position) {
-    Circle token = playerTokenMap.get(playerName);
+    ImageView token = playerTokenMap.get(playerName);
     if (token == null) {
       return;
     }
 
     if (position == 0) {
-      // Place token clearly outside the board to the left, in playerLayer
       if (token.getParent() != playerLayer) {
         if (token.getParent() != null) {
           ((Pane) token.getParent()).getChildren().remove(token);
@@ -415,14 +411,12 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
       return;
     }
 
-    // Ensure token is in playerLayer (on top of board image)
     if (token.getParent() != playerLayer) {
       if (token.getParent() != null) {
         ((Pane) token.getParent()).getChildren().remove(token);
       }
       playerLayer.getChildren().add(token);
     }
-    // Calculate coordinates for the position
     int[] coordinates = getCoordinatesForPosition(position);
     int playerIndex = playerNames.indexOf(playerName);
     int offsetX = playerIndex * 4 - 1;

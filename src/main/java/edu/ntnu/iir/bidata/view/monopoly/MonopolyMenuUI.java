@@ -9,10 +9,12 @@ import edu.ntnu.iir.bidata.model.utils.GameMediator;
 import edu.ntnu.iir.bidata.view.common.CommonButtons;
 import edu.ntnu.iir.bidata.view.common.JavaFXBoardGameLauncher;
 import edu.ntnu.iir.bidata.view.common.PlayerSelectionUI;
+import edu.ntnu.iir.bidata.view.common.PlayerSelectionResult;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,9 +42,10 @@ import edu.ntnu.iir.bidata.Inject;
 public class MonopolyMenuUI {
   private static final Logger LOGGER = Logger.getLogger(MonopolyMenuUI.class.getName());
   private final Stage primaryStage;
-  private final Consumer<List<String>> onStartGame;
+  private final Consumer<PlayerSelectionResult> onStartGame;
   String monopolyPlayerCountLabelClass = "monopolyPlayerCountLabelClass";
   @Getter private List<String> selectedPlayers = new ArrayList<>();
+  @Getter private Map<String, String> selectedPlayerTokens = new java.util.HashMap<>();
   private Label playerCountLabel;
 
   /**
@@ -57,7 +60,7 @@ public class MonopolyMenuUI {
    *     triggers the start of the game
    */
   @Inject
-  public MonopolyMenuUI(Stage primaryStage, Consumer<List<String>> onStartGame) {
+  public MonopolyMenuUI(Stage primaryStage, Consumer<PlayerSelectionResult> onStartGame) {
     this.primaryStage = primaryStage;
     this.onStartGame = onStartGame;
     setupMenu();
@@ -137,7 +140,7 @@ public class MonopolyMenuUI {
     startGameBtn.setOnAction(
         e -> {
           if (selectedPlayers.size() >= 2) {
-            if (onStartGame != null) onStartGame.accept(selectedPlayers);
+            if (onStartGame != null) onStartGame.accept(new PlayerSelectionResult(selectedPlayers, selectedPlayerTokens));
           } else {
             playerCountLabel.setText("Please select at least two players!");
             playerCountLabel.setStyle("-fx-text-fill: red;");
@@ -244,8 +247,10 @@ public class MonopolyMenuUI {
   private void openPlayerSelection() {
     PlayerSelectionUI playerSelection = new PlayerSelectionUI(primaryStage);
     List<String> playerNames = playerSelection.showAndWait();
+    Map<String, String> tokens = playerSelection.getPlayerTokenMap();
     if (playerNames != null && !playerNames.isEmpty()) {
       selectedPlayers = playerNames;
+      selectedPlayerTokens = tokens;
       playerCountLabel.setText(selectedPlayers.size() + " players selected");
       playerCountLabel.getStyleClass().add(monopolyPlayerCountLabelClass);
     } else {
