@@ -64,7 +64,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
   @Inject
   public MonopolyGameUI(BoardGame boardGame, Stage primaryStage, MonopolyController controller, edu.ntnu.iir.bidata.model.utils.GameMediator mediator) {
-    super(boardGame);
+    super(boardGame, primaryStage);
     this.boardGame = boardGame;
     this.primaryStage = primaryStage;
     this.controller = controller;
@@ -93,7 +93,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
     }
   }
 
-  private void setupUI() {
+  public void setupUI() {
     Button backButton;
     Button saveButton;
     root = new BorderPane();
@@ -299,7 +299,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
   @Override
   public Scene getScene() {
-    return super.getScene();
+    return primaryStage.getScene();
   }
 
   public void setBoardGame(BoardGame boardGame) {
@@ -400,5 +400,12 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
   public BorderPane getRoot() {
     return mainLayout;
+  }
+
+  @Override
+  public void refreshUIFromBoardGame() {
+    updatePlayerInfoPanel();
+    updatePlayerTokens();
+    updateRollDiceButtonState();
   }
 }

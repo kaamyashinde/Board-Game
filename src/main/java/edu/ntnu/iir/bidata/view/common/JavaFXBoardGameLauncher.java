@@ -185,25 +185,18 @@ public class JavaFXBoardGameLauncher extends Application {
       // Create mediator
       GameMediator mediator = new DefaultGameMediator();
       // Create view first, pass mediator
-      SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(stage, players, mediator);
-
-      // Create model
       Board board = BoardFactory.createSnakesAndLaddersBoard(100, players);
       BoardGame boardGame = new BoardGame(board, 2);
-
-      // Set players directly instead of adding them one by one (avoids potential duplicates)
       boardGame.setPlayers(players);
-
-      boardGame.addObserver(gameUI);
-
-      // Pass mediator to controller
       SnakesAndLaddersController controller = new SnakesAndLaddersController(
         boardGame,
         new BoardGameFileWriterGson(),
         new BoardGameFileReaderGson(),
         mediator
       );
-      gameUI.setController(controller);
+      SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(boardGame, stage, controller, players, mediator);
+
+      boardGame.addObserver(gameUI);
 
       controller.setPlayerNames(players.stream().map(Player::getName).toList());
 
@@ -229,7 +222,6 @@ public class JavaFXBoardGameLauncher extends Application {
       List<Player> players = boardGame.getPlayers();
       
       // Create view and controller
-      SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(stage, players);
       GameMediator mediator = new DefaultGameMediator();
       SnakesAndLaddersController controller = new SnakesAndLaddersController(
         boardGame,
@@ -237,9 +229,8 @@ public class JavaFXBoardGameLauncher extends Application {
         new BoardGameFileReaderGson(),
         mediator
       );
-      gameUI.setController(controller);
-      gameUI.setBoardGame(boardGame);
-      
+      SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(boardGame, stage, controller, players, mediator);
+
       // Register UI as observer
       boardGame.addObserver(gameUI);
       

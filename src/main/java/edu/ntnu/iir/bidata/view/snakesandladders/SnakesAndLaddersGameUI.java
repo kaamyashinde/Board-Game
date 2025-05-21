@@ -34,11 +34,11 @@ import javafx.util.Duration;
 import edu.ntnu.iir.bidata.model.utils.GameMediator;
 import edu.ntnu.iir.bidata.model.utils.DefaultGameMediator;
 import edu.ntnu.iir.bidata.Inject;
+import edu.ntnu.iir.bidata.view.common.JavaFXGameUI;
 
-public class SnakesAndLaddersGameUI implements Observer {
+public class SnakesAndLaddersGameUI extends JavaFXGameUI {
 
   private static final Logger LOGGER = Logger.getLogger(SnakesAndLaddersGameUI.class.getName());
-  private final Stage primaryStage;
   private final Map<String, Circle> playerTokenMap = new HashMap<>();
   private final Map<String, Label> playerPositionLabels = new HashMap<>();
   private final int TILE_SIZE = 50;
@@ -47,27 +47,28 @@ public class SnakesAndLaddersGameUI implements Observer {
   };
   private int gridSize;
   private int boardSize;
-  private DiceView diceView;
+  private DiceView localDiceView;
   private Pane playerLayer;
-
   private Button rollDiceBtn;
-
   private Button loadButton;
-  private Label statusLabel;
   private List<Player> playerNames;
-  private SnakesAndLaddersController controller;
-  private BoardGame boardGame;
   private boolean isLoadedGame = false;
   private String loadedGameName = null;
   private BorderPane root;
   private GameMediator mediator;
+  private SnakesAndLaddersController controller;
+  private StackPane boardPaneStack;
+  private double boardImageOffsetX = 0;
+  private double boardImageOffsetY = 0;
+  private ImageView boardView;
 
   @Inject
-  public SnakesAndLaddersGameUI(Stage primaryStage, List<Player> playerNames, GameMediator mediator) {
+  public SnakesAndLaddersGameUI(BoardGame boardGame, Stage primaryStage, SnakesAndLaddersController controller, List<Player> playerNames, GameMediator mediator) {
+    super(boardGame, primaryStage);
     LOGGER.info("Initializing Snakes and Ladders Game UI with players: " + playerNames);
-    this.primaryStage = primaryStage;
     this.playerNames = playerNames;
     this.mediator = mediator;
+    this.controller = controller;
     if (this.mediator instanceof DefaultGameMediator m) {
       m.register((sender, event) -> {
         if ("nextPlayer".equals(event)) {
@@ -77,46 +78,18 @@ public class SnakesAndLaddersGameUI implements Observer {
         }
       });
     }
-    // If no players were passed, add a default player
     if (this.playerNames == null || this.playerNames.isEmpty()) {
       LOGGER.warning("No players provided, adding default player");
       this.playerNames = new ArrayList<>();
       this.playerNames.add(new Player("Player 1"));
     }
-    setupGamePage();
+    setupUI();
     initializePlayerPositions();
   }
 
   /**
-   * Constructor for backward compatibility
-   *
-   * @param primaryStage The primary stage
-   * @param playerNames List of player names selected in the menu
+   * Updates the current player indicator in the UI
    */
-  public SnakesAndLaddersGameUI(Stage primaryStage, List<Player> playerNames) {
-    this(primaryStage, playerNames, null);
-  }
-
-  /**
-   * Sets the game controller
-   *
-   * @param controller The game controller
-   */
-  public void setController(SnakesAndLaddersController controller) {
-    LOGGER.info("Setting game controller");
-    this.controller = controller;
-    // Only set player names if this is NOT a loaded game
-    if (!isLoadedGame) {
-      controller.setPlayerNames(
-          playerNames.stream().map(Player::getName).collect(Collectors.toList()));
-    }
-    updateCurrentPlayerIndicator(controller.getCurrentSnakesAndLaddersPlayerName());
-
-    // Create top bar with back button and game controls
-    setUpTopBarWithControls();
-  }
-
-  /** Updates the current player indicator in the UI */
   public void updateCurrentPlayerIndicator(String currentPlayer) {
     LOGGER.info("Updating current player indicator: " + currentPlayer);
     statusLabel.setText(currentPlayer + "'s Turn");
@@ -135,6 +108,7 @@ public class SnakesAndLaddersGameUI implements Observer {
     topBar.getChildren().addAll(backButton, saveButton);
     root.setTop(topBar);
   }
+
   /**
    * Sets whether this is a loaded game and its name
    *
@@ -146,19 +120,13 @@ public class SnakesAndLaddersGameUI implements Observer {
     this.loadedGameName = gameName;
   }
 
-  private void setupGamePage() {
-    VBox playerPanel;
-    LOGGER.info("Setting up game page");
-    primaryStage.setTitle("Snakes & Ladders - Game");
-
-    root = new BorderPane();
-    root.setPadding(new Insets(20));
-    root.getStyleClass().add("snl-game-root");
-
-    // --- Board (center) ---
-    StackPane boardPane = new StackPane();
-    boardPane.setAlignment(Pos.CENTER_LEFT);
-
+  @Override
+  protected void setupBoardPane() {
+    // Custom board setup for Snakes and Ladders
+    boardPane.setPadding(new Insets(20));
+    boardPane.setHgap(2);
+    boardPane.setVgap(2);
+    boardPane.setAlignment(Pos.CENTER);
     if (boardGame != null && boardGame.getBoard() != null) {
       this.boardSize = boardGame.getBoard().getSizeOfBoard();
       this.gridSize = (int) Math.ceil(Math.sqrt(boardSize));
@@ -166,39 +134,75 @@ public class SnakesAndLaddersGameUI implements Observer {
       this.boardSize = 100;
       this.gridSize = 10;
     }
-
-    // Load custom board image
     Image boardImage =
         new Image(
             Objects.requireNonNull(
                 getClass().getResourceAsStream("/snakes_and_ladders_board.jpeg")));
-    ImageView boardView = new ImageView(boardImage);
+    boardView = new ImageView(boardImage);
     boardView.setFitWidth(TILE_SIZE * gridSize);
     boardView.setFitHeight(TILE_SIZE * gridSize);
     boardView.setPreserveRatio(false);
-
-    // Add the board image to the pane
-    boardPane.getChildren().add(boardView);
-
-    // Create a pane for player tokens that will be positioned over the board
+    boardPaneStack = new StackPane();
+    boardPaneStack.setAlignment(Pos.CENTER_LEFT);
+    boardPaneStack.getChildren().add(boardView);
     playerLayer = new Pane();
     playerLayer.setPrefSize(boardView.getFitWidth(), boardView.getFitHeight());
-    boardPane.getChildren().add(playerLayer);
+    boardPaneStack.getChildren().add(playerLayer);
+    boardPane.add(boardPaneStack, 0, 0);
+  }
 
-    root.setCenter(boardPane);
+  @Override
+  protected void setupUI() {
+    super.setupUI();
+    BorderPane root = (BorderPane) primaryStage.getScene().getRoot();
 
-    // --- Right: Player info panel ---
-    playerPanel = new VBox(15);
+    // --- Top bar: Back and Save buttons ---
+    HBox topBar = new HBox(10);
+    topBar.setPadding(new Insets(10));
+    topBar.setAlignment(Pos.CENTER_LEFT);
+    Button backButton = CommonButtons.backToMainMenu(primaryStage, false, controller);
+    backButton.getStyleClass().add("game-control-button");
+    topBar.getChildren().addAll(backButton, saveButton);
+    root.setTop(topBar);
+
+    // --- Bottom bar: Dice view and Roll button ---
+    localDiceView = new DiceView();
+    rollDiceBtn = new Button("Roll Dice");
+    rollDiceBtn.getStyleClass().add("game-control-button");
+    rollDiceBtn.setOnAction(e -> rollDiceAndMove());
+    HBox controls = new HBox(20);
+    controls.setPadding(new Insets(20));
+    controls.setAlignment(Pos.CENTER);
+    controls.getChildren().addAll(localDiceView, rollDiceBtn, pauseButton);
+    root.setBottom(controls);
+
+    // --- Player info panel ---
+    setupPlayerInfoPanelCustom();
+
+    // Calculate board image offset after scene is shown
+    primaryStage.getScene().getWindow().addEventHandler(javafx.stage.WindowEvent.WINDOW_SHOWN, e -> {
+      javafx.geometry.Point2D offset = boardView.localToParent(0, 0);
+      boardImageOffsetX = offset.getX();
+      boardImageOffsetY = offset.getY();
+      // After offset is known, update all tokens to correct positions
+      for (Player player : playerNames) {
+        updatePlayerPosition(player.getName());
+      }
+    });
+  }
+
+  private void setupPlayerInfoPanelCustom() {
+    VBox playerPanel = playerInfoPane;
+    playerPanel.getChildren().clear();
     playerPanel.setPadding(new Insets(20));
     playerPanel.getStyleClass().add("snl-player-panel");
     playerPanel.setPrefWidth(250);
     playerPanel.setAlignment(Pos.TOP_LEFT);
 
     // Add status label at the top of the player panel
-    statusLabel = new Label("Game Started!");
+    statusLabel.setText("Game Started!");
     statusLabel.getStyleClass().add("snl-game-status-label");
     statusLabel.setWrapText(true);
-
     playerPanel.getChildren().add(statusLabel);
     playerPanel.getChildren().add(new Label("--------------------"));
 
@@ -232,38 +236,11 @@ public class SnakesAndLaddersGameUI implements Observer {
       playerBox.getChildren().addAll(nameBox, posLabel);
       playerPanel.getChildren().add(playerBox);
     }
-
-    root.setRight(playerPanel);
-
-    // --- Bottom: Roll dice and status ---
-    VBox bottomBox = new VBox(10);
-    bottomBox.setAlignment(Pos.CENTER);
-    bottomBox.setPadding(new Insets(10));
-
-    HBox diceBox = new HBox(20);
-    diceBox.setAlignment(Pos.CENTER);
-
-    rollDiceBtn = new Button("ROLL DICE");
-    rollDiceBtn.getStyleClass().add("game-control-button");
-    rollDiceBtn.setOnAction(e -> rollDiceAndMove());
-
-    diceView = new DiceView();
-    diceBox.getChildren().addAll(rollDiceBtn, diceView);
-
-    bottomBox.getChildren().add(diceBox);
-    root.setBottom(bottomBox);
-    Scene scene = new Scene(root, 1200, 800);
-    scene
-        .getStylesheets()
-        .addAll(
-            getClass().getResource("/styles.css").toExternalForm(),
-            getClass().getResource("/snakesandladders.css").toExternalForm());
-    primaryStage.setScene(scene);
-    primaryStage.show();
-
   }
 
-  /** Initialize all player positions to the starting position */
+  /**
+   * Initializes all player positions to the starting position
+   */
   private void initializePlayerPositions() {
     LOGGER.info("Initializing player positions");
     for (Player player : playerNames) {
@@ -272,7 +249,9 @@ public class SnakesAndLaddersGameUI implements Observer {
     }
   }
 
-  /** Roll the dice and move the current player */
+  /**
+   * Roll the dice and move the current player
+   */
   private void rollDiceAndMove() {
     if (controller == null) {
       return;
@@ -285,7 +264,7 @@ public class SnakesAndLaddersGameUI implements Observer {
     controller.rollDice();
     int[] rolls = controller.getLastDiceRolls();
     int sum = controller.getLastDiceSum();
-    diceView.setValues(rolls.length > 0 ? rolls[0] : 1, rolls.length > 1 ? rolls[1] : (rolls.length > 0 ? rolls[0] : 1));
+    localDiceView.setValues(rolls.length > 0 ? rolls[0] : 1, rolls.length > 1 ? rolls[1] : (rolls.length > 0 ? rolls[0] : 1));
     statusLabel.setText(currentPlayer + " rolled a " + (rolls.length > 0 ? rolls[0] : 1) + " and " + (rolls.length > 1 ? rolls[1] : (rolls.length > 0 ? rolls[0] : 1)) + "! (Total: " + sum + ")");
     PauseTransition pause = new PauseTransition(Duration.millis(800));
     pause.setOnFinished(
@@ -331,17 +310,23 @@ public class SnakesAndLaddersGameUI implements Observer {
     token.setStroke(Color.BLACK);
     token.setStrokeWidth(2);
 
-    // Add token to the player layer
+    // Always add token to playerLayer (above the board image)
     playerLayer.getChildren().add(token);
-
-    // Position token off-board initially
-    token.setTranslateX(20); // off the board
-    token.setTranslateY(20); // off the board
+    // Place off-board at game start
+    token.setTranslateX(-TILE_SIZE); // left of the board
+    token.setTranslateY(TILE_SIZE * gridSize); // bottom aligned
 
     return token;
   }
 
-  /** Display a message about a snake or ladder */
+  /**
+   * Display a message about a snake or ladder
+   *
+   * @param playerName the player's name
+   * @param fromPosition the starting position
+   * @param toPosition the ending position
+   * @param type the type of snake or ladder
+   */
   public void displaySnakeOrLadderMessage(
       String playerName, int fromPosition, int toPosition, String type) {
     statusLabel.setText(
@@ -363,16 +348,21 @@ public class SnakesAndLaddersGameUI implements Observer {
   }
 
   @Override
-  public void update() {
-    // Instead of updateBoard, update all player positions here
-    if (controller != null) {
+  public void refreshUIFromBoardGame() {
+    javafx.application.Platform.runLater(() -> {
       for (Player player : playerNames) {
         updatePlayerPosition(player.getName());
       }
-      String currentPlayer = controller.getCurrentSnakesAndLaddersPlayerName();
-      updateCurrentPlayerIndicator(currentPlayer);
-      // Optionally, show winner if game is over (if you have such logic)
-    }
+      if (controller != null) {
+        String currentPlayer = controller.getCurrentSnakesAndLaddersPlayerName();
+        updateCurrentPlayerIndicator(currentPlayer);
+      }
+    });
+  }
+
+  @Override
+  public Scene getScene() {
+    return primaryStage.getScene();
   }
 
   /**
@@ -409,9 +399,15 @@ public class SnakesAndLaddersGameUI implements Observer {
     }
 
     if (position == 0) {
-      // Starting position (off board)
-      token.setTranslateX(20);
-      token.setTranslateY(TILE_SIZE * gridSize + 20);
+      // Place token clearly outside the board to the left, in playerLayer
+      if (token.getParent() != playerLayer) {
+        if (token.getParent() != null) {
+          ((Pane) token.getParent()).getChildren().remove(token);
+        }
+        playerLayer.getChildren().add(token);
+      }
+      token.setTranslateX(-TILE_SIZE);
+      token.setTranslateY(TILE_SIZE * gridSize);
       return;
     }
 
@@ -419,19 +415,20 @@ public class SnakesAndLaddersGameUI implements Observer {
       return;
     }
 
+    // Ensure token is in playerLayer (on top of board image)
+    if (token.getParent() != playerLayer) {
+      if (token.getParent() != null) {
+        ((Pane) token.getParent()).getChildren().remove(token);
+      }
+      playerLayer.getChildren().add(token);
+    }
     // Calculate coordinates for the position
     int[] coordinates = getCoordinatesForPosition(position);
-
-    // Add a small offset based on player index to prevent complete overlap
     int playerIndex = playerNames.indexOf(playerName);
     int offsetX = playerIndex * 4 - 1;
     int offsetY = playerIndex * 6 - 5;
-
-    // Move the token - adjust Y coordinate to move down by 2mm
-    // Assuming 1mm is approximately 3-4 pixels on screen
-    int downwardAdjustment = 25;
-    token.setTranslateX(coordinates[0] + offsetX);
-    token.setTranslateY(coordinates[1] + offsetY + downwardAdjustment); // Add to move down
+    token.setTranslateX(boardImageOffsetX + coordinates[0] + offsetX);
+    token.setTranslateY(boardImageOffsetY + coordinates[1] + offsetY - 35);
   }
 
   /**
@@ -466,13 +463,10 @@ public class SnakesAndLaddersGameUI implements Observer {
   }
 
   public void setBoardGame(BoardGame newBoardGame) {
-    if (this.boardGame != null) {
-      this.boardGame.removeObserver(this);
+    if (newBoardGame != null) {
+      newBoardGame.addObserver(this);
     }
-    this.boardGame = newBoardGame;
-    this.boardGame.addObserver(this);
   }
-
 
   public BorderPane getRoot() {
     return root;

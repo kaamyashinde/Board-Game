@@ -32,30 +32,30 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.util.Optional;
 
-public class JavaFXGameUI implements Observer {
+public abstract class JavaFXGameUI implements Observer {
 
-  private final BoardGame boardGame;
-  private final Stage primaryStage;
-  private final Map<Player, Circle> playerTokens;
-  private final Map<Integer, StackPane> tilePanes;
-  private final GridPane boardPane;
-  private final VBox playerInfoPane;
-  private final Label currentPlayerLabel;
-  private final Label diceRollLabel;
-  private final Label statusLabel;
-  private final Button nextTurnButton;
-  private final DiceView diceView;
-  private final VBox gameInfoPane;
-  private final Button pauseButton;
-  private final Button saveButton;
-  private boolean isPaused = false;
-  private GameController controller;
+  protected final BoardGame boardGame;
+  protected final Stage primaryStage;
+  protected final Map<Player, Circle> playerTokens;
+  protected final Map<Integer, StackPane> tilePanes;
+  protected final GridPane boardPane;
+  protected final VBox playerInfoPane;
+  protected final Label currentPlayerLabel;
+  protected final Label diceRollLabel;
+  protected final Label statusLabel;
+  protected final Button nextTurnButton;
+  protected final DiceView diceView;
+  protected final VBox gameInfoPane;
+  protected final Button pauseButton;
+  protected final Button saveButton;
+  protected boolean isPaused = false;
+  protected GameController controller;
 
-  public JavaFXGameUI(BoardGame boardGame) {
+  public JavaFXGameUI(BoardGame boardGame, Stage primaryStage) {
     this.boardGame = boardGame;
+    this.primaryStage = primaryStage;
     this.playerTokens = new HashMap<>();
     this.tilePanes = new HashMap<>();
-    this.primaryStage = new Stage();
     this.boardPane = new GridPane();
     this.playerInfoPane = new VBox(10);
     this.gameInfoPane = new VBox(10);
@@ -66,139 +66,73 @@ public class JavaFXGameUI implements Observer {
     this.diceView = new DiceView();
     this.pauseButton = new Button("Pause");
     this.saveButton = new Button("Save Game");
-
     boardGame.addObserver(this);
-    initializeUI();
+    // Subclasses must call setupUI() in their constructor
   }
 
-  private void initializeUI() {
+  /**
+   * Template method for setting up the UI. Subclasses should call this in their constructor.
+   */
+  protected void setupUI() {
     BorderPane root = new BorderPane();
     root.setPadding(new Insets(20));
-
-    // Setup board
-    setupBoard();
+    setupBoardPane();
     ScrollPane scrollPane = new ScrollPane(boardPane);
     scrollPane.setFitToWidth(true);
     scrollPane.setFitToHeight(true);
     scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
     scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
     root.setCenter(scrollPane);
-
-    // Setup player info panel
     setupPlayerInfoPanel();
     root.setRight(playerInfoPane);
-
-    // Setup game info panel
     setupGameInfoPanel();
     root.setTop(gameInfoPane);
-
-    // Setup controls with dice and game control buttons
     HBox controls = new HBox(20);
     controls.setPadding(new Insets(20));
     controls.setAlignment(Pos.CENTER);
-    
-    // Create a container for game control buttons
     HBox gameControls = new HBox(10);
     gameControls.setAlignment(Pos.CENTER);
     gameControls.getChildren().addAll(pauseButton, saveButton);
-    
     controls.getChildren().addAll(diceView, nextTurnButton, gameControls);
     root.setBottom(controls);
-
     Scene scene = new Scene(root, 800, 600);
     scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
-
-    primaryStage.setTitle("Snakes and Ladders");
     primaryStage.setScene(scene);
   }
 
-  protected void setupBoard() {
+  /**
+   * Protected method for setting up the board pane. Subclasses can override for custom boards.
+   */
+  protected void setupBoardPane() {
     boardPane.setPadding(new Insets(20));
     boardPane.setHgap(2);
     boardPane.setVgap(2);
     boardPane.setAlignment(Pos.CENTER);
-
-    int boardSize = boardGame.getBoard().getSizeOfBoard();
-    int gridSize = (int) Math.ceil(Math.sqrt(boardSize));
-
-    // Create a background for the board
-    Rectangle boardBackground = new Rectangle(
-        (gridSize * 70) + (gridSize * 2), // width
-        (gridSize * 70) + (gridSize * 2)  // height
-    );
-    boardBackground.getStyleClass().add("board-background");
-    boardPane.getChildren().add(boardBackground);
-
-    // Create tiles in a snake pattern (alternating rows)
-    for (int i = 0; i < boardSize; i++) {
-      int row = i / gridSize;
-      int col = (row % 2 == 0) ? i % gridSize : gridSize - 1 - (i % gridSize);
-      int actualRow = gridSize - 1 - row; // Start from bottom
-
-      StackPane tilePane = new StackPane();
-      tilePane.setPrefSize(70, 70);
-
-      Rectangle tile = new Rectangle(70, 70);
-      tile.getStyleClass().add("board-tile");
-
-      Tile boardTile = boardGame.getBoard().getPositionOnBoard(i);
-
-      // Style the tile based on its type
-      if (i == 0) {
-        tile.getStyleClass().add("board-tile-start");
-      } else if (boardTile.getAction() != null) {
-        tile.getStyleClass().add("board-tile-special");
-      } else {
-        tile.getStyleClass().add("board-tile-regular");
-      }
-
-      // Create content box for tile information
-      VBox contentBox = new VBox(2);
-      contentBox.setAlignment(Pos.CENTER);
-      contentBox.setMaxWidth(65);
-
-      // Add tile number
-      Text number = new Text(String.valueOf(i));
-      number.getStyleClass().add("tile-number");
-
-      // Add action text if the tile has an action
-      if (boardTile.getAction() != null) {
-        Text actionText = new Text(boardTile.getAction().getDescription());
-        actionText.getStyleClass().add("tile-action-text");
-        contentBox.getChildren().add(actionText);
-      }
-
-      contentBox.getChildren().add(number);
-      tilePane.getChildren().addAll(tile, contentBox);
-      tilePanes.put(i, tilePane);
-
-      // Add the tile to the board
-      boardPane.add(tilePane, col, actualRow);
-    }
+    // Default: no tiles. Subclasses should implement their own tile setup.
   }
 
-  private void setupPlayerInfoPanel() {
+  /**
+   * Protected method for setting up the player info panel.
+   */
+  protected void setupPlayerInfoPanel() {
     playerInfoPane.setPadding(new Insets(20));
     playerInfoPane.getStyleClass().add("player-info-panel");
-
     Label title = new Label("Player Information");
     title.getStyleClass().add("title-label");
-
     currentPlayerLabel.getStyleClass().add("status-label");
     diceRollLabel.getStyleClass().add("label");
-
     playerInfoPane.getChildren().addAll(title, currentPlayerLabel, diceRollLabel);
   }
 
-  private void setupGameInfoPanel() {
+  /**
+   * Protected method for setting up the game info panel.
+   */
+  protected void setupGameInfoPanel() {
     gameInfoPane.setPadding(new Insets(20));
     gameInfoPane.getStyleClass().add("control-panel");
-
     Label title = new Label("Game Status");
     title.getStyleClass().add("title-label");
-
     statusLabel.getStyleClass().add("status-label");
-
     gameInfoPane.getChildren().addAll(title, statusLabel);
   }
 
@@ -360,28 +294,14 @@ public class JavaFXGameUI implements Observer {
   }
 
   /**
-   * Refreshes the UI to reflect the current state of the boardGame.
+   * Abstract method for refreshing the UI from the board game state.
    */
-  public void refreshUIFromBoardGame() {
-    Platform.runLater(() -> {
-      updateBoard();
-      Player currentPlayer = boardGame.getCurrentPlayer();
-      if (currentPlayer != null) {
-        currentPlayerLabel.setText("Current Player: " + currentPlayer.getName());
-        statusLabel.setText(currentPlayer.getName() + "'s turn to roll the dice!");
-      }
-      if (boardGame.isGameOver()) {
-        Player winner = boardGame.getWinner();
-        if (winner != null) {
-          showWinner(winner);
-        }
-      }
-    });
-  }
+  public abstract void refreshUIFromBoardGame();
 
-  protected Scene getScene() {
-    return primaryStage.getScene();
-  }
+  /**
+   * Abstract method to get the main scene for this UI.
+   */
+  public abstract Scene getScene();
 
   protected VBox getPlayerInfoPane() {
     return playerInfoPane;

@@ -250,17 +250,15 @@ public class SnakesAndLaddersMenuUI {
     // Create mediator
     GameMediator mediator = new DefaultGameMediator();
     // Create view and controller (always new instance)
-    SnakesAndLaddersGameUI gameUI =
-        new SnakesAndLaddersGameUI(primaryStage, boardGame.getPlayers(), mediator);
     SnakesAndLaddersController controller = new SnakesAndLaddersController(
       boardGame,
       new BoardGameFileWriterGson(),
       new BoardGameFileReaderGson(),
       mediator
     );
+    SnakesAndLaddersGameUI gameUI =
+        new SnakesAndLaddersGameUI(boardGame, primaryStage, controller, boardGame.getPlayers(), mediator);
     gameUI.setLoadedGame(true, gameName);
-    gameUI.setController(controller);
-    gameUI.setBoardGame(boardGame);
     LOGGER.info(
         "Game loaded successfully"
             + boardGame.getCurrentPlayer().getName()
