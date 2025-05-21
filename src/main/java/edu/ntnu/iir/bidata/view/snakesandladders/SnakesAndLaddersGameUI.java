@@ -81,6 +81,8 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
       this.playerNames.add(new Player("Player 1"));
     }
     setupUI();
+    primaryStage.setMinWidth(870);
+    primaryStage.setMinHeight(750);
     initializePlayerPositions();
   }
 

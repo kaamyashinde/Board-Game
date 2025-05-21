@@ -222,7 +222,7 @@ public class SnakesAndLaddersMenuUI {
                   // Create and set the scene
                   createAndSetScene(gameUI.getRoot());
                 } catch (Exception e) {
-                  LOGGER.log(Level.SEVERE, "Error loading Snakes and Ladders game", e);
+                  LOGGER.log(Level.SEVERE, "Error loading Snakes and Ladders game");
                 }
               }
             });
