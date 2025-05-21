@@ -94,11 +94,11 @@ public class SnakesAndLaddersMenuUI {
     logoStack.setPadding(new Insets(10, 20, 10, 10));
     logoStack.setAlignment(Pos.TOP_LEFT);
     Color[] greens = {
-      Color.web("#006400"),
-      Color.web("#008000"),
-      Color.web("#00A000"),
-      Color.web("#4caf50"),
-      Color.web("#bdebc8")
+        Color.web("#006400"),
+        Color.web("#008000"),
+        Color.web("#00A000"),
+        Color.web("#4caf50"),
+        Color.web("#bdebc8")
     };
     int[] heights = {40, 30, 40, 20, 30, 20, 40, 30, 20, 40, 30};
     for (int i = 0; i < 11; i++) {
@@ -255,10 +255,10 @@ public class SnakesAndLaddersMenuUI {
     GameMediator mediator = new DefaultGameMediator();
     // Create view and controller (always new instance)
     SnakesAndLaddersController controller = new SnakesAndLaddersController(
-      boardGame,
-      new BoardGameFileWriterGson(),
-      new BoardGameFileReaderGson(),
-      mediator
+        boardGame,
+        new BoardGameFileWriterGson(),
+        new BoardGameFileReaderGson(),
+        mediator
     );
     SnakesAndLaddersGameUI gameUI =
         new SnakesAndLaddersGameUI(boardGame, primaryStage, controller, boardGame.getPlayers(), mediator);
