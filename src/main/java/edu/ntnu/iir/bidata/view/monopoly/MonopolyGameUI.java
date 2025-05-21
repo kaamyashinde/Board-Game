@@ -44,15 +44,10 @@ public class MonopolyGameUI extends JavaFXGameUI {
   private final Button jailRollButton = new Button("Roll Dice (Jail)");
   private final Button jailPayButton = new Button("Pay $50");
   private final Label actionLabel = new Label("");
-  private final Color BLANK_COLOR = Color.LIGHTGRAY;
   private final Color[] GROUP_COLORS = {
       Color.BROWN, Color.LIGHTBLUE, Color.PINK, Color.ORANGE,
       Color.RED, Color.YELLOW, Color.GREEN, Color.BLUE
   };
-  private final Color GO_COLOR = Color.LIMEGREEN;
-  private final Color JAIL_COLOR = Color.DARKGRAY;
-  private final Color FREE_PARKING_COLOR = Color.GOLD;
-  private final Color GO_TO_JAIL_COLOR = Color.ORANGERED;
   private final BorderPane mainLayout;
   private final GridPane boardPane;
   private final VBox playerInfoPanel;
@@ -355,7 +350,8 @@ public class MonopolyGameUI extends JavaFXGameUI {
     // Fill the center with blank tiles
     for (int row = 1; row < gridDim - 1; row++) {
       for (int col = 1; col < gridDim - 1; col++) {
-        Rectangle blank = new Rectangle(70, 70, BLANK_COLOR);
+        Rectangle blank = new Rectangle(70, 70);
+        blank.getStyleClass().add("blank-tile");
         StackPane blankPane = new StackPane(blank);
         boardPane.add(blankPane, col, row);
       }
@@ -366,35 +362,60 @@ public class MonopolyGameUI extends JavaFXGameUI {
   }
 
   private StackPane createTilePane(Tile tile) {
-    Rectangle rect = new Rectangle(70, 70);
-    rect.getStyleClass().add("monopoly-tile");
-    Label label = new Label();
-    label.getStyleClass().add("monopoly-tile-label");
+    StackPane pane = new StackPane();
+    pane.setPrefSize(70, 70);
 
     if (tile instanceof PropertyTile) {
       PropertyTile pt = (PropertyTile) tile;
-      // Add property group style class
-      String propertyGroupClass = "property-group-" + pt.getGroup();
-      rect.getStyleClass().add(propertyGroupClass);
-      label.setText("Property\n$" + pt.getPrice());
-    } else if (tile instanceof GoTile) {
-      rect.getStyleClass().add("go-tile");
-      label.setText("GO");
-    } else if (tile instanceof JailTile) {
-      rect.getStyleClass().add("jail-tile");
-      label.setText("JAIL");
-    } else if (tile instanceof FreeParkingTile) {
-      rect.getStyleClass().add("free-parking-tile");
-      label.setText("FREE\nPARKING");
-    } else if (tile.getAction() instanceof GoToJailAction) {
-      rect.getStyleClass().add("go-to-jail-tile");
-      label.setText("GO TO\nJAIL");
+      // Create a more authentic property tile with a color bar at the top
+      VBox propertyContainer = new VBox();
+      propertyContainer.getStyleClass().add("property-tile-container");
+
+      // Create the color bar at the top
+      Rectangle colorBar = new Rectangle(70, 15);
+      colorBar.getStyleClass().addAll("property-color-bar", "property-group-" + pt.getGroup());
+
+      // Create the main part of the tile
+      Rectangle mainRect = new Rectangle(70, 55);
+      mainRect.getStyleClass().add("monopoly-tile");
+      mainRect.setFill(Color.WHITE);
+
+      // Create the property information
+      Label label = new Label("$" + pt.getPrice());
+      label.getStyleClass().add("monopoly-tile-label");
+
+      // Add to container
+      StackPane mainArea = new StackPane(mainRect, label);
+      propertyContainer.getChildren().addAll(colorBar, mainArea);
+
+      pane.getChildren().add(propertyContainer);
     } else {
-      rect.getStyleClass().add("blank-tile");
-      label.setText("");
+      // For non-property tiles, create a simple rectangular tile
+      Rectangle rect = new Rectangle(70, 70);
+      rect.getStyleClass().add("monopoly-tile");
+      Label label = new Label();
+      label.getStyleClass().add("monopoly-tile-label");
+
+      if (tile instanceof GoTile) {
+        rect.getStyleClass().add("go-tile");
+        label.setText("GO");
+      } else if (tile instanceof JailTile) {
+        rect.getStyleClass().add("jail-tile");
+        label.setText("JAIL");
+      } else if (tile instanceof FreeParkingTile) {
+        rect.getStyleClass().add("free-parking-tile");
+        label.setText("FREE\nPARKING");
+      } else if (tile.getAction() instanceof GoToJailAction) {
+        rect.getStyleClass().add("go-to-jail-tile");
+        label.setText("GO TO\nJAIL");
+      } else {
+        rect.getStyleClass().add("blank-tile");
+        label.setText("");
+      }
+
+      pane.getChildren().addAll(rect, label);
     }
-    StackPane pane = new StackPane(rect, label);
-    pane.setPrefSize(70, 70);
+
     return pane;
   }
 
