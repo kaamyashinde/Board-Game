@@ -118,9 +118,10 @@ public class SnakesAndLaddersMenuUI {
     centerBox.setAlignment(Pos.TOP_CENTER);
     centerBox.setPadding(new Insets(40, 0, 0, 0));
 
-    StackPane titlePane = setUpCenterBoxTitleLabel();
-
+    // LOAD BOARD button (moved to the top)
     HBox boardButtons = setUpCenterBoxBrdBtns();
+
+    StackPane titlePane = setUpCenterBoxTitleLabel();
 
     // Choose The Players button
     Button choosePlayersBtn = setUpCenterBoxChoosePlayersBtn();
@@ -129,11 +130,12 @@ public class SnakesAndLaddersMenuUI {
     playerCountLabel = new Label("No players selected");
     playerCountLabel.getStyleClass().add("snl-player-count-label");
 
-    // START button
+    // START button (moved to the bottom)
     Button startGameBtn = setUpCenterBoxStartGameBtn();
+
     centerBox
         .getChildren()
-        .addAll(startGameBtn, playerCountLabel, titlePane, choosePlayersBtn, boardButtons);
+        .addAll(boardButtons, titlePane, choosePlayersBtn, playerCountLabel, startGameBtn);
     return centerBox;
   }
 
