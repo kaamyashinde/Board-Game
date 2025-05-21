@@ -58,14 +58,21 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
   private double boardImageOffsetX = 0;
   private double boardImageOffsetY = 0;
   private ImageView boardView;
+  private String boardImagePath;
 
   @Inject
   public SnakesAndLaddersGameUI(BoardGame boardGame, Stage primaryStage, SnakesAndLaddersController controller, List<Player> playerNames, GameMediator mediator) {
+    this(boardGame, primaryStage, controller, playerNames, mediator, "/snakes_and_ladders_board.jpeg");
+  }
+
+  @Inject
+  public SnakesAndLaddersGameUI(BoardGame boardGame, Stage primaryStage, SnakesAndLaddersController controller, List<Player> playerNames, GameMediator mediator, String boardImagePath) {
     super(boardGame, primaryStage);
     LOGGER.info("Initializing Snakes and Ladders Game UI with players: " + playerNames);
     this.playerNames = playerNames;
     this.mediator = mediator;
     this.controller = controller;
+    this.boardImagePath = boardImagePath;
     if (this.mediator instanceof DefaultGameMediator m) {
       m.register((sender, event) -> {
         if ("nextPlayer".equals(event)) {
@@ -136,7 +143,7 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
     Image boardImage =
         new Image(
             Objects.requireNonNull(
-                getClass().getResourceAsStream("/snakes_and_ladders_board.jpeg")));
+                getClass().getResourceAsStream(boardImagePath)));
     boardView = new ImageView(boardImage);
     boardView.setFitWidth(TILE_SIZE * gridSize);
     boardView.setFitHeight(TILE_SIZE * gridSize);
