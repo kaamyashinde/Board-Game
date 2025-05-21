@@ -62,11 +62,11 @@ public class BoardFactory {
    *
    * @param boardSize The size of the board (typically 100 for Snakes and Ladders).
    * @param players   The player list.
+   * @param config    The TileConfiguration for the board.
    * @return A fully initialized Snakes and Ladders Board.
    */
-  public static Board createSnakesAndLaddersBoard(int boardSize, List<Player> players) {
+  public static Board createSnakesAndLaddersBoard(int boardSize, List<Player> players, TileConfiguration config) {
     Board board = new Board(boardSize);
-    TileConfiguration config = new TileConfiguration();
     TileFactory tileFactory = new TileFactory(players, config);
 
     // Add tiles with snakes, ladders, etc.
@@ -86,6 +86,17 @@ public class BoardFactory {
       }
     }
     return board;
+  }
+
+  /**
+   * Creates a Snakes and Ladders board using TileFactory and a default TileConfiguration.
+   *
+   * @param boardSize The size of the board (typically 100 for Snakes and Ladders).
+   * @param players   The player list.
+   * @return A fully initialized Snakes and Ladders Board.
+   */
+  public static Board createSnakesAndLaddersBoard(int boardSize, List<Player> players) {
+    return createSnakesAndLaddersBoard(boardSize, players, new TileConfiguration());
   }
 
   /**
