@@ -118,6 +118,9 @@ public class SnakesAndLaddersMenuUI {
     centerBox.setAlignment(Pos.TOP_CENTER);
     centerBox.setPadding(new Insets(40, 0, 0, 0));
 
+    // LOAD BOARD button (moved to the top)
+    HBox boardButtons = setUpCenterBoxBrdBtns();
+
     StackPane titlePane = setUpCenterBoxTitleLabel();
     HBox boardButtons = setUpCenterBoxBrdBtns();
     Button choosePlayersBtn = setUpCenterBoxChoosePlayersBtn();

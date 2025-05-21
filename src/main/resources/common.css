@@ -90,3 +90,11 @@
   -fx-background-color: #f7e6c7;
   -fx-text-fill: #3b3b6d;
 }
+
+/* Style for the new instructions label */
+.player-selection-instructions-label {
+  -fx-text-fill: #333333;
+  -fx-font-size: 14px;
+  -fx-font-style: italic;
+  -fx-padding: 5 0 5 0;
+}

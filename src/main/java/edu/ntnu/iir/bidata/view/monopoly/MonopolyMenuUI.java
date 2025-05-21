@@ -148,7 +148,9 @@ public class MonopolyMenuUI {
             createAndSetScene(gameUI);
           } else {
             playerCountLabel.setText("Please select at least two players!");
-            playerCountLabel.setStyle("-fx-text-fill: red;");
+            playerCountLabel.getStyleClass().clear();
+            playerCountLabel.getStyleClass().add("warning-label");
+            playerCountLabel.getStyleClass().add(monopolyPlayerCountLabelClass);
           }
         });
     centerBox.getChildren().add(startGameBtn);
@@ -164,7 +166,9 @@ public class MonopolyMenuUI {
             createAndSetScene(gameUI);
           } else {
             playerCountLabel.setText("Please select at least two players!");
-            playerCountLabel.setStyle("-fx-text-fill: red;");
+            playerCountLabel.getStyleClass().clear();
+            playerCountLabel.getStyleClass().add("warning-label");
+            playerCountLabel.getStyleClass().add(monopolyPlayerCountLabelClass);
           }
         });
     centerBox.getChildren().add(mediumBoardBtn);
@@ -180,7 +184,9 @@ public class MonopolyMenuUI {
             createAndSetScene(gameUI);
           } else {
             playerCountLabel.setText("Please select at least two players!");
-            playerCountLabel.setStyle("-fx-text-fill: red;");
+            playerCountLabel.getStyleClass().clear();
+            playerCountLabel.getStyleClass().add("warning-label");
+            playerCountLabel.getStyleClass().add(monopolyPlayerCountLabelClass);
           }
         });
     centerBox.getChildren().add(largeBoardBtn);
@@ -208,11 +214,11 @@ public class MonopolyMenuUI {
     logoStack.setPadding(new Insets(10, 20, 10, 10));
     logoStack.setAlignment(Pos.TOP_LEFT);
     Color[] colors = {
-      Color.web("#3b3b6d"),
-      Color.web("#f7e6c7"),
-      Color.web("#b39ddb"),
-      Color.web("#e69a28"),
-      Color.web("#c2c2fa")
+        Color.web("#3b3b6d"),
+        Color.web("#f7e6c7"),
+        Color.web("#b39ddb"),
+        Color.web("#e69a28"),
+        Color.web("#c2c2fa")
     };
     setUpLogoStackHeight(colors, logoStack);
     return logoStack;
@@ -285,14 +291,17 @@ public class MonopolyMenuUI {
     PlayerSelectionUI playerSelection = new PlayerSelectionUI(primaryStage);
     List<String> playerNames = playerSelection.showAndWait();
     Map<String, String> tokens = playerSelection.getPlayerTokenMap();
+
+    // Reset style classes first
+    playerCountLabel.getStyleClass().clear();
+    playerCountLabel.getStyleClass().add(monopolyPlayerCountLabelClass);
+
     if (playerNames != null && !playerNames.isEmpty()) {
       selectedPlayers = playerNames;
       selectedPlayerTokens = tokens;
       playerCountLabel.setText(selectedPlayers.size() + " players selected");
-      playerCountLabel.getStyleClass().add(monopolyPlayerCountLabelClass);
     } else {
       playerCountLabel.setText("No players selected");
-      playerCountLabel.getStyleClass().add(monopolyPlayerCountLabelClass);
     }
   }
 
@@ -352,10 +361,10 @@ public class MonopolyMenuUI {
     // Dependency injection wiring
     GameMediator mediator = new DefaultGameMediator();
     MonopolyController controller = new MonopolyController(
-      boardGame,
-      new BoardGameFileWriterGson(),
-      new BoardGameFileReaderGson(),
-      mediator
+        boardGame,
+        new BoardGameFileWriterGson(),
+        new BoardGameFileReaderGson(),
+        mediator
     );
     MonopolyGameUI gameUI = new MonopolyGameUI(boardGame, primaryStage, controller, mediator);
     LOGGER.info(
@@ -393,10 +402,10 @@ public class MonopolyMenuUI {
   private MonopolyGameUI getMonopolyGameUI(BoardGame boardGame, boolean startNew) {
     GameMediator mediator = new DefaultGameMediator();
     MonopolyController controller = new MonopolyController(
-      boardGame,
-      new BoardGameFileWriterGson(),
-      new BoardGameFileReaderGson(),
-      mediator
+        boardGame,
+        new BoardGameFileWriterGson(),
+        new BoardGameFileReaderGson(),
+        mediator
     );
     MonopolyGameUI gameUI = new MonopolyGameUI(boardGame, primaryStage, controller, mediator);
     boardGame.addObserver(gameUI);

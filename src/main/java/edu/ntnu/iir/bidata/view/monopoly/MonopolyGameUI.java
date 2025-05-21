@@ -44,14 +44,10 @@ public class MonopolyGameUI extends JavaFXGameUI {
   private final Button jailRollButton = new Button("Roll Dice (Jail)");
   private final Button jailPayButton = new Button("Pay $50");
   private final Label actionLabel = new Label("");
-  private final Color BLANK_COLOR = Color.LIGHTGRAY;
   private final Color[] GROUP_COLORS = {
-    Color.SADDLEBROWN, Color.LIGHTBLUE, Color.HOTPINK, Color.ORANGE
+      Color.BROWN, Color.LIGHTBLUE, Color.PINK, Color.ORANGE,
+      Color.RED, Color.YELLOW, Color.GREEN, Color.BLUE
   };
-  private final Color GO_COLOR = Color.LIMEGREEN;
-  private final Color JAIL_COLOR = Color.DARKGRAY;
-  private final Color FREE_PARKING_COLOR = Color.GOLD;
-  private final Color GO_TO_JAIL_COLOR = Color.ORANGERED;
   private final BorderPane mainLayout;
   private final GridPane boardPane;
   private final VBox playerInfoPanel;
@@ -100,6 +96,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
     root.setPadding(new Insets(25));
     root.setPrefWidth(1100);
     root.setPrefHeight(750);
+    root.getStyleClass().add("monopoly-main-layout");
 
     // --- Top bar: Back and Save buttons ---
     HBox topBar = new HBox(10);
@@ -130,21 +127,32 @@ public class MonopolyGameUI extends JavaFXGameUI {
     controls.setPadding(new Insets(15));
     controls.setAlignment(Pos.CENTER);
     controls.getStyleClass().add("monopoly-game-controls");
+
     rollDiceButton.getStyleClass().add("monopoly-roll-dice-button");
     rollDiceButton.setOnAction(e -> handleRollDice());
+
     buyButton.getStyleClass().add("monopoly-buy-button");
     buyButton.setOnAction(e -> handleBuyProperty());
+
     skipButton.getStyleClass().add("monopoly-skip-button");
     skipButton.setOnAction(e -> handleSkipAction());
+
     payRentButton.getStyleClass().add("monopoly-pay-rent-button");
     payRentButton.setOnAction(e -> handlePayRent());
+
     jailRollButton.getStyleClass().add("monopoly-jail-roll-button");
     jailRollButton.setOnAction(e -> handleJailRoll());
+
     jailPayButton.getStyleClass().add("monopoly-jail-pay-button");
     jailPayButton.setOnAction(e -> handleJailPay());
+
     diceView.getStyleClass().add("monopoly-dice-view");
+
     controls.getChildren().addAll(diceView, rollDiceButton, buyButton, skipButton, payRentButton, jailRollButton, jailPayButton);
     root.setBottom(controls);
+
+    // Add actionLabel with proper styling
+    actionLabel.getStyleClass().add("monopoly-action-label");
 
     // Set the root of the existing scene
     getScene().setRoot(root);
@@ -158,18 +166,6 @@ public class MonopolyGameUI extends JavaFXGameUI {
     // Add stylesheets
     getScene().getStylesheets().add(getClass().getResource("/monopoly.css").toExternalForm());
     getScene().getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
-
-    // Ensure buttons have consistent styling
-    rollDiceButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
-    buyButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
-    skipButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
-    payRentButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
-    jailRollButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
-    jailPayButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
-    backButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
-
-    // Ensure actionLabel has consistent styling
-    actionLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333;");
   }
 
   private void handleRollDice() {
@@ -235,8 +231,8 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
         playerBox.getChildren().addAll(nameLabel, moneyLabel, positionLabel, propertiesLabel);
         playerInfoPanel.getChildren().add(playerBox);
-        LOGGER.info(String.format("Added player to panel: name=%s, money=%d, position=%d, properties=%d", 
-          monopolyPlayer.getName(), monopolyPlayer.getMoney(), monopolyPlayer.getCurrentTile().getId(), monopolyPlayer.getOwnedProperties().size()));
+        LOGGER.info(String.format("Added player to panel: name=%s, money=%d, position=%d, properties=%d",
+            monopolyPlayer.getName(), monopolyPlayer.getMoney(), monopolyPlayer.getCurrentTile().getId(), monopolyPlayer.getOwnedProperties().size()));
         playerCount++;
       }
     }
@@ -351,47 +347,91 @@ public class MonopolyGameUI extends JavaFXGameUI {
       tilePanes.put(tileIndex, tilePane);
       tileIndex++;
     }
-    // Fill the center with blank tiles
-    for (int row = 1; row < gridDim - 1; row++) {
-      for (int col = 1; col < gridDim - 1; col++) {
-        Rectangle blank = new Rectangle(70, 70, BLANK_COLOR);
-        StackPane blankPane = new StackPane(blank);
-        boardPane.add(blankPane, col, row);
-      }
+
+    // Create a center area with MONOPOLY text
+    if (gridDim > 3) {
+      // Create a pane spanning the entire center area
+      StackPane centerArea = new StackPane();
+
+      // Create background rectangle
+      Rectangle centerRect = new Rectangle(
+          (gridDim - 2) * 70 + (gridDim - 3) * 5, // Width accounting for tile sizes and gaps
+          (gridDim - 2) * 70 + (gridDim - 3) * 5  // Height accounting for tile sizes and gaps
+      );
+      centerRect.getStyleClass().add("monopoly-center-area");
+
+      // Create MONOPOLY text
+      javafx.scene.text.Text monopolyText = new javafx.scene.text.Text("MONOPOLY");
+      monopolyText.getStyleClass().add("monopoly-center-text");
+
+      centerArea.getChildren().addAll(centerRect, monopolyText);
+
+      // Add to center of grid, spanning the appropriate number of cells
+      boardPane.add(centerArea, 1, 1, gridDim - 2, gridDim - 2);
+      GridPane.setHalignment(centerArea, javafx.geometry.HPos.CENTER);
+      GridPane.setValignment(centerArea, javafx.geometry.VPos.CENTER);
     }
+
     updatePlayerInfoPanel();
     updatePlayerTokens();
     updateRollDiceButtonState();
   }
 
   private StackPane createTilePane(Tile tile) {
-    Rectangle rect = new Rectangle(70, 70);
-    rect.getStyleClass().add("monopoly-tile");
-    Label label = new Label();
-    label.getStyleClass().add("monopoly-tile-label");
+    StackPane pane = new StackPane();
+    pane.setPrefSize(70, 70);
 
     if (tile instanceof PropertyTile) {
       PropertyTile pt = (PropertyTile) tile;
-      rect.setFill(GROUP_COLORS[pt.getGroup() % GROUP_COLORS.length]);
-      label.setText("Property\n$" + pt.getPrice());
-    } else if (tile instanceof GoTile) {
-      rect.setFill(GO_COLOR);
-      label.setText("GO");
-    } else if (tile instanceof JailTile) {
-      rect.setFill(JAIL_COLOR);
-      label.setText("JAIL");
-    } else if (tile instanceof FreeParkingTile) {
-      rect.setFill(FREE_PARKING_COLOR);
-      label.setText("FREE\nPARKING");
-    } else if (tile.getAction() instanceof GoToJailAction) {
-      rect.setFill(GO_TO_JAIL_COLOR);
-      label.setText("GO TO\nJAIL");
+      // Create a more authentic property tile with a color bar at the top
+      VBox propertyContainer = new VBox();
+      propertyContainer.getStyleClass().add("property-tile-container");
+
+      // Create the color bar at the top
+      Rectangle colorBar = new Rectangle(70, 15);
+      colorBar.getStyleClass().addAll("property-color-bar", "property-group-" + pt.getGroup());
+
+      // Create the main part of the tile
+      Rectangle mainRect = new Rectangle(70, 55);
+      mainRect.getStyleClass().add("monopoly-tile");
+      mainRect.setFill(Color.WHITE);
+
+      // Create the property information
+      Label label = new Label("$" + pt.getPrice());
+      label.getStyleClass().add("monopoly-tile-label");
+
+      // Add to container
+      StackPane mainArea = new StackPane(mainRect, label);
+      propertyContainer.getChildren().addAll(colorBar, mainArea);
+
+      pane.getChildren().add(propertyContainer);
     } else {
-      rect.setFill(BLANK_COLOR);
-      label.setText("");
+      // For non-property tiles, create a simple rectangular tile
+      Rectangle rect = new Rectangle(70, 70);
+      rect.getStyleClass().add("monopoly-tile");
+      Label label = new Label();
+      label.getStyleClass().add("monopoly-tile-label");
+
+      if (tile instanceof GoTile) {
+        rect.getStyleClass().add("go-tile");
+        label.setText("GO");
+      } else if (tile instanceof JailTile) {
+        rect.getStyleClass().add("jail-tile");
+        label.setText("JAIL");
+      } else if (tile instanceof FreeParkingTile) {
+        rect.getStyleClass().add("free-parking-tile");
+        label.setText("FREE\nPARKING");
+      } else if (tile.getAction() instanceof GoToJailAction) {
+        rect.getStyleClass().add("go-to-jail-tile");
+        label.setText("GO TO\nJAIL");
+      } else {
+        rect.getStyleClass().add("blank-tile");
+        label.setText("");
+      }
+
+      pane.getChildren().addAll(rect, label);
     }
-    StackPane pane = new StackPane(rect, label);
-    pane.setPrefSize(70, 70);
+
     return pane;
   }
 
