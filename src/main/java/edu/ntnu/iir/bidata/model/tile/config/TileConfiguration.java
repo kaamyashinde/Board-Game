@@ -2,17 +2,23 @@ package edu.ntnu.iir.bidata.model.tile.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Configuration class for special tiles on the board.
  */
 public class TileConfiguration {
+  private static final Logger LOGGER = Logger.getLogger(TileConfiguration.class.getName());
 
   private final Map<Integer, Integer> ladderConfig;
   private final Map<Integer, Integer> snakeConfig;
   private final Map<Integer, Integer> moveBackConfig;
   private final int[] skipTurnPositions;
   private final int[] switchPlacesPositions;
+
+  public TileConfiguration() {
+    this("medium");
+  }
 
   public TileConfiguration(String level) {
     ladderConfig = new HashMap<>();
@@ -22,6 +28,7 @@ public class TileConfiguration {
     int[] switchPlaces = new int[]{};
 
     if ("easy".equalsIgnoreCase(level)) {
+      LOGGER.info("Easy level configuration");
       // Easy level configuration
       ladderConfig.put(4, 16);
       ladderConfig.put(19, 40);
@@ -38,6 +45,7 @@ public class TileConfiguration {
       skipTurns = new int[]{};
       switchPlaces = new int[]{};
     } else if ("hard".equalsIgnoreCase(level)) {
+      LOGGER.info("Hard level configuration");
       // Hard level configuration
       ladderConfig.put(4, 25);
       ladderConfig.put(42, 84);
@@ -56,6 +64,7 @@ public class TileConfiguration {
       skipTurns = new int[]{};
       switchPlaces = new int[]{};
     } else {
+      LOGGER.info("Medium level configuration");
       // Medium (default) configuration
       ladderConfig.put(3, 12);
       ladderConfig.put(15, 22);
@@ -72,10 +81,6 @@ public class TileConfiguration {
     }
     skipTurnPositions = skipTurns;
     switchPlacesPositions = switchPlaces;
-  }
-
-  public TileConfiguration() {
-    this("medium");
   }
 
   public boolean isLadderStart(int position) {

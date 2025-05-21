@@ -14,29 +14,27 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.logging.Logger;
 import edu.ntnu.iir.bidata.Inject;
+import edu.ntnu.iir.bidata.model.tile.config.TileConfiguration;
 
 /** Controller class specifically for Snakes and Ladders game logic. */
 public class SnakesAndLaddersController extends BaseGameController {
   private static final Logger LOGGER = Logger.getLogger(SnakesAndLaddersController.class.getName());
 
-  // Snakes and Ladders specific data
-  private final int[][] snakes = {{99, 41}, {95, 75}, {89, 86}, {78, 15}, {38, 2}, {29, 11}};
-  private final int[][] ladders = {
-    {3, 36}, {8, 12}, {14, 26}, {31, 73}, {59, 80}, {83, 97}, {90, 92}
-  };
   private final BoardGameFileWriter boardGameWriter;
   private final BoardGameFileReader boardGameReader;
   private boolean gameStarted = false;
   private BoardGame boardGame;
   private final GameMediator mediator;
+  private final TileConfiguration tileConfig;
 
   @Inject
-  public SnakesAndLaddersController(BoardGame boardGame, BoardGameFileWriter boardGameWriter, BoardGameFileReader boardGameReader, GameMediator mediator) {
+  public SnakesAndLaddersController(BoardGame boardGame, BoardGameFileWriter boardGameWriter, BoardGameFileReader boardGameReader, GameMediator mediator, TileConfiguration tileConfig) {
     super(boardGame);
     this.boardGame = boardGame;
     this.boardGameWriter = boardGameWriter;
     this.boardGameReader = boardGameReader;
     this.mediator = mediator;
+    this.tileConfig = tileConfig;
     LOGGER.info("SnakesAndLaddersController initialized");
   }
 
@@ -129,29 +127,20 @@ public class SnakesAndLaddersController extends BaseGameController {
         player.move(steps);
 
         // Check for snakes
-        for (int[] snake : snakes) {
-          if (end == snake[0]) {
-            // Move player to snake tail
-            steps = snake[1] - end;
-            player.move(steps);
-            end = snake[1];
-            type = "snake";
-            break;
-          }
+        if (tileConfig.isSnakeHead(end)) {
+          int tail = tileConfig.getSnakeTail(end);
+          steps = tail - end;
+          player.move(steps);
+          end = tail;
+          type = "snake";
         }
-
         // Check for ladders only if it's a normal move
-        if (type.equals("normal")) {
-          for (int[] ladder : ladders) {
-            if (end == ladder[0]) {
-              // Move player to ladder top
-              steps = ladder[1] - end;
-              player.move(steps);
-              end = ladder[1];
-              type = "ladder";
-              break;
-            }
-          }
+        else if (tileConfig.isLadderStart(end)) {
+          int top = tileConfig.getLadderEnd(end);
+          steps = top - end;
+          player.move(steps);
+          end = top;
+          type = "ladder";
         }
 
         return new MoveResult(start, end, type);
