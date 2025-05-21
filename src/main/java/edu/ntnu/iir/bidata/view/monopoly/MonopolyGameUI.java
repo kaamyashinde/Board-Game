@@ -304,13 +304,23 @@ public class MonopolyGameUI extends JavaFXGameUI {
     update();
   }
 
+  private int getGridDimForBoardSize(int boardSize) {
+    // Find the smallest n such that 4*(n-1) >= boardSize
+    int n = 3;
+    while (4 * (n - 1) < boardSize) {
+      n++;
+    }
+    return n;
+  }
+
   private void initializeBoard() {
     boardPane.getChildren().clear();
     tilePanes.clear();
+    int boardSize = getBoardGame().getBoard().getSizeOfBoard();
+    int gridDim = getGridDimForBoardSize(boardSize);
     int tileIndex = 0;
     // Top row (left to right)
-    for (int col = 0; col < GRID_DIM; col++) {
-      if (tileIndex >= 20) break;
+    for (int col = 0; col < gridDim && tileIndex < boardSize; col++) {
       Tile tile = getBoardGame().getBoard().getTile(tileIndex);
       StackPane tilePane = createTilePane(tile);
       boardPane.add(tilePane, col, 0);
@@ -318,26 +328,23 @@ public class MonopolyGameUI extends JavaFXGameUI {
       tileIndex++;
     }
     // Right column (top to bottom, excluding top)
-    for (int row = 1; row < GRID_DIM - 1; row++) {
-      if (tileIndex >= 20) break;
+    for (int row = 1; row < gridDim - 1 && tileIndex < boardSize; row++) {
       Tile tile = getBoardGame().getBoard().getTile(tileIndex);
       StackPane tilePane = createTilePane(tile);
-      boardPane.add(tilePane, GRID_DIM - 1, row);
+      boardPane.add(tilePane, gridDim - 1, row);
       tilePanes.put(tileIndex, tilePane);
       tileIndex++;
     }
     // Bottom row (right to left)
-    for (int col = GRID_DIM - 1; col >= 0; col--) {
-      if (tileIndex >= 20) break;
+    for (int col = gridDim - 1; col >= 0 && tileIndex < boardSize; col--) {
       Tile tile = getBoardGame().getBoard().getTile(tileIndex);
       StackPane tilePane = createTilePane(tile);
-      boardPane.add(tilePane, col, GRID_DIM - 1);
+      boardPane.add(tilePane, col, gridDim - 1);
       tilePanes.put(tileIndex, tilePane);
       tileIndex++;
     }
     // Left column (bottom to top, excluding top and bottom)
-    for (int row = GRID_DIM - 2; row > 0; row--) {
-      if (tileIndex >= 20) break;
+    for (int row = gridDim - 2; row > 0 && tileIndex < boardSize; row--) {
       Tile tile = getBoardGame().getBoard().getTile(tileIndex);
       StackPane tilePane = createTilePane(tile);
       boardPane.add(tilePane, 0, row);
@@ -345,8 +352,8 @@ public class MonopolyGameUI extends JavaFXGameUI {
       tileIndex++;
     }
     // Fill the center with blank tiles
-    for (int row = 1; row < GRID_DIM - 1; row++) {
-      for (int col = 1; col < GRID_DIM - 1; col++) {
+    for (int row = 1; row < gridDim - 1; row++) {
+      for (int col = 1; col < gridDim - 1; col++) {
         Rectangle blank = new Rectangle(70, 70, BLANK_COLOR);
         StackPane blankPane = new StackPane(blank);
         boardPane.add(blankPane, col, row);
