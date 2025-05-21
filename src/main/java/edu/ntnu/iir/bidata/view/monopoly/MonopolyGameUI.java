@@ -46,7 +46,8 @@ public class MonopolyGameUI extends JavaFXGameUI {
   private final Label actionLabel = new Label("");
   private final Color BLANK_COLOR = Color.LIGHTGRAY;
   private final Color[] GROUP_COLORS = {
-    Color.SADDLEBROWN, Color.LIGHTBLUE, Color.HOTPINK, Color.ORANGE
+      Color.BROWN, Color.LIGHTBLUE, Color.PINK, Color.ORANGE,
+      Color.RED, Color.YELLOW, Color.GREEN, Color.BLUE
   };
   private final Color GO_COLOR = Color.LIMEGREEN;
   private final Color JAIL_COLOR = Color.DARKGRAY;
@@ -100,6 +101,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
     root.setPadding(new Insets(25));
     root.setPrefWidth(1100);
     root.setPrefHeight(750);
+    root.getStyleClass().add("monopoly-main-layout");
 
     // --- Top bar: Back and Save buttons ---
     HBox topBar = new HBox(10);
@@ -130,21 +132,32 @@ public class MonopolyGameUI extends JavaFXGameUI {
     controls.setPadding(new Insets(15));
     controls.setAlignment(Pos.CENTER);
     controls.getStyleClass().add("monopoly-game-controls");
+
     rollDiceButton.getStyleClass().add("monopoly-roll-dice-button");
     rollDiceButton.setOnAction(e -> handleRollDice());
+
     buyButton.getStyleClass().add("monopoly-buy-button");
     buyButton.setOnAction(e -> handleBuyProperty());
+
     skipButton.getStyleClass().add("monopoly-skip-button");
     skipButton.setOnAction(e -> handleSkipAction());
+
     payRentButton.getStyleClass().add("monopoly-pay-rent-button");
     payRentButton.setOnAction(e -> handlePayRent());
+
     jailRollButton.getStyleClass().add("monopoly-jail-roll-button");
     jailRollButton.setOnAction(e -> handleJailRoll());
+
     jailPayButton.getStyleClass().add("monopoly-jail-pay-button");
     jailPayButton.setOnAction(e -> handleJailPay());
+
     diceView.getStyleClass().add("monopoly-dice-view");
+
     controls.getChildren().addAll(diceView, rollDiceButton, buyButton, skipButton, payRentButton, jailRollButton, jailPayButton);
     root.setBottom(controls);
+
+    // Add actionLabel with proper styling
+    actionLabel.getStyleClass().add("monopoly-action-label");
 
     // Set the root of the existing scene
     getScene().setRoot(root);
@@ -158,18 +171,6 @@ public class MonopolyGameUI extends JavaFXGameUI {
     // Add stylesheets
     getScene().getStylesheets().add(getClass().getResource("/monopoly.css").toExternalForm());
     getScene().getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
-
-    // Ensure buttons have consistent styling
-    rollDiceButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
-    buyButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
-    skipButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
-    payRentButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
-    jailRollButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
-    jailPayButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
-    backButton.setStyle("-fx-border-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.5, 0, 0);");
-
-    // Ensure actionLabel has consistent styling
-    actionLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333;");
   }
 
   private void handleRollDice() {
@@ -235,8 +236,8 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
         playerBox.getChildren().addAll(nameLabel, moneyLabel, positionLabel, propertiesLabel);
         playerInfoPanel.getChildren().add(playerBox);
-        LOGGER.info(String.format("Added player to panel: name=%s, money=%d, position=%d, properties=%d", 
-          monopolyPlayer.getName(), monopolyPlayer.getMoney(), monopolyPlayer.getCurrentTile().getId(), monopolyPlayer.getOwnedProperties().size()));
+        LOGGER.info(String.format("Added player to panel: name=%s, money=%d, position=%d, properties=%d",
+            monopolyPlayer.getName(), monopolyPlayer.getMoney(), monopolyPlayer.getCurrentTile().getId(), monopolyPlayer.getOwnedProperties().size()));
         playerCount++;
       }
     }
@@ -372,22 +373,24 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
     if (tile instanceof PropertyTile) {
       PropertyTile pt = (PropertyTile) tile;
-      rect.setFill(GROUP_COLORS[pt.getGroup() % GROUP_COLORS.length]);
+      // Add property group style class
+      String propertyGroupClass = "property-group-" + pt.getGroup();
+      rect.getStyleClass().add(propertyGroupClass);
       label.setText("Property\n$" + pt.getPrice());
     } else if (tile instanceof GoTile) {
-      rect.setFill(GO_COLOR);
+      rect.getStyleClass().add("go-tile");
       label.setText("GO");
     } else if (tile instanceof JailTile) {
-      rect.setFill(JAIL_COLOR);
+      rect.getStyleClass().add("jail-tile");
       label.setText("JAIL");
     } else if (tile instanceof FreeParkingTile) {
-      rect.setFill(FREE_PARKING_COLOR);
+      rect.getStyleClass().add("free-parking-tile");
       label.setText("FREE\nPARKING");
     } else if (tile.getAction() instanceof GoToJailAction) {
-      rect.setFill(GO_TO_JAIL_COLOR);
+      rect.getStyleClass().add("go-to-jail-tile");
       label.setText("GO TO\nJAIL");
     } else {
-      rect.setFill(BLANK_COLOR);
+      rect.getStyleClass().add("blank-tile");
       label.setText("");
     }
     StackPane pane = new StackPane(rect, label);
