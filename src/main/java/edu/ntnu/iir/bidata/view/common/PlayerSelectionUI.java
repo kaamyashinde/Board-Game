@@ -275,8 +275,16 @@ public class PlayerSelectionUI {
     ToggleGroup tokenGroup = new ToggleGroup();
     HBox tokenBox = new HBox(10);
     tokenBox.setAlignment(Pos.CENTER);
+    // Only exclude tokens already used by selected players
+    java.util.Set<String> usedTokens = new java.util.HashSet<>();
+    for (String selectedPlayer : selectedPlayersList) {
+      String usedToken = playerTokenMap.get(selectedPlayer);
+      if (usedToken != null) {
+        usedTokens.add(usedToken);
+      }
+    }
     for (String token : availableTokens) {
-      if (!playerTokenMap.containsValue(token)) { // Only show tokens not already picked
+      if (!usedTokens.contains(token)) {
         RadioButton rb = new RadioButton();
         rb.setToggleGroup(tokenGroup);
         ImageView iv = new ImageView(new Image(getClass().getResourceAsStream("/tokens/" + token)));
@@ -308,9 +316,13 @@ public class PlayerSelectionUI {
         statusLabel.setText("Player " + name + " already exists in available players!");
         return;
       }
-      if (playerTokenMap.containsValue(token)) {
-        statusLabel.setText("Token already taken!");
-        return;
+      // Only check for token conflict among selected players
+      for (String selectedPlayer : selectedPlayersList) {
+        String usedToken = playerTokenMap.get(selectedPlayer);
+        if (token.equals(usedToken)) {
+          statusLabel.setText("Token already taken!");
+          return;
+        }
       }
       availablePlayersList.add(name);
       playerTokenMap.put(name, token);
@@ -340,8 +352,16 @@ public class PlayerSelectionUI {
     ToggleGroup tokenGroup = new ToggleGroup();
     HBox tokenBox = new HBox(10);
     tokenBox.setAlignment(Pos.CENTER);
+    // Only exclude tokens already used by selected players
+    java.util.Set<String> usedTokens = new java.util.HashSet<>();
+    for (String selectedPlayer : selectedPlayersList) {
+      String usedToken = playerTokenMap.get(selectedPlayer);
+      if (usedToken != null) {
+        usedTokens.add(usedToken);
+      }
+    }
     for (String token : availableTokens) {
-      if (!playerTokenMap.containsValue(token)) {
+      if (!usedTokens.contains(token)) {
         RadioButton rb = new RadioButton();
         rb.setToggleGroup(tokenGroup);
         ImageView iv = new ImageView(new Image(getClass().getResourceAsStream("/tokens/" + token)));
