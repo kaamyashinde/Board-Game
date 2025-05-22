@@ -108,10 +108,15 @@ public class MonopolyController extends BaseGameController {
     // Roll the dice before moving
     boardGame.getDice().rollAllDice();
     int[] diceValues = boardGame.getCurrentDiceValues();
-    int steps = java.util.Arrays.stream(diceValues).sum();
+    // Ensure we have exactly 2 dice values
+    if (diceValues == null || diceValues.length != 2) {
+      LOGGER.warning("Invalid dice values, defaulting to [1,1]");
+      diceValues = new int[]{1, 1};
+    }
+    int steps = diceValues[0] + diceValues[1];
     // Move the player
     currentPlayer.move(steps);
-    LOGGER.info(currentPlayer.getName() + " moved " + steps + " steps");
+    LOGGER.info(currentPlayer.getName() + " rolled " + diceValues[0] + " and " + diceValues[1] + " (Total: " + steps + ")");
     // Handle the tile the player landed on
     Tile currentTile = currentPlayer.getCurrentTile();
     if (currentTile instanceof PropertyTile propertyTile) {
@@ -180,9 +185,18 @@ public class MonopolyController extends BaseGameController {
     SimpleMonopolyPlayer currentPlayer = (SimpleMonopolyPlayer) boardGame.getCurrentPlayer();
     boardGame.getDice().rollAllDice();
     int[] diceValues = boardGame.getCurrentDiceValues();
-    boolean rolledSix = java.util.Arrays.stream(diceValues).anyMatch(value -> value == 6);
+    // Ensure we have exactly 2 dice values
+    if (diceValues == null || diceValues.length != 2) {
+      LOGGER.warning("Invalid dice values, defaulting to [1,1]");
+      diceValues = new int[]{1, 1};
+    }
+    // Player gets out of jail if either die shows a 6
+    boolean rolledSix = diceValues[0] == 6 || diceValues[1] == 6;
     if (rolledSix) {
       currentPlayer.setInJail(false);
+      LOGGER.info(currentPlayer.getName() + " rolled " + diceValues[0] + " and " + diceValues[1] + " - Released from jail!");
+    } else {
+      LOGGER.info(currentPlayer.getName() + " rolled " + diceValues[0] + " and " + diceValues[1] + " - Must stay in jail");
     }
     awaitingJailAction = false;
     mediator.notify(this, "nextPlayer");
@@ -385,6 +399,34 @@ public class MonopolyController extends BaseGameController {
   public int getLastDiceSum() {
     int[] values = boardGame.getCurrentDiceValues();
     return values != null ? java.util.Arrays.stream(values).sum() : 0;
+  }
+
+  /**
+   * Sets the awaiting player action state
+   */
+  public void setAwaitingPlayerAction(boolean awaiting) {
+    this.awaitingPlayerAction = awaiting;
+  }
+
+  /**
+   * Sets the pending property tile
+   */
+  public void setPendingPropertyTile(PropertyTile tile) {
+    this.pendingPropertyTile = tile;
+  }
+
+  /**
+   * Sets the awaiting rent action state
+   */
+  public void setAwaitingRentAction(boolean awaiting) {
+    this.awaitingRentAction = awaiting;
+  }
+
+  /**
+   * Sets the pending rent property tile
+   */
+  public void setPendingRentPropertyTile(PropertyTile tile) {
+    this.pendingRentPropertyTile = tile;
   }
 }
 
