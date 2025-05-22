@@ -210,8 +210,8 @@ public class SnakesAndLaddersMenuUI {
     scene
         .getStylesheets()
         .addAll(
-            getClass().getResource("/styles.css").toExternalForm(),
-            getClass().getResource("/snakesandladders.css").toExternalForm());
+            getClass().getResource("/style/styles.css").toExternalForm(),
+            getClass().getResource("/style/snakesandladders.css").toExternalForm());
     primaryStage.setScene(scene);
     primaryStage.show();
   }

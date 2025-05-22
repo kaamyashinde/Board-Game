@@ -102,7 +102,7 @@ public class BoardManagementUI {
         });
 
     Scene scene = new Scene(layout, 350, 200);
-    scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+    scene.getStylesheets().add(getClass().getResource("/style/styles.css").toExternalForm());
     removeDialog.setScene(scene);
     removeDialog.showAndWait();
   }

@@ -100,7 +100,7 @@ public abstract class JavaFXGameUI implements Observer {
     controls.getChildren().addAll(diceView, nextTurnButton, gameControls);
     root.setBottom(controls);
     Scene scene = new Scene(root, 800, 600);
-    scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+    scene.getStylesheets().add(getClass().getResource("/style/styles.css").toExternalForm());
     primaryStage.setScene(scene);
   }
 
