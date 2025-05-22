@@ -179,9 +179,12 @@ public class SnakesAndLaddersMenuUI {
     Button mediumBtn = createMenuButton("Level: Medium");
     Button hardBtn = createMenuButton("Level: Hard");
 
-    easyBtn.setOnAction(e -> startGameWithLevel("easy", "/snakes_and_ladders_easy.jpg"));
-    mediumBtn.setOnAction(e -> startGameWithLevel("medium", "/snakes_and_ladders_board.jpeg"));
-    hardBtn.setOnAction(e -> startGameWithLevel("hard", "/snakes_and_ladders_hard_board.png"));
+    easyBtn.setOnAction(e -> startGameWithLevel("easy",
+        "/snakeandladder_boardgame/snakes_and_ladders_easy.jpg"));
+    mediumBtn.setOnAction(e -> startGameWithLevel("medium",
+        "/snakeandladder_boardgame/snakes_and_ladders_board.jpeg"));
+    hardBtn.setOnAction(e -> startGameWithLevel("hard",
+        "/snakeandladder_boardgame/snakes_and_ladders_hard_board.png"));
 
     HBox levelButtons = new HBox(20, easyBtn, mediumBtn, hardBtn);
     levelButtons.setAlignment(Pos.CENTER);
@@ -440,9 +443,9 @@ public class SnakesAndLaddersMenuUI {
     // Determine image path based on level
     String imagePath =
         switch (level) {
-          case "easy" -> "/snakes_and_ladders_easy.jpg";
-          case "hard" -> "/snakes_and_ladders_hard_board.png";
-          default -> "/snakes_and_ladders_board.jpeg";
+          case "easy" -> "/snakeandladder_boardgame/snakes_and_ladders_easy.jpg";
+          case "hard" -> "/snakeandladder_boardgame/snakes_and_ladders_hard_board.png";
+          default -> "/snakeandladder_boardgame/snakes_and_ladders_board.jpeg";
         };
     SnakesAndLaddersGameUI gameUI =
         new SnakesAndLaddersGameUI(

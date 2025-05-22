@@ -85,7 +85,7 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
         controller,
         playerNames,
         mediator,
-        "/snakes_and_ladders_board.jpeg");
+        "/snakeandladder_boardgame/snakes_and_ladders_board.jpeg");
   }
 
   /**
