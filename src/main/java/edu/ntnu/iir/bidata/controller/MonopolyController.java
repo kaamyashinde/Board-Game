@@ -366,4 +366,26 @@ public class MonopolyController extends BaseGameController {
   public int[] getLastDiceRolls() {
     return boardGame.getCurrentDiceValues();
   }
+
+  /**
+   * Rolls the dice without processing any game logic.
+   * This method is used by the UI to get dice values for display before animation.
+   */
+  public void rollDice() {
+    boardGame.getDice().rollAllDice();
+    diceRolled = true;
+    LOGGER.info("Dice rolled: " + java.util.Arrays.toString(boardGame.getCurrentDiceValues()));
+  }
+
+  /**
+   * Gets the sum of the last dice roll.
+   *
+   * @return the sum of all dice values from the last roll
+   */
+  public int getLastDiceSum() {
+    int[] values = boardGame.getCurrentDiceValues();
+    return values != null ? java.util.Arrays.stream(values).sum() : 0;
+  }
 }
+
+
