@@ -81,8 +81,7 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
 
     // Serialize essential tile data
     Map<String, Map<String, Object>> tilesData = new HashMap<>();
-    for (Map.Entry<Integer, Tile> entry : boardGame.getBoard().getTiles().entrySet()) {
-      Tile tile = entry.getValue();
+    boardGame.getBoard().getTiles().forEach((id, tile) -> {
       Map<String, Object> tileData = new HashMap<>();
       tileData.put("id", tile.getId());
       tileData.put("type", tile.getClass().getSimpleName());
@@ -100,7 +99,7 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
         tileData.put("action", gson.toJsonTree(tile.getAction()));
       }
       tilesData.put(String.valueOf(tile.getId()), tileData);
-    }
+    });
     Map<String, Object> boardData = new HashMap<>();
     boardData.put("tiles", tilesData);
     boardData.put("boardSize", boardGame.getBoard().getSizeOfBoard());
@@ -109,7 +108,7 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
 
     // Serialize player data
     List<Map<String, Object>> playersData = new ArrayList<>();
-    for (Player player : boardGame.getPlayers()) {
+    boardGame.getPlayers().forEach(player -> {
       Map<String, Object> playerData = new HashMap<>();
       playerData.put("name", player.getName());
       playerData.put("money", ((SimpleMonopolyPlayer) player).getMoney());
@@ -121,7 +120,7 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
       playerData.put("playerType", "MONOPOLY");
       playerData.put("tokenImage", player.getTokenImage());
       playersData.add(playerData);
-    }
+    });
     simplifiedGame.put("players", playersData);
 
     // Serialize current player index

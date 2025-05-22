@@ -77,7 +77,7 @@ public class BoardGameFileReaderGson implements BoardGameFileReader {
 
       // Third pass: set each player's currentTile to the correct Tile instance from the board
       if (jsonObject.has("players")) {
-        for (var playerElement : jsonObject.getAsJsonArray("players")) {
+        jsonObject.getAsJsonArray("players").forEach(playerElement -> {
           JsonObject playerObj = playerElement.getAsJsonObject();
           if (playerObj.has("currentTile")) {
             JsonObject currentTileObj = playerObj.getAsJsonObject("currentTile");
@@ -94,7 +94,7 @@ public class BoardGameFileReaderGson implements BoardGameFileReader {
                   }
                 });
           }
-        }
+        });
       }
     }
 
@@ -110,14 +110,14 @@ public class BoardGameFileReaderGson implements BoardGameFileReader {
    */
   private static void collectTilesFromBoardGameJsonFile(
       JsonObject tilesObject, BoardGame boardGame, Map<Integer, Tile> tileMap) {
-    for (String key : tilesObject.keySet()) {
+    tilesObject.keySet().forEach(key -> {
       JsonObject tileJson = tilesObject.getAsJsonObject(key);
       int id = tileJson.get("id").getAsInt();
       Tile tile = boardGame.getBoard().getTile(id);
       if (tile != null) {
         tileMap.put(id, tile);
       }
-    }
+    });
   }
 
   /**
@@ -128,7 +128,7 @@ public class BoardGameFileReaderGson implements BoardGameFileReader {
    */
   private static void connectTilesFromBoardGameJsonFile(
       JsonObject tilesObject, Map<Integer, Tile> tileMap) {
-    for (String key : tilesObject.keySet()) {
+    tilesObject.keySet().forEach(key -> {
       JsonObject tileJson = tilesObject.getAsJsonObject(key);
       int id = tileJson.get("id").getAsInt();
       if (tileJson.has("nextTileId")) {
@@ -139,6 +139,6 @@ public class BoardGameFileReaderGson implements BoardGameFileReader {
           tile.setNextTile(nextTile);
         }
       }
-    }
+    });
   }
 }

@@ -20,11 +20,11 @@ public class BoardDeserializer implements JsonDeserializer<Board> {
 
         if (boardObject.has("tiles")) {
             JsonObject tilesObject = boardObject.getAsJsonObject("tiles");
-            for (String key : tilesObject.keySet()) {
+            tilesObject.keySet().forEach(key -> {
                 JsonObject tileJson = tilesObject.getAsJsonObject(key);
                 Tile tile = context.deserialize(tileJson, Tile.class);
                 board.addTile(tile);
-            }
+            });
         }
 
         return board;
