@@ -16,6 +16,7 @@ import edu.ntnu.iir.bidata.model.utils.GameMediator;
 import edu.ntnu.iir.bidata.view.common.CommonButtons;
 import edu.ntnu.iir.bidata.view.common.DiceView;
 import edu.ntnu.iir.bidata.view.common.JavaFXGameUI;
+import edu.ntnu.iir.bidata.view.animation.MonopolyAnimator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
   private static final int TILE_SIZE = 60;
   private final Map<Integer, StackPane> tilePanes = new HashMap<>();
   private final Map<Player, ImageView> playerTokens = new HashMap<>();
+  private final Map<String, ImageView> playerTokensByName = new HashMap<>();
   private final Button rollDiceButton = new Button("Roll Dice");
   private final Button buyButton = new Button("Buy");
   private final Button skipButton = new Button("Skip");
@@ -60,6 +62,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
   private final Stage primaryStage;
   private final GameMediator mediator;
   protected BoardGame boardGame;
+  private MonopolyAnimator animator;
   @Setter private MonopolyController controller;
   private BorderPane root;
 
@@ -67,12 +70,6 @@ public class MonopolyGameUI extends JavaFXGameUI {
    * Constructs the MonopolyGameUI, setting up the primary user interface components for the
    * Monopoly game. Initializes various UI elements, registers event listeners, and connects
    * necessary components such as the game mediator and the controller.
-   *
-   * @param boardGame the BoardGame instance representing the state and rules of the game
-   * @param primaryStage the primary Stage for displaying the game's user interface
-   * @param controller the MonopolyController responsible for managing user interactions and game
-   *     logic
-   * @param mediator the GameMediator facilitating communication between game components
    */
   @Inject
   public MonopolyGameUI(
@@ -110,19 +107,17 @@ public class MonopolyGameUI extends JavaFXGameUI {
     }
   }
 
+  // Getter methods for animator access
+  public Map<Integer, StackPane> getTilePanes() {
+    return tilePanes;
+  }
+
+  public Map<String, ImageView> getPlayerTokensByName() {
+    return playerTokensByName;
+  }
+
   /**
-   * Sets up the user interface for the Monopoly game. This method initializes and configures the
-   * layout of the main game components, including the top bar, board, player info panel, game
-   * control buttons, and action label. It also applies necessary styles and adds event listeners to
-   * various UI elements.
-   *
-   * <p>The main layout structure includes: - A top bar with 'Back to Main Menu' and 'Save Game'
-   * buttons. - A central game board displayed in a grid pane. - A right panel showing player
-   * information. - A bottom bar with game control buttons (e.g., roll dice, buy property, skip
-   * turn, etc.).
-   *
-   * <p>Additional configurations include defining minimum window sizes, adding stylesheets, and
-   * initializing the game board.
+   * Sets up the user interface for the Monopoly game with enhanced layout including action label.
    */
   public void setupUI() {
     root = new BorderPane();
@@ -155,7 +150,19 @@ public class MonopolyGameUI extends JavaFXGameUI {
     playerInfoPanel.setPrefWidth(220);
     root.setRight(playerInfoPanel);
 
-    // --- Bottom bar: Game controls ---
+    // --- Bottom bar: Game controls with action label ---
+    VBox bottomSection = new VBox(10);
+    bottomSection.setAlignment(Pos.CENTER);
+    bottomSection.setPadding(new Insets(15));
+
+    // Action label for game feedback
+    actionLabel.getStyleClass().add("monopoly-action-label");
+    actionLabel.setText("Ready to play! Roll the dice to start.");
+    actionLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333; -fx-text-alignment: center;");
+    actionLabel.setWrapText(true);
+    actionLabel.setPrefWidth(800);
+
+    // Game controls
     HBox controls = new HBox(10);
     controls.setPadding(new Insets(15));
     controls.setAlignment(Pos.CENTER);
@@ -191,10 +198,9 @@ public class MonopolyGameUI extends JavaFXGameUI {
             payRentButton,
             jailRollButton,
             jailPayButton);
-    root.setBottom(controls);
 
-    // Add actionLabel with proper styling
-    actionLabel.getStyleClass().add("monopoly-action-label");
+    bottomSection.getChildren().addAll(actionLabel, controls);
+    root.setBottom(bottomSection);
 
     // Set the root of the existing scene
     getScene().setRoot(root);
@@ -205,18 +211,126 @@ public class MonopolyGameUI extends JavaFXGameUI {
     // Initialize the board
     initializeBoard();
 
+    // Initialize animator after board is set up
+    animator = new MonopolyAnimator(this, tilePanes, playerTokensByName);
+
     // Add stylesheets
     getScene().getStylesheets().add(getClass().getResource("/monopoly.css").toExternalForm());
     getScene().getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
   }
 
   /**
-   * Updates the user interface components of the Monopoly game. This method refreshes the display
-   * of player information, updates the player tokens on the game board, and adjusts the state of
-   * the "Roll Dice" button along with other relevant UI controls.
-   *
-   * <p>The method performs the following: - Invokes `updatePlayerInfoPanel()` to update the player
-   * information displayed in the right panel. - Invokes `updatePlayerTokens()`
+   * Handles the logic for the "Roll Dice" action with proper animation flow.
+   * Animation happens first, then game logic is processed.
+   */
+  private void handleRollDice() {
+    // Check if animation is in progress
+    if (animator != null && animator.isAnimationInProgress()) {
+      LOGGER.info("Animation in progress, ignoring dice roll");
+      return;
+    }
+
+    // Store current state before any changes
+    Player currentPlayer = getBoardGame().getCurrentPlayer();
+    int originalPos = currentPlayer.getCurrentPosition();
+    String playerName = currentPlayer.getName();
+
+    // Roll dice first to get the values for display and calculation
+    boardGame.getDice().rollAllDice();
+    int[] diceValues = boardGame.getCurrentDiceValues();
+    int diceSum = java.util.Arrays.stream(diceValues).sum();
+
+    // Update dice view immediately when dice are rolled
+    if (diceValues != null && diceValues.length >= 2) {
+      diceView.setValues(diceValues[0], diceValues[1]);
+      actionLabel.setText(playerName + " rolled " + diceValues[0] + " and " + diceValues[1] + " (Total: " + diceSum + ")");
+    } else if (diceValues != null && diceValues.length == 1) {
+      diceView.setValues(diceValues[0], diceValues[0]);
+      actionLabel.setText(playerName + " rolled " + diceValues[0]);
+    } else {
+      diceView.setValues(1, 1);
+      actionLabel.setText(playerName + " rolled 1 and 1 (Total: 2)");
+      diceSum = 2;
+    }
+
+    // Calculate final position without actually moving the player yet
+    int boardSize = getBoardGame().getBoard().getSizeOfBoard();
+    int calculatedFinalPos = (originalPos + diceSum) % boardSize;
+
+    // Check if this would be a "Go to Jail" situation by examining the tile
+    Tile targetTile = getBoardGame().getBoard().getTile(calculatedFinalPos);
+    boolean isGoToJailTile = targetTile.getAction() instanceof GoToJailAction;
+
+    if (isGoToJailTile) {
+      // Find the jail position
+      int jailPos = findJailPosition();
+
+      // Animate movement to the "Go to Jail" tile first, then to jail
+      animator.animateMovement(playerName, originalPos, calculatedFinalPos, boardSize, () -> {
+        actionLabel.setText(playerName + " landed on 'Go to Jail'! Moving to jail...");
+
+        // After reaching "Go to Jail" tile, animate to jail
+        animator.animateGoToJail(playerName, jailPos, () -> {
+          // Now let controller handle the actual game logic
+          controller.handlePlayerMove();
+          update();
+        });
+      });
+    } else {
+      // Normal movement
+      animator.animateMovement(playerName, originalPos, calculatedFinalPos, boardSize, () -> {
+        // After animation completes, let controller handle the game logic
+        controller.handlePlayerMove();
+
+        // Update action label based on what happened
+        updateActionLabelAfterMove(playerName, calculatedFinalPos);
+        update();
+      });
+    }
+  }
+
+  /**
+   * Updates the action label based on what the player landed on
+   */
+  private void updateActionLabelAfterMove(String playerName, int position) {
+    Tile landedTile = getBoardGame().getBoard().getTile(position);
+    Player currentPlayer = getBoardGame().getCurrentPlayer();
+
+    if (landedTile instanceof PropertyTile) {
+      PropertyTile property = (PropertyTile) landedTile;
+      if (property.getOwner() == null) {
+        actionLabel.setText(playerName + " can buy this property for $" + property.getPrice());
+      } else if (property.getOwner() != currentPlayer) {
+        actionLabel.setText(playerName + " must pay rent of $" + property.getRent());
+      } else {
+        actionLabel.setText(playerName + " landed on their own property");
+      }
+    } else if (landedTile instanceof GoTile) {
+      actionLabel.setText(playerName + " passed GO! Collect $200");
+    } else if (landedTile instanceof JailTile) {
+      actionLabel.setText(playerName + " is just visiting jail");
+    } else if (landedTile instanceof FreeParkingTile) {
+      actionLabel.setText(playerName + " landed on Free Parking");
+    } else {
+      actionLabel.setText(playerName + " landed on " + landedTile.getClass().getSimpleName().replace("Tile", ""));
+    }
+  }
+
+  /**
+   * Finds the jail position on the board
+   */
+  private int findJailPosition() {
+    for (int i = 0; i < getBoardGame().getBoard().getSizeOfBoard(); i++) {
+      Tile tile = getBoardGame().getBoard().getTile(i);
+      if (tile instanceof JailTile) {
+        return i;
+      }
+    }
+    return 15; // Default jail position if not found
+  }
+
+  /**
+   * Updates the user interface components of the Monopoly game.
    */
   @Override
   public void update() {
@@ -226,9 +340,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
   }
 
   /**
-   * Retrieves the current {@link Scene} associated with the primary stage of the application.
-   *
-   * @return the current Scene object displayed on the primary Stage
+   * Retrieves the current Scene associated with the primary stage.
    */
   @Override
   public Scene getScene() {
@@ -236,20 +348,26 @@ public class MonopolyGameUI extends JavaFXGameUI {
   }
 
   /**
-   * Updates the player information panel to reflect the current state of all players in the game.
-   * This method clears the existing panel and iterates through the list of players to display each
-   * player's relevant details in the user interface.
-   *
-   * <p>For players of type {@code SimpleMonopolyPlayer}, the following information is displayed: -
-   * Name of the player - Amount of money they possess - Current position on the Monopoly board
-   * (tile ID) - Number of properties owned
-   *
-   * <p>Each player's details are added as a styled VBox to the player information panel. The method
-   * also logs relevant information, such as the player's name, class, and updated UI information.
+   * Updates the player information panel with enhanced current player indicator.
    */
   private void updatePlayerInfoPanel() {
     LOGGER.info("Clearing playerInfoPanel and updating player info...");
     playerInfoPanel.getChildren().clear();
+
+    // Add current player indicator at the top
+    Player currentPlayer = boardGame.getCurrentPlayer();
+    if (currentPlayer != null) {
+      Label currentPlayerLabel = new Label("Current Turn: " + currentPlayer.getName());
+      currentPlayerLabel.getStyleClass().add("monopoly-current-player-label");
+      currentPlayerLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c5aa0; -fx-padding: 10px;");
+      playerInfoPanel.getChildren().add(currentPlayerLabel);
+
+      // Add separator
+      Label separator = new Label("─────────────────");
+      separator.getStyleClass().add("monopoly-separator");
+      playerInfoPanel.getChildren().add(separator);
+    }
+
     int[] playerCount = {0};
     boardGame
         .getPlayers()
@@ -262,20 +380,38 @@ public class MonopolyGameUI extends JavaFXGameUI {
                       + player.getClass().getName());
               if (player instanceof SimpleMonopolyPlayer monopolyPlayer) {
                 VBox playerBox = new VBox(5);
-                playerBox.setPadding(new Insets(20));
+                playerBox.setPadding(new Insets(15));
                 playerBox.getStyleClass().add("monopoly-player-box");
+
+                // Highlight current player
+                if (player == currentPlayer) {
+                  playerBox.setStyle("-fx-background-color: #e3f2fd; -fx-border-color: #2196f3; -fx-border-width: 2px; -fx-border-radius: 5px;");
+                }
 
                 Label nameLabel = new Label(monopolyPlayer.getName());
                 nameLabel.getStyleClass().add("monopoly-player-name");
+                nameLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+
                 Label moneyLabel = new Label("Money: $" + monopolyPlayer.getMoney());
+                moneyLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #4caf50;");
+
                 Label positionLabel =
                     new Label("Position: Tile #" + monopolyPlayer.getCurrentTile().getId());
+                positionLabel.setStyle("-fx-font-size: 12px;");
+
                 Label propertiesLabel =
                     new Label("Properties: " + monopolyPlayer.getOwnedProperties().size());
+                propertiesLabel.setStyle("-fx-font-size: 12px;");
 
-                playerBox
-                    .getChildren()
-                    .addAll(nameLabel, moneyLabel, positionLabel, propertiesLabel);
+                // Add jail status if applicable
+                if (monopolyPlayer.isInJail()) {
+                  Label jailLabel = new Label("🔒 IN JAIL");
+                  jailLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #f44336; -fx-font-weight: bold;");
+                  playerBox.getChildren().addAll(nameLabel, moneyLabel, positionLabel, propertiesLabel, jailLabel);
+                } else {
+                  playerBox.getChildren().addAll(nameLabel, moneyLabel, positionLabel, propertiesLabel);
+                }
+
                 playerInfoPanel.getChildren().add(playerBox);
                 LOGGER.info(
                     String.format(
@@ -291,64 +427,72 @@ public class MonopolyGameUI extends JavaFXGameUI {
   }
 
   /**
-   * Updates the positions of player tokens on the Monopoly game board.
-   *
-   * <p>This method removes all existing tokens from the game board's tile panes and updates the
-   * tokens to reflect the current positions of all players. The following steps are performed:
-   *
-   * <p>1. Clears all tokens from the tile panes, ensuring they are reset before updating. 2. For
-   * each player in the game: - Determines the player's current tile based on their position on the
-   * board. - Retrieves or creates a graphical token (ImageView) for the player. - If the player
-   * already has a token, it is reused. - If the player does not have a token, a new one is created
-   * based on the player's associated token image or a default size is applied. - Adds the token to
-   * the appropriate tile pane corresponding to the player's current position.
-   *
-   * <p>The graphical token is represented as an {@link ImageView}, and its size is standardized to
-   * fit properly within the board's tiles.
+   * Updates the positions of player tokens on the board (only when animation is not in progress).
    */
   private void updatePlayerTokens() {
-    // Remove all tokens
+    // Only update if animation is not in progress
+    if (animator != null && animator.isAnimationInProgress()) {
+      return;
+    }
+
+    // Remove all tokens from tile panes
     tilePanes.values().forEach(pane -> pane.getChildren().removeIf(n -> n instanceof ImageView));
+
+    // Add tokens for each player
     getBoardGame()
         .getPlayers()
         .forEach(
             player -> {
               int pos = player.getCurrentTile() != null ? player.getCurrentTile().getId() : 0;
-              StackPane tilePane = tilePanes.get(pos);
-              ImageView token = playerTokens.get(player);
-              if (token == null) {
-                String tokenImage = player.getTokenImage();
-                if (tokenImage != null && !tokenImage.isEmpty()) {
-                  Image img = new Image(Objects.requireNonNull(
-                      getClass().getResourceAsStream("/tokens/" + tokenImage)));
-                  token = new ImageView(img);
-                  token.setFitWidth(32);
-                  token.setFitHeight(48);
-                } else {
-                  token = new ImageView();
-                  token.setFitWidth(32);
-                  token.setFitHeight(48);
+              ImageView token = getOrCreatePlayerToken(player);
+
+              // Use animator's method to properly place the token
+              if (animator != null) {
+                animator.moveTokenToTile(token, pos);
+              } else {
+                // Fallback: place directly in tile pane
+                StackPane tilePane = tilePanes.get(pos);
+                if (tilePane != null) {
+                  tilePane.getChildren().add(token);
                 }
-                playerTokens.put(player, token);
               }
-              tilePane.getChildren().add(token);
             });
   }
 
   /**
-   * Updates the state of the "Roll Dice" button and other related UI controls based on the current
-   * game state and player status.
-   *
-   * <p>This method performs the following: - Determines the current player and ensures the game is
-   * not in a "game over" state. - Evaluates whether the "Roll Dice" action is available by checking
-   * if the player is not awaiting actions like buying properties, paying rent, or currently in
-   * jail. - Enables or disables the "Roll Dice" button, "Buy" button, "Skip" button, "Pay Rent"
-   * button, "Jail Roll" button, and "Jail Pay" button accordingly to ensure proper gameplay flow
-   * and prevent invalid actions.
-   *
-   * <p>Conditions used to update the state of each button: - The "Roll Dice" button is enabled only
-   * when it is the current player's turn, the game is not over, and the player is not awaiting
-   * other actions or in jail
+   * Creates or retrieves a player token
+   */
+  private ImageView getOrCreatePlayerToken(Player player) {
+    ImageView token = playerTokens.get(player);
+    if (token == null) {
+      String tokenImage = player.getTokenImage();
+      if (tokenImage != null && !tokenImage.isEmpty()) {
+        try {
+          Image img = new Image(Objects.requireNonNull(
+              getClass().getResourceAsStream("/tokens/" + tokenImage)));
+          token = new ImageView(img);
+        } catch (Exception e) {
+          LOGGER.warning("Could not load token image: " + tokenImage + ", using default");
+          token = new ImageView();
+        }
+      } else {
+        token = new ImageView();
+      }
+
+      token.setFitWidth(24);
+      token.setFitHeight(36);
+      token.setPreserveRatio(true);
+      token.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 2, 0, 1, 1);");
+      token.toFront();
+
+      playerTokens.put(player, token);
+      playerTokensByName.put(player.getName(), token);
+    }
+    return token;
+  }
+
+  /**
+   * Updates button states based on game state and animation status.
    */
   private void updateRollDiceButtonState() {
     Player current = getBoardGame().getCurrentPlayer();
@@ -356,140 +500,62 @@ public class MonopolyGameUI extends JavaFXGameUI {
     boolean awaitingBuy = controller.isAwaitingPlayerAction();
     boolean awaitingRent = controller.isAwaitingRentAction();
     boolean inJail = controller.isCurrentPlayerInJail();
-    boolean rollDiceActive =
-        current != null && !isGameOver && !awaitingBuy && !awaitingRent && !inJail;
+    boolean animationInProgress = animator != null && animator.isAnimationInProgress();
+    boolean rollDiceActive = current != null && !isGameOver && !awaitingBuy && !awaitingRent && !inJail && !animationInProgress;
 
     rollDiceButton.setDisable(!rollDiceActive);
-    buyButton.setDisable(rollDiceActive || isGameOver || awaitingRent || inJail);
-    skipButton.setDisable(rollDiceActive || isGameOver || awaitingRent || inJail);
-    payRentButton.setDisable(rollDiceActive || isGameOver || awaitingBuy || inJail);
-    jailRollButton.setDisable(isGameOver || !inJail);
-    jailPayButton.setDisable(isGameOver || !inJail);
-  }
+    buyButton.setDisable(rollDiceActive || isGameOver || awaitingRent || inJail || animationInProgress);
+    skipButton.setDisable(rollDiceActive || isGameOver || awaitingRent || inJail || animationInProgress);
+    payRentButton.setDisable(rollDiceActive || isGameOver || awaitingBuy || inJail || animationInProgress);
+    jailRollButton.setDisable(isGameOver || !inJail || animationInProgress);
+    jailPayButton.setDisable(isGameOver || !inJail || animationInProgress);
 
-  /**
-   * Handles the logic for the "Roll Dice" action in the Monopoly game user interface.
-   *
-   * <p>This method integrates with the game controller to process the player's dice roll, updates
-   * the dice display in the UI, and ensures that correct dice values are shown based on the result
-   * of the roll.
-   *
-   * <p>The following operations are performed: 1. Invokes the game controller to manage player
-   * movement logic. 2. Retrieves the last dice roll values from the game controller. 3. Updates the
-   * dice view to display the retrieved dice values. If the retrieved values contain: - Two dice
-   * values, they are displayed directly. - A single dice value, it is duplicated to represent both
-   * dice. - Null or invalid values, defaults both dice to a value of 1.
-   */
-  private void handleRollDice() {
-    controller.handlePlayerMove();
-    // Show dice value
-    int[] diceValues = controller.getLastDiceRolls();
-    if (diceValues != null && diceValues.length == 2) {
-      diceView.setValues(diceValues[0], diceValues[1]);
-    } else if (diceValues != null && diceValues.length == 1) {
-      diceView.setValues(diceValues[0], diceValues[0]);
-    } else {
-      diceView.setValues(1, 1);
+    // Update button text based on state
+    if (awaitingBuy) {
+      buyButton.setText("Buy Property");
+      skipButton.setText("Skip Purchase");
+    } else if (awaitingRent) {
+      payRentButton.setText("Pay Rent");
     }
-    // Optionally, display the sum somewhere if needed
   }
 
   /**
-   * Handles the buy property action within the Monopoly game user interface.
-   *
-   * <p>This method delegates the responsibility of managing the purchase of the property that the
-   * current player has landed on to the game controller. If the action is valid based on the game
-   * state, the controller ensures the following:
-   *
-   * <p>- The current player successfully acquires the property. - The game state is updated to
-   * reflect the purchase. - Turn progression and transition to the next player are handled
-   * appropriately.
-   *
-   * <p>This method is triggered when the "Buy" button is interacted with, and it facilitates the
-   * smooth integration between the user interface and the game's core logic defined in the
-   * controller.
+   * Handles the buy property action.
    */
   private void handleBuyProperty() {
     controller.buyPropertyForCurrentPlayer();
   }
 
   /**
-   * Handles the "Skip Turn" action in the Monopoly game user interface.
-   *
-   * <p>This method delegates the responsibility of skipping the current player's action to the game
-   * controller. It ensures that the game progresses smoothly by performing the following
-   * operations:
-   *
-   * <p>- Skips the current player's turn by invoking the corresponding method in the controller. -
-   * Advances the game state to transition to the next player's turn. - Allows the game logic to
-   * resolve any pending actions or state updates associated with skipping the current turn.
-   *
-   * <p>This method is typically invoked when the "Skip" button is clicked in the user interface,
-   * signaling that the current player wishes to forgo their action or is unable to perform an
-   * action.
+   * Handles the skip action.
    */
   private void handleSkipAction() {
     controller.skipActionForCurrentPlayer();
   }
 
   /**
-   * Handles the action to process the current player's obligation to pay rent in the Monopoly game.
-   *
-   * <p>This method delegates the responsibility to the game controller to manage and execute the
-   * rent payment logic for the current player. It ensures that the game state is updated
-   * accordingly and validates that the necessary deductions or transactions occur based on the game
-   * rules.
-   *
-   * <p>Operations performed by this method include: - Invoking the controller's logic to deduct
-   * rent from the current player's balance. - Updating the game state to reflect the rent payment.
-   * - Facilitating smooth gameplay progression post rent payment.
-   *
-   * <p>This method is typically triggered when the "Pay Rent" button is interacted with in the user
-   * interface.
+   * Handles the pay rent action.
    */
   private void handlePayRent() {
     controller.payRentForCurrentPlayer();
   }
 
   /**
-   * Handles the action of rolling the dice when a player is in jail. This method delegates the
-   * handling of the dice roll to the controller's {@code handleJailRollDice} method, which manages
-   * the logic for determining the player's outcome based on the roll while in jail.
+   * Handles jail roll action.
    */
   private void handleJailRoll() {
     controller.handleJailRollDice();
   }
 
   /**
-   * Handles the action for processing jail pay. This method delegates the operation to the
-   * controller's handleJailPay method.
+   * Handles jail pay action.
    */
   private void handleJailPay() {
     controller.handleJailPay();
   }
 
   /**
-   * Initializes the game board by creating and placing the tile panes in a circular formation (top
-   * row, right column, bottom row, and left column). For larger boards, adds a center area with
-   * decorative "MONOPOLY" text.
-   *
-   * <ul>
-   *   <li>Clears the existing board and tile panes.
-   *   <li>Determines the size and grid dimensions of the board based on the game's configuration.
-   *   <li>Populates the board in the following order:
-   *       <ul>
-   *         <li>Top row: Places tiles from left to right.
-   *         <li>Right column: Places tiles from top to bottom (excluding the corners).
-   *         <li>Bottom row: Places tiles from right to left.
-   *         <li>Left column: Places tiles from bottom to top (excluding the corners).
-   *       </ul>
-   *   <li>Adds a decorative center area for larger boards, with "MONOPOLY" text.
-   *   <li>Updates the player information panel, player tokens, and the state of the roll dice
-   *       button.
-   * </ul>
-   *
-   * <p>This method ensures the board is correctly initialized and displayed according to the game's
-   * current configuration.
+   * Initializes the game board layout.
    */
   private void initializeBoard() {
     boardPane.getChildren().clear();
@@ -497,6 +563,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
     int boardSize = getBoardGame().getBoard().getSizeOfBoard();
     int gridDim = getGridDimForBoardSize(boardSize);
     int[] tileIndex = {0};
+
     // Top row (left to right)
     java.util.stream.IntStream.range(0, gridDim)
         .filter(col -> tileIndex[0] < boardSize)
@@ -508,6 +575,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
               tilePanes.put(tileIndex[0], tilePane);
               tileIndex[0]++;
             });
+
     // Right column (top to bottom, excluding top)
     java.util.stream.IntStream.range(1, gridDim - 1)
         .filter(row -> tileIndex[0] < boardSize)
@@ -519,6 +587,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
               tilePanes.put(tileIndex[0], tilePane);
               tileIndex[0]++;
             });
+
     // Bottom row (right to left)
     java.util.stream.IntStream.iterate(gridDim - 1, col -> col >= 0, col -> col - 1)
         .filter(col -> tileIndex[0] < boardSize)
@@ -530,6 +599,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
               tilePanes.put(tileIndex[0], tilePane);
               tileIndex[0]++;
             });
+
     // Left column (bottom to top, excluding top and bottom)
     java.util.stream.IntStream.iterate(gridDim - 2, row -> row > 0, row -> row - 1)
         .filter(row -> tileIndex[0] < boardSize)
@@ -541,40 +611,33 @@ public class MonopolyGameUI extends JavaFXGameUI {
               tilePanes.put(tileIndex[0], tilePane);
               tileIndex[0]++;
             });
+
     // Create a center area with MONOPOLY text
     if (gridDim > 3) {
-      // Create a pane spanning the entire center area
       StackPane centerArea = new StackPane();
       Rectangle centerRect =
           new Rectangle(
               (gridDim - 2) * 70 + (gridDim - 3) * 5, (gridDim - 2) * 70 + (gridDim - 3) * 5);
       centerRect.getStyleClass().add("monopoly-center-area");
 
-      // Create MONOPOLY text
       javafx.scene.text.Text monopolyText = new javafx.scene.text.Text("MONOPOLY");
       monopolyText.getStyleClass().add("monopoly-center-text");
 
       centerArea.getChildren().addAll(centerRect, monopolyText);
-
-      // Add to center of grid, spanning the appropriate number of cells
       boardPane.add(centerArea, 1, 1, gridDim - 2, gridDim - 2);
       GridPane.setHalignment(centerArea, javafx.geometry.HPos.CENTER);
       GridPane.setValignment(centerArea, javafx.geometry.VPos.CENTER);
     }
+
     updatePlayerInfoPanel();
     updatePlayerTokens();
     updateRollDiceButtonState();
   }
 
   /**
-   * Calculates the smallest grid dimension n such that the perimeter of a grid with side length
-   * (n-1) is greater than or equal to the provided board size.
-   *
-   * @param boardSize the total size of the board, used to determine the required grid dimension
-   * @return the smallest integer n such that 4 * (n - 1) >= boardSize
+   * Calculates the grid dimension for a given board size.
    */
   private int getGridDimForBoardSize(int boardSize) {
-    // Find the smallest n such that 4*(n-1) >= boardSize
     int n = 3;
     while (4 * (n - 1) < boardSize) {
       n++;
@@ -583,43 +646,30 @@ public class MonopolyGameUI extends JavaFXGameUI {
   }
 
   /**
-   * Creates a StackPane representation of a tile for display in a game board UI. The appearance of
-   * the tile varies based on its type. Property tiles include a color bar and display their price,
-   * while other tiles have unique styling and labels based on their specific type (e.g., GoTile,
-   * JailTile).
-   *
-   * @param tile the tile to be represented as a graphical StackPane
-   * @return the StackPane representation of the given tile, styled appropriately
+   * Creates a tile pane for the board.
    */
   private StackPane createTilePane(Tile tile) {
     StackPane pane = new StackPane();
     pane.setPrefSize(70, 70);
 
     if (tile instanceof PropertyTile pt) {
-      // Create a more authentic property tile with a color bar at the top
       VBox propertyContainer = new VBox();
       propertyContainer.getStyleClass().add("property-tile-container");
 
-      // Create the color bar at the top
       Rectangle colorBar = new Rectangle(70, 15);
       colorBar.getStyleClass().addAll("property-color-bar", "property-group-" + pt.getGroup());
 
-      // Create the main part of the tile
       Rectangle mainRect = new Rectangle(70, 55);
       mainRect.getStyleClass().add("monopoly-tile");
       mainRect.setFill(Color.WHITE);
 
-      // Create the property information
       Label label = new Label("$" + pt.getPrice());
       label.getStyleClass().add("monopoly-tile-label");
 
-      // Add to container
       StackPane mainArea = new StackPane(mainRect, label);
       propertyContainer.getChildren().addAll(colorBar, mainArea);
-
       pane.getChildren().add(propertyContainer);
     } else {
-      // For non-property tiles, create a simple rectangular tile
       Rectangle rect = new Rectangle(70, 70);
       rect.getStyleClass().add("monopoly-tile");
       Label label = new Label();
@@ -649,30 +699,23 @@ public class MonopolyGameUI extends JavaFXGameUI {
   }
 
   /**
-   * Sets the board game instance for this UI and updates its state accordingly. It unregisters this
-   * UI as an observer from the previous board game (if any) and registers it as an observer for the
-   * new board game. Finally, it initializes and updates the board based on the new board game.
-   *
-   * @param boardGame the new instance of the BoardGame to be set
+   * Sets the board game and updates the UI.
    */
   public void setBoardGame(BoardGame boardGame) {
-    // Remove this UI as observer from the old boardGame if needed
     if (this.boardGame != null) {
       this.boardGame.removeObserver(this);
     }
     this.boardGame = boardGame;
-    // Register as observer to the new boardGame
     this.boardGame.addObserver(this);
     initializeBoard();
     update();
   }
 
   /**
-   * Retrieves the root layout of the application.
-   *
-   * @return the main layout represented by a BorderPane object.
+   * Gets the root layout.
    */
   public BorderPane getRoot() {
     return mainLayout;
   }
+
 }
