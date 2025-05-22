@@ -85,7 +85,7 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
         controller,
         playerNames,
         mediator,
-        "/snakes_and_ladders_board.jpeg");
+        "/snakeandladder_boardgame/snakes_and_ladders_board.jpeg");
   }
 
   /**
@@ -173,7 +173,8 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
     topBar.setAlignment(Pos.CENTER_LEFT);
     Button backButton = CommonButtons.backToMainMenu(primaryStage, false, controller);
     backButton.getStyleClass().add("game-control-button");
-    topBar.getChildren().addAll(backButton, saveButton);
+    Button saveBtn = CommonButtons.saveGameBtn(false, controller, new Label());
+    topBar.getChildren().addAll(backButton, saveBtn);
     root.setTop(topBar);
 
     // --- Bottom bar: Dice view and Roll button ---

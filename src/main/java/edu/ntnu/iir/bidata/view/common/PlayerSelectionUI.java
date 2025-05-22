@@ -206,7 +206,7 @@ public class PlayerSelectionUI {
     root.setBottom(bottomBox);
 
     Scene scene = new Scene(root, 600, 700);
-    scene.getStylesheets().add(getClass().getResource("/common.css").toExternalForm());
+    scene.getStylesheets().add(getClass().getResource("/style/common.css").toExternalForm());
     stage.setScene(scene);
 
     // Add double-click functionality for quicker selection
@@ -405,7 +405,7 @@ public class PlayerSelectionUI {
         });
 
     Scene scene = new Scene(layout, 400, 300);
-    scene.getStylesheets().add(getClass().getResource("/common.css").toExternalForm());
+    scene.getStylesheets().add(getClass().getResource("/style/common.css").toExternalForm());
     addDialog.setScene(scene);
     addDialog.showAndWait();
   }
@@ -562,7 +562,7 @@ public class PlayerSelectionUI {
         });
 
     Scene scene = new Scene(layout, 400, 200);
-    scene.getStylesheets().add(getClass().getResource("/common.css").toExternalForm());
+    scene.getStylesheets().add(getClass().getResource("/style/common.css").toExternalForm());
     tokenDialog.setScene(scene);
     tokenDialog.showAndWait();
   }
