@@ -153,14 +153,14 @@ public class MainMenuUI {
   private GridPane createSnakesAndLaddersGrid() {
     GridPane boardGrid = new GridPane();
     int size = 6;
-    for (int i = 0; i < size; i++) {
-      for (int j = 0; j < size; j++) {
-        Region sq = new Region();
-        sq.setPrefSize(20, 20);
-        sq.setStyle("-fx-background-color: " + (((i + j) % 2 == 0) ? "#e0ffe0" : "#7ed957") + ";");
-        boardGrid.add(sq, j, i);
-      }
-    }
+    java.util.stream.IntStream.range(0, size).forEach(i -> {
+        java.util.stream.IntStream.range(0, size).forEach(j -> {
+            Region sq = new Region();
+            sq.setPrefSize(20, 20);
+            sq.setStyle("-fx-background-color: " + (((i + j) % 2 == 0) ? "#e0ffe0" : "#7ed957") + ";");
+            boardGrid.add(sq, j, i);
+        });
+    });
     return boardGrid;
   }
 
@@ -169,39 +169,30 @@ public class MainMenuUI {
    */
   private GridPane createLudoGrid() {
     GridPane ludoGrid = new GridPane();
-
-    // Create a simplified Ludo board representation
     Color[] playerColors = {
         Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW
     };
-
     int size = 5;
-    for (int i = 0; i < size; i++) {
-      for (int j = 0; j < size; j++) {
-        Region sq = new Region();
-        sq.setPrefSize(20, 20);
-
-        // Corner regions are player bases
-        if ((i == 0 && j == 0) || (i == 0 && j == size-1) ||
-            (i == size-1 && j == 0) || (i == size-1 && j == size-1)) {
-          int colorIndex = 0;
-          if (i == 0 && j == 0) colorIndex = 0;
-          else if (i == 0 && j == size-1) colorIndex = 1;
-          else if (i == size-1 && j == 0) colorIndex = 2;
-          else colorIndex = 3;
-
-          sq.setStyle("-fx-background-color: " + toHexString(playerColors[colorIndex]) + ";");
-        } else if (i == size/2 && j == size/2) {
-          // Center square
-          sq.setStyle("-fx-background-color: white;");
-        } else {
-          // Path squares
-          sq.setStyle("-fx-background-color: " + (((i + j) % 2 == 0) ? "#fff0f0" : "#f0f0ff") + ";");
-        }
-        ludoGrid.add(sq, j, i);
-      }
-    }
-
+    java.util.stream.IntStream.range(0, size).forEach(i -> {
+        java.util.stream.IntStream.range(0, size).forEach(j -> {
+            Region sq = new Region();
+            sq.setPrefSize(20, 20);
+            if ((i == 0 && j == 0) || (i == 0 && j == size-1) ||
+                (i == size-1 && j == 0) || (i == size-1 && j == size-1)) {
+                int colorIndex = 0;
+                if (i == 0 && j == 0) colorIndex = 0;
+                else if (i == 0 && j == size-1) colorIndex = 1;
+                else if (i == size-1 && j == 0) colorIndex = 2;
+                else colorIndex = 3;
+                sq.setStyle("-fx-background-color: " + toHexString(playerColors[colorIndex]) + ";");
+            } else if (i == size/2 && j == size/2) {
+                sq.setStyle("-fx-background-color: white;");
+            } else {
+                sq.setStyle("-fx-background-color: " + (((i + j) % 2 == 0) ? "#fff0f0" : "#f0f0ff") + ";");
+            }
+            ludoGrid.add(sq, j, i);
+        });
+    });
     return ludoGrid;
   }
 
@@ -214,45 +205,32 @@ public class MainMenuUI {
     VBox stack = new VBox(8);
     stack.setPadding(new Insets(10, 20, 10, 10));
     stack.setAlignment(Pos.TOP_LEFT);
-
-    // Only add the title container if text is not empty
     if (text != null && !text.isEmpty()) {
-      // Create a container for the title at the top
-      VBox titleContainer = new VBox();
-      titleContainer.setAlignment(Pos.CENTER);
-      titleContainer.setPadding(new Insets(0, 0, 10, 0));
-
-      // Create the title label
-      Label titleLabel = new Label(text);
-      titleLabel.getStyleClass().add("main-menu-logo-title");
-      titleContainer.getChildren().add(titleLabel);
-
-      // Add title to the top of our stack
-      stack.getChildren().add(titleContainer);
+        VBox titleContainer = new VBox();
+        titleContainer.setAlignment(Pos.CENTER);
+        titleContainer.setPadding(new Insets(0, 0, 10, 0));
+        Label titleLabel = new Label(text);
+        titleLabel.getStyleClass().add("main-menu-logo-title");
+        titleContainer.getChildren().add(titleLabel);
+        stack.getChildren().add(titleContainer);
     }
-
-    // Then add colored regions
-    for (int i = 0; i < heights.length; i++) {
-      Region r = new Region();
-      int w = (i % 3 == 0 ? 40 : (i % 3 == 1 ? 30 : 60));
-      r.setPrefSize(w, heights[i]);
-      r.setStyle(
-          "-fx-background-radius: 15; " +
-              "-fx-background-color: " + toHexString(colors[i % colors.length]) + ";"
-      );
-      stack.getChildren().add(r);
-    }
-
+    java.util.stream.IntStream.range(0, heights.length).forEach(i -> {
+        Region r = new Region();
+        int w = (i % 3 == 0 ? 40 : (i % 3 == 1 ? 30 : 60));
+        r.setPrefSize(w, heights[i]);
+        r.setStyle(
+            "-fx-background-radius: 15; " +
+                "-fx-background-color: " + toHexString(colors[i % colors.length]) + ";"
+        );
+        stack.getChildren().add(r);
+    });
     StackPane pane = new StackPane(stack);
     pane.setPrefWidth(180);
     pane.setAlignment(Pos.CENTER);
-
-    // Make the entire pane clickable if onClick is provided
     if (onClick != null) {
-      pane.setOnMouseClicked(e -> onClick.run());
-      pane.setCursor(Cursor.HAND);
+        pane.setOnMouseClicked(e -> onClick.run());
+        pane.setCursor(Cursor.HAND);
     }
-
     return pane;
   }
 
@@ -273,19 +251,19 @@ public class MainMenuUI {
   private Region createMonopolyGrid() {
     GridPane grid = new GridPane();
     grid.setPrefSize(60, 60);
-    for (int i = 0; i < 5; i++) {
-      for (int j = 0; j < 5; j++) {
-        Rectangle rect = new Rectangle(12, 12);
-        if (i == 0 || i == 4 || j == 0 || j == 4) {
-          rect.setFill(Color.web("#3b3b6d"));
-        } else {
-          rect.setFill(Color.web("#f7e6c7"));
-        }
-        rect.setArcWidth(2);
-        rect.setArcHeight(2);
-        grid.add(rect, j, i);
-      }
-    }
+    java.util.stream.IntStream.range(0, 5).forEach(i -> {
+        java.util.stream.IntStream.range(0, 5).forEach(j -> {
+            Rectangle rect = new Rectangle(12, 12);
+            if (i == 0 || i == 4 || j == 0 || j == 4) {
+                rect.setFill(Color.web("#3b3b6d"));
+            } else {
+                rect.setFill(Color.web("#f7e6c7"));
+            }
+            rect.setArcWidth(2);
+            rect.setArcHeight(2);
+            grid.add(rect, j, i);
+        });
+    });
     return grid;
   }
 }

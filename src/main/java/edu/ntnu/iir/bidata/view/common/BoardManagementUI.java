@@ -124,10 +124,10 @@ public class BoardManagementUI {
     if (savedGamesDir.exists() && savedGamesDir.isDirectory()) {
       java.io.File[] savedGames = savedGamesDir.listFiles((dir, name) -> name.endsWith(".json"));
       if (savedGames != null) {
-        for (java.io.File game : savedGames) {
+        java.util.Arrays.stream(savedGames).forEach(game -> {
           String gameName = game.getName().replace(".json", "");
           gameList.getItems().add(gameName);
-        }
+        });
       }
     }
     dialog.getDialogPane().setContent(gameList);

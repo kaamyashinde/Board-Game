@@ -214,8 +214,8 @@ public class MonopolyGameUI extends JavaFXGameUI {
   private void updatePlayerInfoPanel() {
     LOGGER.info("Clearing playerInfoPanel and updating player info...");
     playerInfoPanel.getChildren().clear();
-    int playerCount = 0;
-    for (Player player : boardGame.getPlayers()) {
+    int[] playerCount = {0};
+    boardGame.getPlayers().forEach(player -> {
       LOGGER.info("Processing player: " + player.getName() + " of class: " + player.getClass().getName());
       if (player instanceof SimpleMonopolyPlayer) {
         SimpleMonopolyPlayer monopolyPlayer = (SimpleMonopolyPlayer) player;
@@ -235,19 +235,16 @@ public class MonopolyGameUI extends JavaFXGameUI {
         playerInfoPanel.getChildren().add(playerBox);
         LOGGER.info(String.format("Added player to panel: name=%s, money=%d, position=%d, properties=%d",
             monopolyPlayer.getName(), monopolyPlayer.getMoney(), monopolyPlayer.getCurrentTile().getId(), monopolyPlayer.getOwnedProperties().size()));
-        playerCount++;
+        playerCount[0]++;
       }
-    }
-    LOGGER.info("Total players added to playerInfoPanel: " + playerCount);
+    });
+    LOGGER.info("Total players added to playerInfoPanel: " + playerCount[0]);
   }
 
   private void updatePlayerTokens() {
     // Remove all tokens
-    for (StackPane pane : tilePanes.values()) {
-      pane.getChildren().removeIf(n -> n instanceof ImageView);
-    }
-    // Add tokens for each player
-    for (Player player : getBoardGame().getPlayers()) {
+    tilePanes.values().forEach(pane -> pane.getChildren().removeIf(n -> n instanceof ImageView));
+    getBoardGame().getPlayers().forEach(player -> {
       int pos = player.getCurrentTile() != null ? player.getCurrentTile().getId() : 0;
       StackPane tilePane = tilePanes.get(pos);
       ImageView token = playerTokens.get(player);
@@ -266,7 +263,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
         playerTokens.put(player, token);
       }
       tilePane.getChildren().add(token);
-    }
+    });
   }
 
   private void updateRollDiceButtonState() {
@@ -316,64 +313,58 @@ public class MonopolyGameUI extends JavaFXGameUI {
     tilePanes.clear();
     int boardSize = getBoardGame().getBoard().getSizeOfBoard();
     int gridDim = getGridDimForBoardSize(boardSize);
-    int tileIndex = 0;
+    int[] tileIndex = {0};
     // Top row (left to right)
-    for (int col = 0; col < gridDim && tileIndex < boardSize; col++) {
-      Tile tile = getBoardGame().getBoard().getTile(tileIndex);
+    java.util.stream.IntStream.range(0, gridDim).filter(col -> tileIndex[0] < boardSize).forEach(col -> {
+      Tile tile = getBoardGame().getBoard().getTile(tileIndex[0]);
       StackPane tilePane = createTilePane(tile);
       boardPane.add(tilePane, col, 0);
-      tilePanes.put(tileIndex, tilePane);
-      tileIndex++;
-    }
+      tilePanes.put(tileIndex[0], tilePane);
+      tileIndex[0]++;
+    });
     // Right column (top to bottom, excluding top)
-    for (int row = 1; row < gridDim - 1 && tileIndex < boardSize; row++) {
-      Tile tile = getBoardGame().getBoard().getTile(tileIndex);
+    java.util.stream.IntStream.range(1, gridDim - 1).filter(row -> tileIndex[0] < boardSize).forEach(row -> {
+      Tile tile = getBoardGame().getBoard().getTile(tileIndex[0]);
       StackPane tilePane = createTilePane(tile);
       boardPane.add(tilePane, gridDim - 1, row);
-      tilePanes.put(tileIndex, tilePane);
-      tileIndex++;
-    }
+      tilePanes.put(tileIndex[0], tilePane);
+      tileIndex[0]++;
+    });
     // Bottom row (right to left)
-    for (int col = gridDim - 1; col >= 0 && tileIndex < boardSize; col--) {
-      Tile tile = getBoardGame().getBoard().getTile(tileIndex);
-      StackPane tilePane = createTilePane(tile);
-      boardPane.add(tilePane, col, gridDim - 1);
-      tilePanes.put(tileIndex, tilePane);
-      tileIndex++;
-    }
+    java.util.stream.IntStream.iterate(gridDim - 1, col -> col >= 0, col -> col - 1)
+      .filter(col -> tileIndex[0] < boardSize)
+      .forEach(col -> {
+        Tile tile = getBoardGame().getBoard().getTile(tileIndex[0]);
+        StackPane tilePane = createTilePane(tile);
+        boardPane.add(tilePane, col, gridDim - 1);
+        tilePanes.put(tileIndex[0], tilePane);
+        tileIndex[0]++;
+      });
     // Left column (bottom to top, excluding top and bottom)
-    for (int row = gridDim - 2; row > 0 && tileIndex < boardSize; row--) {
-      Tile tile = getBoardGame().getBoard().getTile(tileIndex);
-      StackPane tilePane = createTilePane(tile);
-      boardPane.add(tilePane, 0, row);
-      tilePanes.put(tileIndex, tilePane);
-      tileIndex++;
-    }
-
+    java.util.stream.IntStream.iterate(gridDim - 2, row -> row > 0, row -> row - 1)
+      .filter(row -> tileIndex[0] < boardSize)
+      .forEach(row -> {
+        Tile tile = getBoardGame().getBoard().getTile(tileIndex[0]);
+        StackPane tilePane = createTilePane(tile);
+        boardPane.add(tilePane, 0, row);
+        tilePanes.put(tileIndex[0], tilePane);
+        tileIndex[0]++;
+      });
     // Create a center area with MONOPOLY text
     if (gridDim > 3) {
-      // Create a pane spanning the entire center area
       StackPane centerArea = new StackPane();
-
-      // Create background rectangle
       Rectangle centerRect = new Rectangle(
-          (gridDim - 2) * 70 + (gridDim - 3) * 5, // Width accounting for tile sizes and gaps
-          (gridDim - 2) * 70 + (gridDim - 3) * 5  // Height accounting for tile sizes and gaps
+        (gridDim - 2) * 70 + (gridDim - 3) * 5,
+        (gridDim - 2) * 70 + (gridDim - 3) * 5
       );
       centerRect.getStyleClass().add("monopoly-center-area");
-
-      // Create MONOPOLY text
       javafx.scene.text.Text monopolyText = new javafx.scene.text.Text("MONOPOLY");
       monopolyText.getStyleClass().add("monopoly-center-text");
-
       centerArea.getChildren().addAll(centerRect, monopolyText);
-
-      // Add to center of grid, spanning the appropriate number of cells
       boardPane.add(centerArea, 1, 1, gridDim - 2, gridDim - 2);
       GridPane.setHalignment(centerArea, javafx.geometry.HPos.CENTER);
       GridPane.setValignment(centerArea, javafx.geometry.VPos.CENTER);
     }
-
     updatePlayerInfoPanel();
     updatePlayerTokens();
     updateRollDiceButtonState();

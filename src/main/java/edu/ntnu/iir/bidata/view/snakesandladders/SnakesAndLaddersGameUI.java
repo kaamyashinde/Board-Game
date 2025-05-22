@@ -193,9 +193,7 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
       boardImageOffsetX = offset.getX();
       boardImageOffsetY = offset.getY();
       // After offset is known, update all tokens to correct positions
-      for (Player player : playerNames) {
-        updatePlayerPosition(player.getName());
-      }
+      playerNames.forEach(player -> updatePlayerPosition(player.getName()));
     });
   }
 
@@ -206,40 +204,28 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
     playerPanel.getStyleClass().add("snl-player-panel");
     playerPanel.setPrefWidth(250);
     playerPanel.setAlignment(Pos.TOP_LEFT);
-
-    // Add status label at the top of the player panel
     statusLabel.setText("Game Started!");
     statusLabel.getStyleClass().add("snl-game-status-label");
     statusLabel.setWrapText(true);
     playerPanel.getChildren().add(statusLabel);
     playerPanel.getChildren().add(new Label("--------------------"));
-
-    // Create player tokens and labels based on selected players
-    for (int i = 0; i < playerNames.size(); i++) {
+    java.util.stream.IntStream.range(0, playerNames.size()).forEach(i -> {
       String playerName = playerNames.get(i).getName();
-
-      // Create player info section
       VBox playerBox = new VBox(5);
       playerBox.getStyleClass().add("snl-player-info-box");
-
       Label playerLabel = new Label(playerName.toUpperCase() + ":");
       playerLabel.getStyleClass().add("snl-player-name-label");
-
-      // Position label
       int actualPosition = playerNames.get(i).getCurrentPosition();
       Label posLabel = new Label("at position: " + actualPosition);
       playerPositionLabels.put(playerName, posLabel);
-
       ImageView token = createPlayerToken(playerNames.get(i));
       playerTokenMap.put(playerName, token);
-
       HBox nameBox = new HBox(10);
       nameBox.setAlignment(Pos.CENTER_LEFT);
       nameBox.getChildren().addAll(token, playerLabel);
-
       playerBox.getChildren().addAll(nameBox, posLabel);
       playerPanel.getChildren().add(playerBox);
-    }
+    });
   }
 
   /**
@@ -273,10 +259,10 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
    */
   private void initializePlayerPositions() {
     LOGGER.info("Initializing player positions");
-    for (Player player : playerNames) {
+    playerNames.forEach(player -> {
       int position = player.getCurrentPosition();
       movePlayerToken(player.getName(), position);
-    }
+    });
   }
 
   /**
@@ -363,9 +349,7 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
   @Override
   public void refreshUIFromBoardGame() {
     javafx.application.Platform.runLater(() -> {
-      for (Player player : playerNames) {
-        updatePlayerPosition(player.getName());
-      }
+      playerNames.forEach(player -> updatePlayerPosition(player.getName()));
       if (controller != null) {
         String currentPlayer = controller.getCurrentSnakesAndLaddersPlayerName();
         updateCurrentPlayerIndicator(currentPlayer);

@@ -103,7 +103,7 @@ public class SnakesAndLaddersMenuUI {
       Color.web("#bdebc8")
     };
     int[] heights = {40, 30, 40, 20, 30, 20, 40, 30, 20, 40, 30};
-    for (int i = 0; i < 11; i++) {
+    java.util.stream.IntStream.range(0, 11).forEach(i -> {
       Region r = new Region();
       r.setPrefSize((i % 3 == 0 ? 40 : (i % 3 == 1 ? 30 : 60)), heights[i]);
       r.setStyle(
@@ -111,7 +111,7 @@ public class SnakesAndLaddersMenuUI {
               + toHexString(greens[i % greens.length])
               + ";");
       logoStack.getChildren().add(r);
-    }
+    });
     return logoStack;
   }
 

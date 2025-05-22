@@ -219,7 +219,7 @@ public class PlayerSelectionUI {
       availablePlayersList.clear();
 
       // Add all loaded players to available list
-      for (Player player : loadedPlayers) {
+      loadedPlayers.forEach(player -> {
         String name = player.getName();
         String token = player.getTokenImage();
         if (!name.isEmpty() && !availablePlayersList.contains(name)) {
@@ -228,7 +228,7 @@ public class PlayerSelectionUI {
             playerTokenMap.put(name, token);
           }
         }
-      }
+      });
 
       inputStream.close();
       statusLabel.setText("Loaded " + availablePlayersList.size() + " available players. Select the ones you want to play with.");
@@ -313,13 +313,13 @@ public class PlayerSelectionUI {
     tokenBox.setAlignment(Pos.CENTER);
     // Only exclude tokens already used by selected players
     java.util.Set<String> usedTokens = new java.util.HashSet<>();
-    for (String selectedPlayer : selectedPlayersList) {
+    selectedPlayersList.forEach(selectedPlayer -> {
       String usedToken = playerTokenMap.get(selectedPlayer);
       if (usedToken != null) {
         usedTokens.add(usedToken);
       }
-    }
-    for (String token : availableTokens) {
+    });
+    availableTokens.forEach(token -> {
       if (!usedTokens.contains(token)) {
         RadioButton rb = new RadioButton();
         rb.setToggleGroup(tokenGroup);
@@ -330,7 +330,7 @@ public class PlayerSelectionUI {
         rb.setUserData(token);
         tokenBox.getChildren().add(rb);
       }
-    }
+    });
 
     Button addButton = createStyledButton("ADD", 120, 40);
 
@@ -353,13 +353,13 @@ public class PlayerSelectionUI {
         return;
       }
       // Only check for token conflict among selected players
-      for (String selectedPlayer : selectedPlayersList) {
+      selectedPlayersList.forEach(selectedPlayer -> {
         String usedToken = playerTokenMap.get(selectedPlayer);
         if (token.equals(usedToken)) {
           statusLabel.setText("Token already taken!");
           return;
         }
-      }
+      });
       availablePlayersList.add(name);
       playerTokenMap.put(name, token);
       statusLabel.setText("Added " + name + " to available players with token " + token);
@@ -390,13 +390,13 @@ public class PlayerSelectionUI {
     tokenBox.setAlignment(Pos.CENTER);
     // Only exclude tokens already used by selected players
     java.util.Set<String> usedTokens = new java.util.HashSet<>();
-    for (String selectedPlayer : selectedPlayersList) {
+    selectedPlayersList.forEach(selectedPlayer -> {
       String usedToken = playerTokenMap.get(selectedPlayer);
       if (usedToken != null) {
         usedTokens.add(usedToken);
       }
-    }
-    for (String token : availableTokens) {
+    });
+    availableTokens.forEach(token -> {
       if (!usedTokens.contains(token)) {
         RadioButton rb = new RadioButton();
         rb.setToggleGroup(tokenGroup);
@@ -407,7 +407,7 @@ public class PlayerSelectionUI {
         rb.setUserData(token);
         tokenBox.getChildren().add(rb);
       }
-    }
+    });
     Button selectButton = createStyledButton("SELECT", 120, 40);
     layout.getChildren().addAll(tokenLabel, tokenBox, selectButton);
 

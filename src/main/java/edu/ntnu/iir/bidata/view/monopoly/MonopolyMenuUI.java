@@ -314,16 +314,16 @@ public class MonopolyMenuUI {
    */
   private void setUpLogoStackHeight(Color[] colors, VBox logoStack) {
     int[] heights = {40, 30, 40, 20, 30, 20, 40, 30, 20, 40, 30};
-    for (int i = 0; i < 11; i++) {
-      Region r = new Region();
-      int operation = i % 3 == 1 ? 30 : 60;
-      r.setPrefSize((i % 3 == 0 ? 40 : operation), heights[i]);
-      r.setStyle(
-          "-fx-background-radius: 15; -fx-background-color: "
-              + toHexString(colors[i % colors.length])
-              + ";");
-      logoStack.getChildren().add(r);
-    }
+    java.util.stream.IntStream.range(0, 11).forEach(i -> {
+        Region r = new Region();
+        int operation = i % 3 == 1 ? 30 : 60;
+        r.setPrefSize((i % 3 == 0 ? 40 : operation), heights[i]);
+        r.setStyle(
+            "-fx-background-radius: 15; -fx-background-color: "
+                + toHexString(colors[i % colors.length])
+                + ";");
+        logoStack.getChildren().add(r);
+    });
   }
 
   /**

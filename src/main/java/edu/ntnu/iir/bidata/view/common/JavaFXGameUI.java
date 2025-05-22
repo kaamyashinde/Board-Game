@@ -168,11 +168,7 @@ public abstract class JavaFXGameUI implements Observer {
     if (token != null) {
       int position = player.getCurrentTile().getId();
       StackPane tilePane = tilePanes.get(position);
-
-      for (StackPane pane : tilePanes.values()) {
-        pane.getChildren().remove(token);
-      }
-
+      tilePanes.values().forEach(pane -> pane.getChildren().remove(token));
       tilePane.getChildren().add(token);
     }
   }
@@ -239,9 +235,7 @@ public abstract class JavaFXGameUI implements Observer {
 
   public void updateBoard() {
     Platform.runLater(() -> {
-      for (Player player : playerTokens.keySet()) {
-        updatePlayerPosition(player);
-      }
+      playerTokens.keySet().forEach(this::updatePlayerPosition);
     });
   }
 

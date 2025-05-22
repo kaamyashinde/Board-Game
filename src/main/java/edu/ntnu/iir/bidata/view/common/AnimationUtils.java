@@ -74,7 +74,7 @@ public class AnimationUtils {
     Timeline timeline = new Timeline();
     int frames = 8; // Number of "rolls" before settling
 
-    for (int i = 0; i < frames; i++) {
+    java.util.stream.IntStream.range(0, frames).forEach(i -> {
       final int frameIndex = i;
       KeyFrame keyFrame = new KeyFrame(
           Duration.millis(durationMillis * i / frames),
@@ -97,7 +97,7 @@ public class AnimationUtils {
           }
       );
       timeline.getKeyFrames().add(keyFrame);
-    }
+    });
 
     // Final frame shows the actual result
     KeyFrame finalFrame = new KeyFrame(
@@ -217,13 +217,13 @@ public class AnimationUtils {
       // For ladder, create a climbing motion effect
       Timeline climbingMotion = new Timeline();
       int steps = 6;
-      for (int i = 0; i < steps; i++) {
+      java.util.stream.IntStream.range(0, steps).forEach(i -> {
         KeyFrame keyFrame = new KeyFrame(
             Duration.millis(durationMillis * i / steps),
             new KeyValue(node.rotateProperty(), (i % 2 == 0) ? 15 : -15)
         );
         climbingMotion.getKeyFrames().add(keyFrame);
-      }
+      });
 
       // End with no rotation
       KeyFrame finalFrame = new KeyFrame(
@@ -369,39 +369,25 @@ public class AnimationUtils {
     if (isMovingForward) {
       // Moving forward (normal roll)
       if (endTileId > startTileId) {
-        // Simple forward movement
-        for (int id = startTileId + 1; id <= endTileId; id++) {
-          pathTileIds.add(id);
-        }
+        java.util.stream.IntStream.rangeClosed(startTileId + 1, endTileId).forEach(id -> pathTileIds.add(id));
       } else {
         // Wrapping around the board (e.g., passing GO)
-        for (int id = startTileId + 1; id <= maxTileId; id++) {
-          pathTileIds.add(id);
-        }
-        for (int id = 0; id <= endTileId; id++) {
-          pathTileIds.add(id);
-        }
+        java.util.stream.IntStream.rangeClosed(startTileId + 1, maxTileId).forEach(id -> pathTileIds.add(id));
+        java.util.stream.IntStream.rangeClosed(0, endTileId).forEach(id -> pathTileIds.add(id));
       }
     } else {
       // Moving backward (e.g., from a card or special action)
       if (startTileId > endTileId) {
-        // Simple backward movement
-        for (int id = startTileId - 1; id >= endTileId; id--) {
-          pathTileIds.add(id);
-        }
+        java.util.stream.IntStream.iterate(startTileId - 1, id -> id >= endTileId, id -> id - 1).forEach(pathTileIds::add);
       } else {
         // Wrapping backward around the board
-        for (int id = startTileId - 1; id >= 0; id--) {
-          pathTileIds.add(id);
-        }
-        for (int id = maxTileId; id >= endTileId; id--) {
-          pathTileIds.add(id);
-        }
+        java.util.stream.IntStream.iterate(startTileId - 1, id -> id >= 0, id -> id - 1).forEach(pathTileIds::add);
+        java.util.stream.IntStream.iterate(maxTileId, id -> id >= endTileId, id -> id - 1).forEach(pathTileIds::add);
       }
     }
 
     // Create an animation for each tile in the path
-    for (int tileId : pathTileIds) {
+    pathTileIds.forEach(tileId -> {
       StackPane targetPane = tilePanes.get(tileId);
       if (targetPane != null) {
         // Calculate the center position of the target tile
@@ -432,7 +418,7 @@ public class AnimationUtils {
 
         sequentialTransition.getChildren().add(moveWithBounce);
       }
-    }
+    });
 
     // Set the onFinished handler for the overall animation
     if (onFinished != null) {

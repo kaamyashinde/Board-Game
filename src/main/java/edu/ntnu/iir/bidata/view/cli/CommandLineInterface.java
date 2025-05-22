@@ -49,16 +49,16 @@ public class CommandLineInterface {
       scanner.nextLine();
       BoardGame.MoveResult moveResult = game.makeMoveWithResult();
       StringBuilder diceStr = new StringBuilder();
-      int steps = 0;
+      int[] stepsArr = {0};
       if (moveResult.diceValues != null && moveResult.diceValues.length > 0) {
-        for (int i = 0; i < moveResult.diceValues.length; i++) {
-          steps += moveResult.diceValues[i];
+        java.util.stream.IntStream.range(0, moveResult.diceValues.length).forEach(i -> {
+          stepsArr[0] += moveResult.diceValues[i];
           diceStr.append(moveResult.diceValues[i]);
           if (i < moveResult.diceValues.length - 1) {
             diceStr.append(" + ");
           }
-        }
-        System.out.println("Rolled: " + diceStr + " = " + steps);
+        });
+        System.out.println("Rolled: " + diceStr + " = " + stepsArr[0]);
       }
       if (moveResult.actionDesc != null && !moveResult.actionDesc.isEmpty()) {
         System.out.println("Tile Action: " + moveResult.actionDesc);
@@ -98,7 +98,7 @@ public class CommandLineInterface {
         System.out.println("Please enter a valid number.");
       }
     }
-    for (int i = 0; i < numPlayers; i++) {
+    java.util.stream.IntStream.range(0, numPlayers).forEach(i -> {
       String name;
       do {
         System.out.print("Enter name for Player " + (i + 1) + ": ");
@@ -110,7 +110,7 @@ public class CommandLineInterface {
       } while (name.isEmpty());
       game.addPlayer(name);
       LOGGER.info("Added player: " + name);
-    }
+    });
     LOGGER.info("Player setup completed with " + numPlayers + " players");
   }
 
@@ -119,20 +119,20 @@ public class CommandLineInterface {
     System.out.println("\nResults for Round " + round + ":");
     System.out.printf("%-10s %-12s %-15s %-15s %-22s %-22s %-20s\n", "Round", "Player",
         "Dice Rolled", "Prev Pos", "After Move", "After Tile Action", "Tile Action");
-    for (TurnResult tr : turnResults) {
+    turnResults.forEach(tr -> {
       System.out.printf("%-10d %-12s %-15s %-15d %-22d %-22d %-20s\n", tr.round, tr.playerName,
           tr.diceRolled, tr.prevPos, tr.newPos, tr.afterActionPos, tr.actionDesc);
-    }
+    });
   }
 
   private void printGameState() {
     LOGGER.info("Printing current game state");
     System.out.println("\nCurrent Game State:");
     List<Player> players = game.getPlayers();
-    for (Player player : players) {
+    players.forEach(player -> {
       System.out.println(player.getName() + " is at position " + player.getCurrentPosition());
       LOGGER.info(player.getName() + " position: " + player.getCurrentPosition());
-    }
+    });
   }
 
   // Helper class to store turn results
