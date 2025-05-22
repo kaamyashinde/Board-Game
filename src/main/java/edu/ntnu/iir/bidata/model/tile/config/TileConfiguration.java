@@ -100,12 +100,7 @@ public class TileConfiguration {
   }
 
   public boolean isSkipTurn(int position) {
-    for (int pos : skipTurnPositions) {
-        if (pos == position) {
-            return true;
-        }
-    }
-    return false;
+    return java.util.Arrays.stream(skipTurnPositions).anyMatch(pos -> pos == position);
   }
 
   public boolean isMoveBack(int position) {
@@ -117,11 +112,6 @@ public class TileConfiguration {
   }
 
   public boolean isSwitchPlaces(int position) {
-    for (int pos : switchPlacesPositions) {
-        if (pos == position) {
-            return true;
-        }
-    }
-    return false;
+    return java.util.Arrays.stream(switchPlacesPositions).anyMatch(pos -> pos == position);
   }
 } 

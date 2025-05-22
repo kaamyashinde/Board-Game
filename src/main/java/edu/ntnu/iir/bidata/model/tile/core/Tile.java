@@ -69,14 +69,14 @@ public class Tile {
    * @throws GameException if the end of the board is reached
    */
   public Tile getNextTile(int steps) {
-    Tile targetTile = this;
-    for (int i = 0; i < steps; i++) {
-      targetTile = targetTile.getNextTile();
-      if (targetTile == null) {
+    Tile[] targetTile = {this};
+    java.util.stream.IntStream.range(0, steps).forEach(i -> {
+      targetTile[0] = targetTile[0].getNextTile();
+      if (targetTile[0] == null) {
         throw new GameException("Reached the end of the board");
       }
-    }
-    return targetTile;
+    });
+    return targetTile[0];
   }
 
   /**

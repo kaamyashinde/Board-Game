@@ -74,22 +74,11 @@ public class SwitchPositionAction implements TileAction {
    * @return The player who is closest in front of the current player, or null if no player is ahead
    */
   private Player findPlayerInFront(Player currentPlayer) {
-    Player playerInFront = null;
     int currentPosition = currentPlayer.getCurrentPosition();
-    int minDistance = Integer.MAX_VALUE;
-
-    for (Player otherPlayer : allPlayers) {
-      if (otherPlayer != currentPlayer) {
-        int otherPosition = otherPlayer.getCurrentPosition();
-        if (otherPosition > currentPosition) {
-          int distance = otherPosition - currentPosition;
-          if (distance < minDistance) {
-            minDistance = distance;
-            playerInFront = otherPlayer;
-          }
-        }
-      }
-    }
-    return playerInFront;
+    return allPlayers.stream()
+        .filter(otherPlayer -> otherPlayer != currentPlayer)
+        .filter(otherPlayer -> otherPlayer.getCurrentPosition() > currentPosition)
+        .min(java.util.Comparator.comparingInt(otherPlayer -> otherPlayer.getCurrentPosition() - currentPosition))
+        .orElse(null);
   }
 } 

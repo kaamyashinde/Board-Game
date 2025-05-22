@@ -17,11 +17,11 @@ public class MonopolyBoardFactory {
         createAndAddTiles(board);
 
         // Fill empty positions with blank Tile (no action)
-        for (int i = 0; i < BOARD_SIZE; i++) {
+        java.util.stream.IntStream.range(0, BOARD_SIZE).forEach(i -> {
             if (board.getTile(i) == null) {
                 board.addTile(new Tile(i));
             }
-        }
+        });
 
         // Connect tiles in a circle
         connectTilesCircular(board);
@@ -50,16 +50,16 @@ public class MonopolyBoardFactory {
 
     private static void addPropertyGroup(Board board, int startPos, int endPos,
                                        int group, int price, int rent) {
-        for (int pos = startPos; pos <= endPos; pos++) {
-            board.addTile(new PropertyTile(pos, price, rent, group));
-        }
+        java.util.stream.IntStream.rangeClosed(startPos, endPos).forEach(pos ->
+            board.addTile(new PropertyTile(pos, price, rent, group))
+        );
     }
 
     private static void connectTilesCircular(Board board) {
         // Connect all tiles in a circle
-        for (int i = 0; i < BOARD_SIZE - 1; i++) {
-            board.connectTiles(i, board.getTile(i + 1));
-        }
+        java.util.stream.IntStream.range(0, BOARD_SIZE - 1).forEach(i ->
+            board.connectTiles(i, board.getTile(i + 1))
+        );
         // Connect last tile back to first tile
         board.connectTiles(BOARD_SIZE - 1, board.getTile(0));
     }
@@ -83,11 +83,11 @@ public class MonopolyBoardFactory {
         addPropertyGroup(board, 22, 24, 2, 220, 44); // Left column
         addPropertyGroup(board, 26, 27, 3, 240, 48); // Left column, before corner
         // Fill empty positions with blank Tile (no action)
-        for (int i = 0; i < BOARD_SIZE; i++) {
+        java.util.stream.IntStream.range(0, BOARD_SIZE).forEach(i -> {
             if (board.getTile(i) == null) {
                 board.addTile(new Tile(i));
             }
-        }
+        });
         // Connect tiles in a circle
         connectTilesCircular(board, BOARD_SIZE);
         return board;
@@ -112,11 +112,11 @@ public class MonopolyBoardFactory {
         addPropertyGroup(board, 25, 27, 2, 220, 44); // Left column
         addPropertyGroup(board, 29, 31, 3, 240, 48); // Left column, before corner
         // Fill empty positions with blank Tile (no action)
-        for (int i = 0; i < BOARD_SIZE; i++) {
+        java.util.stream.IntStream.range(0, BOARD_SIZE).forEach(i -> {
             if (board.getTile(i) == null) {
                 board.addTile(new Tile(i));
             }
-        }
+        });
         // Connect tiles in a circle
         connectTilesCircular(board, BOARD_SIZE);
         return board;
@@ -124,9 +124,9 @@ public class MonopolyBoardFactory {
 
     // Overloaded connectTilesCircular for custom board size
     private static void connectTilesCircular(Board board, int boardSize) {
-        for (int i = 0; i < boardSize - 1; i++) {
-            board.connectTiles(i, board.getTile(i + 1));
-        }
+        java.util.stream.IntStream.range(0, boardSize - 1).forEach(i ->
+            board.connectTiles(i, board.getTile(i + 1))
+        );
         board.connectTiles(boardSize - 1, board.getTile(0));
     }
 }

@@ -26,7 +26,7 @@ public class BoardFactory {
     Board board = new Board(boardSize);
 
     // Add tiles and actions
-    for (int i = 0; i < board.getSizeOfBoard(); i++) {
+    java.util.stream.IntStream.range(0, board.getSizeOfBoard()).forEach(i -> {
       TileAction action = null;
       if (i == 3) {
         action = new HopFiveStepsAction();
@@ -40,19 +40,19 @@ public class BoardFactory {
       if (!board.addTile(i, action)) {
         throw new GameException("Failed to add tile at position " + i);
       }
-    }
+    });
 
     // Connect tiles
-    for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
-      board.connectTiles(i, board.getTile(i + 1));
-    }
+    java.util.stream.IntStream.range(0, board.getSizeOfBoard() - 1).forEach(i ->
+      board.connectTiles(i, board.getTile(i + 1))
+    );
 
     // Validate connections
-    for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
+    java.util.stream.IntStream.range(0, board.getSizeOfBoard() - 1).forEach(i -> {
       if (!board.isValidTileConnection(i, i + 1)) {
         throw new GameException("Invalid tile connection between tiles " + i + " and " + (i + 1));
       }
-    }
+    });
 
     return board;
   }
@@ -70,21 +70,21 @@ public class BoardFactory {
     TileFactory tileFactory = new TileFactory(players, config);
 
     // Add tiles with snakes, ladders, etc.
-    for (int i = 0; i < board.getSizeOfBoard(); i++) {
+    java.util.stream.IntStream.range(0, board.getSizeOfBoard()).forEach(i -> {
       if (!board.addTile(i, tileFactory.createTile(i).getAction())) {
         throw new GameException("Failed to add tile at position " + i);
       }
-    }
+    });
     // Connect tiles
-    for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
-      board.connectTiles(i, board.getTile(i + 1));
-    }
+    java.util.stream.IntStream.range(0, board.getSizeOfBoard() - 1).forEach(i ->
+      board.connectTiles(i, board.getTile(i + 1))
+    );
     // Validate connections
-    for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
+    java.util.stream.IntStream.range(0, board.getSizeOfBoard() - 1).forEach(i -> {
       if (!board.isValidTileConnection(i, i + 1)) {
         throw new GameException("Invalid tile connection between tiles " + i + " and " + (i + 1));
       }
-    }
+    });
     return board;
   }
 
@@ -117,7 +117,7 @@ public class BoardFactory {
     Board board = new Board(MAIN_TRACK_SIZE);
 
     // Add tiles with their respective actions
-    for (int i = 0; i < MAIN_TRACK_SIZE; i++) {
+    java.util.stream.IntStream.range(0, MAIN_TRACK_SIZE).forEach(i -> {
       TileAction action = null;
 
       // Safe spots (every 13th tile)
@@ -139,22 +139,22 @@ public class BoardFactory {
       if (!board.addTile(i, action)) {
         throw new GameException("Failed to add tile at position " + i);
       }
-    }
+    });
 
     // Connect tiles in the main track
-    for (int i = 0; i < MAIN_TRACK_SIZE - 1; i++) {
-      board.connectTiles(i, board.getTile(i + 1));
-    }
+    java.util.stream.IntStream.range(0, MAIN_TRACK_SIZE - 1).forEach(i ->
+      board.connectTiles(i, board.getTile(i + 1))
+    );
     // Connect last tile to first tile to complete the loop
     board.connectTiles(MAIN_TRACK_SIZE - 1, board.getTile(0));
 
     // Validate connections
-    for (int i = 0; i < MAIN_TRACK_SIZE; i++) {
+    java.util.stream.IntStream.range(0, MAIN_TRACK_SIZE).forEach(i -> {
       int nextTile = (i + 1) % MAIN_TRACK_SIZE;
       if (!board.isValidTileConnection(i, nextTile)) {
         throw new GameException("Invalid tile connection between tiles " + i + " and " + nextTile);
       }
-    }
+    });
 
     return board;
   }

@@ -67,7 +67,7 @@ public class BoardGame implements Observable {
    */
   private void initializeBoard() {
     // Create all tiles first
-    for (int i = 0; i < board.getSizeOfBoard(); i++) {
+    java.util.stream.IntStream.range(0, board.getSizeOfBoard()).forEach(i -> {
       TileAction action = null;
       // Add different tile actions at specific positions
       if (i == 3) {
@@ -82,19 +82,19 @@ public class BoardGame implements Observable {
       if (!board.addTile(i, action)) {
         throw new GameException("Failed to add tile at position " + i);
       }
-    }
+    });
 
     // Connect all tiles using the Board class's method
-    for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
-      board.connectTiles(i, board.getTile(i + 1));
-    }
+    java.util.stream.IntStream.range(0, board.getSizeOfBoard() - 1).forEach(i ->
+      board.connectTiles(i, board.getTile(i + 1))
+    );
 
     // Validate all tile connections
-    for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
+    java.util.stream.IntStream.range(0, board.getSizeOfBoard() - 1).forEach(i -> {
       if (!board.isValidTileConnection(i, i + 1)) {
         throw new GameException("Invalid tile connection between tiles " + i + " and " + (i + 1));
       }
-    }
+    });
   }
 
   /**
@@ -132,9 +132,7 @@ public class BoardGame implements Observable {
     }
 
     // Set all players to starting position
-    for (Player player : players) {
-      player.setCurrentTile(startingTile);
-    }
+    players.forEach(player -> player.setCurrentTile(startingTile));
 
     currentPlayerIndex = 0;
     gameOver = false;
@@ -260,9 +258,7 @@ public class BoardGame implements Observable {
   @Override
   public void notifyObservers() {
     if (observers == null) observers = new ArrayList<>();
-    for (Observer observer : observers) {
-      observer.update();
-    }
+    observers.forEach(Observer::update);
   }
 
   /**
@@ -297,9 +293,7 @@ public class BoardGame implements Observable {
     this.players.addAll(players);
     // Reset player positions to starting tile
     Tile startingTile = board.getStartingTile();
-    for (Player player : this.players) {
-      player.setCurrentTile(startingTile);
-    }
+    this.players.forEach(player -> player.setCurrentTile(startingTile));
     notifyObservers();
   }
 
