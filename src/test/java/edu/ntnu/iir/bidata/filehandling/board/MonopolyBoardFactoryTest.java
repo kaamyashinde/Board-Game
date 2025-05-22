@@ -4,6 +4,7 @@ import edu.ntnu.iir.bidata.model.board.Board;
 import edu.ntnu.iir.bidata.model.board.MonopolyBoardFactory;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.GoTile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.JailTile;
+import edu.ntnu.iir.bidata.model.tile.actions.monopoly.GoToJailAction;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.FreeParkingTile;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -59,7 +60,7 @@ class MonopolyBoardFactoryTest {
         assertEquals(28, board.getSizeOfBoard());
         // Check special tiles
         assertTrue(board.getTile(0) instanceof GoTile);
-        assertTrue(board.getTile(7).getAction() instanceof edu.ntnu.iir.bidata.model.tile.actions.monopoly.GoToJailAction);
+        assertTrue(board.getTile(7).getAction() instanceof GoToJailAction);
         assertTrue(board.getTile(14) instanceof FreeParkingTile);
         assertTrue(board.getTile(21) instanceof JailTile);
         // Check that all tiles are not null
@@ -74,7 +75,7 @@ class MonopolyBoardFactoryTest {
         assertEquals(32, board.getSizeOfBoard());
         // Check special tiles
         assertTrue(board.getTile(0) instanceof GoTile);
-        assertTrue(board.getTile(8).getAction() instanceof edu.ntnu.iir.bidata.model.tile.actions.monopoly.GoToJailAction);
+        assertTrue(board.getTile(8).getAction() instanceof GoToJailAction);
         assertTrue(board.getTile(16) instanceof FreeParkingTile);
         assertTrue(board.getTile(24) instanceof JailTile);
         // Check that all tiles are not null
