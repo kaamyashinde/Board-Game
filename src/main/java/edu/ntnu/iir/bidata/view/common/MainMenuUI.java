@@ -96,8 +96,8 @@ public class MainMenuUI {
     // Snakes & Ladders game box - removed grid visualization
     StackPane snakesAndLaddersPane =
         createGamePane(
-            "#c2c2fa",
-            "#2e8b57",
+            "#e0ffe0", // Light green background instead of purple (#c2c2fa)
+            "#2e8b57", // Keep the same border color
             "Snakes & Ladders",
             "snakes-ladders-label",
             () -> gameTypeCallback.accept(GameType.SNAKES_AND_LADDERS));
