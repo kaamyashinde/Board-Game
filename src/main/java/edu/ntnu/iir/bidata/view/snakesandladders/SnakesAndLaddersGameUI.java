@@ -293,12 +293,25 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
     int[] rolls = controller.getLastDiceRolls();
     int sum = controller.getLastDiceSum();
     localDiceView.setValues(rolls.length > 0 ? rolls[0] : 1, rolls.length > 1 ? rolls[1] : (rolls.length > 0 ? rolls[0] : 1));
+    
+    SnakesAndLaddersController.MoveResult result = controller.movePlayer(currentPlayer, sum);
+
+    if (result.type.equals("skip")) {
+      statusLabel.setText(currentPlayer + " rolled too high! Turn skipped.");
+      PauseTransition pause = new PauseTransition(Duration.millis(800));
+      pause.setOnFinished(event -> {
+        controller.nextSnakesAndLaddersPlayer();
+        updateCurrentPlayerIndicator(controller.getCurrentSnakesAndLaddersPlayerName());
+        rollDiceBtn.setDisable(false);
+      });
+      pause.play();
+      return;
+    }
+
     statusLabel.setText(currentPlayer + " rolled a " + (rolls.length > 0 ? rolls[0] : 1) + " and " + (rolls.length > 1 ? rolls[1] : (rolls.length > 0 ? rolls[0] : 1)) + "! (Total: " + sum + ")");
     PauseTransition pause = new PauseTransition(Duration.millis(800));
     pause.setOnFinished(
         event -> {
-          SnakesAndLaddersController.MoveResult result = controller.movePlayer(currentPlayer, sum);
-
           // Update the player position immediately after the move
           updatePlayerPosition(currentPlayer);
 
