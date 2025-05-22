@@ -27,6 +27,13 @@
   -fx-font-size: 14px;
 }
 
+/* Red warning frame around "MAX 5 PLAYERS" */
+.player-selection-limit-warning {
+  -fx-border-color: red;
+  -fx-border-radius: 15;
+  -fx-border-width: 2;
+}
+
 /* MainMenuUI Styles */
 .main-menu-root {
   -fx-background-color: #f5fff5;
@@ -50,11 +57,11 @@
 }
 
 .main-menu-game-label {
-  -fx-font-size: 18px;
-  -fx-font-weight: bold;
+  -fx-font-size: 20px;  /* Moderate increase from original 18px */
+  -fx-font-weight: bold; /* Regular bold instead of extra bold */
   -fx-text-fill: white;
-  -fx-background-color: rgba(0, 100, 0, 0.7);
-  -fx-padding: 5 10;
+  -fx-background-color: rgba(0, 100, 0, 0.7); /* Original opacity */
+  -fx-padding: 8 15;   /* Moderate padding */
   -fx-background-radius: 10;
 }
 
@@ -65,30 +72,20 @@
   -fx-padding: 2 8 2 8;
 }
 
-/* ——— Generic helpers ——— */
-.bold-label {
-  -fx-font-weight: bold;
-}
-
-/* Red warning frame around “MAX 5 PLAYERS” */
-.player-selection-limit-warning {
-  -fx-border-color: red;
-  -fx-border-radius: 15;
-  -fx-border-width: 2;
-}
-
-/* Optional text at the top of the colourful left logo strip  */
 .main-menu-logo-title {
   -fx-font-size: 18px;
   -fx-font-weight: bold;
 }
 
-/* Consolidated - one definition is enough */
-.monopoly-back-button {
-  -fx-font-size: 16px;
+/* BoardManagementUI Styles */
+.board-management-dialog {
+  -fx-background-color: #f5fff5;
+  -fx-background-radius: 20;
+}
+
+/* ——— Generic helpers ——— */
+.bold-label {
   -fx-font-weight: bold;
-  -fx-background-color: #f7e6c7;
-  -fx-text-fill: #3b3b6d;
 }
 
 /* Style for the new instructions label */
@@ -97,4 +94,17 @@
   -fx-font-size: 14px;
   -fx-font-style: italic;
   -fx-padding: 5 0 5 0;
+}
+
+/* Specific style for Snakes & Ladders text to make it fit */
+.snakes-ladders-label {
+  -fx-font-size: 18px;  /* Smaller font for longer text */
+}
+
+/* Consolidated - one definition is enough */
+.monopoly-back-button {
+  -fx-font-size: 16px;
+  -fx-font-weight: bold;
+  -fx-background-color: #f7e6c7;
+  -fx-text-fill: #3b3b6d;
 }
