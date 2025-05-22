@@ -10,6 +10,8 @@ import edu.ntnu.iir.bidata.model.tile.core.monopoly.FreeParkingTile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.GoTile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.JailTile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.PropertyTile;
+import edu.ntnu.iir.bidata.model.utils.DefaultGameMediator;
+import edu.ntnu.iir.bidata.model.utils.GameMediator;
 import edu.ntnu.iir.bidata.view.common.CommonButtons;
 import edu.ntnu.iir.bidata.view.common.JavaFXGameUI;
 import edu.ntnu.iir.bidata.view.common.DiceView;
@@ -57,11 +59,11 @@ public class MonopolyGameUI extends JavaFXGameUI {
   protected BoardGame boardGame;
 
   @Setter private MonopolyController controller;
-  private final edu.ntnu.iir.bidata.model.utils.GameMediator mediator;
+  private final GameMediator mediator;
   private BorderPane root;
 
   @Inject
-  public MonopolyGameUI(BoardGame boardGame, Stage primaryStage, MonopolyController controller, edu.ntnu.iir.bidata.model.utils.GameMediator mediator) {
+  public MonopolyGameUI(BoardGame boardGame, Stage primaryStage, MonopolyController controller, GameMediator mediator) {
     super(boardGame, primaryStage);
     this.boardGame = boardGame;
     this.primaryStage = primaryStage;
@@ -78,7 +80,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
     setupUI();
 
     // Register mediator listener to update UI on nextPlayer event
-    if (mediator instanceof edu.ntnu.iir.bidata.model.utils.DefaultGameMediator m) {
+    if (mediator instanceof DefaultGameMediator m) {
       m.register((sender, event) -> {
         if ("nextPlayer".equals(event)) {
           javafx.application.Platform.runLater(() -> {

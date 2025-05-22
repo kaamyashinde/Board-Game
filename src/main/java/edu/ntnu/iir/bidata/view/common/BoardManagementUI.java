@@ -26,7 +26,6 @@ import edu.ntnu.iir.bidata.Inject;
 public class BoardManagementUI {
   private final Stage ownerStage;
   private List<String> boardsList = new ArrayList<>();
-  private edu.ntnu.iir.bidata.model.board.Board currentBoard = null;
   private static final Logger LOGGER = Logger.getLogger(BoardManagementUI.class.getName());
 
   /**

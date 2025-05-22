@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import edu.ntnu.iir.bidata.Inject;
+import edu.ntnu.iir.bidata.filehandling.player.PlayerFileReaderCSV;
+import edu.ntnu.iir.bidata.model.player.Player;
 
 /**
  * UI for player selection, including loading players from CSV files and selecting which ones to use.
@@ -210,14 +212,14 @@ public class PlayerSelectionUI {
       }
 
       // Use the new method to read directly from InputStream
-      java.util.List<edu.ntnu.iir.bidata.model.player.Player> loadedPlayers =
-          new edu.ntnu.iir.bidata.filehandling.player.PlayerFileReaderCSV().readPlayersFromInputStream(inputStream);
+      java.util.List<Player> loadedPlayers =
+          new PlayerFileReaderCSV().readPlayersFromInputStream(inputStream);
 
       // Clear existing available players
       availablePlayersList.clear();
 
       // Add all loaded players to available list
-      for (edu.ntnu.iir.bidata.model.player.Player player : loadedPlayers) {
+      for (Player player : loadedPlayers) {
         String name = player.getName();
         String token = player.getTokenImage();
         if (!name.isEmpty() && !availablePlayersList.contains(name)) {

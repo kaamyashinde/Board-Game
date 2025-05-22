@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import edu.ntnu.iir.bidata.model.tile.core.TileAction;
+import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.model.tile.actions.base.GoToTileAction;
 import edu.ntnu.iir.bidata.model.tile.actions.base.SafeSpotAction;
 import edu.ntnu.iir.bidata.model.tile.actions.game.LoseTurnAction;
@@ -80,9 +81,9 @@ public class TileActionTypeAdapterFactory implements TypeAdapterFactory {
                     case "SnakeAction":
                         return (T) new SnakeAction(jsonObject.get("tailTileId").getAsInt());
                     case "EntryPointAction":
-                        return (T) new EntryPointAction(gson.fromJson(jsonObject.get("owner"), edu.ntnu.iir.bidata.model.player.Player.class));
+                        return (T) new EntryPointAction(gson.fromJson(jsonObject.get("owner"), Player.class));
                     case "SwitchPositionAction":
-                        Type listType = new TypeToken<List<edu.ntnu.iir.bidata.model.player.Player>>(){}.getType();
+                        Type listType = new TypeToken<List<Player>>(){}.getType();
                         return (T) new SwitchPositionAction(gson.fromJson(jsonObject.get("allPlayers"), listType));
                     case "SafeSpotAction":
                         return (T) new SafeSpotAction();
