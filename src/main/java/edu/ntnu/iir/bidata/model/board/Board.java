@@ -101,6 +101,12 @@ public class Board {
   public boolean isValidTileConnection(int fromId, int toId) {
     Tile fromTile = tiles.get(fromId);
     Tile toTile = tiles.get(toId);
+
+    // Add null check for fromTile
+    if (fromTile == null) {
+      return false;
+    }
+
     try {
       return fromTile.getNextTile(1) == toTile;
     } catch (GameException e) {
