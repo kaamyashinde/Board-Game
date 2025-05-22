@@ -1,9 +1,9 @@
 package edu.ntnu.iir.bidata.model.player;
 
 import edu.ntnu.iir.bidata.model.tile.core.Tile;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
-import java.util.Objects;
 
 /**
  * Class that handles the movements of a specific player.
@@ -21,6 +21,15 @@ public class Player {
   private String tokenImage; // Path or name of the token image
 
   /**
+   * Constructs a Player instance with the specified name. The token image is set to null.
+   *
+   * @param inputName the name of the player
+   */
+  public Player(String inputName) {
+    this(inputName, null);
+  }
+
+  /**
    * The constructor that initialises the players with their name and the board game they are
    * connected to.
    *
@@ -30,10 +39,6 @@ public class Player {
   public Player(String inputName, String tokenImage) {
     setName(inputName);
     setTokenImage(tokenImage);
-  }
-
-  public Player(String inputName) {
-    this(inputName, null);
   }
 
   /**
@@ -72,20 +77,32 @@ public class Player {
     return currentTile != null ? currentTile.getId() : -1;
   }
 
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null || getClass() != obj.getClass()) return false;
-    Player other = (Player) obj;
-    return Objects.equals(name, other.name) &&
-           Objects.equals(currentTile, other.currentTile) &&
-           skipNextTurn == other.skipNextTurn &&
-           Objects.equals(tokenImage, other.tokenImage);
-  }
-
+  /**
+   * Computes the hash code for the Player object based on its attributes.
+   *
+   * @return the hash code value calculated using the name, currentTile, skipNextTurn, and
+   *     tokenImage fields
+   */
   @Override
   public int hashCode() {
     return Objects.hash(name, currentTile, skipNextTurn, tokenImage);
   }
 
+  /**
+   * Compares this Player object with another object to determine equality. Two Player objects are
+   * considered equal if they have the same name, currentTile, skipNextTurn value, and tokenImage.
+   *
+   * @param obj the object to be compared with this Player
+   * @return true if the specified object is equal to this Player, false otherwise
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null || getClass() != obj.getClass()) return false;
+    Player other = (Player) obj;
+    return Objects.equals(name, other.name)
+        && Objects.equals(currentTile, other.currentTile)
+        && skipNextTurn == other.skipNextTurn
+        && Objects.equals(tokenImage, other.tokenImage);
+  }
 }

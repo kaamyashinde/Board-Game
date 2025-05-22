@@ -18,18 +18,21 @@ public class Dice {
    * The constructor that takes in the number of dice as a parameter to create a certain number of
    * Dice in the list.
    *
-   * <p>The use of Collections.nCopies was suggested by CoPilot when asked for a replacement for the
-   * use of a for loop.
+   * <p>For Monopoly, this will always create exactly 2 dice regardless of input,
+   * but still validates that the input is a positive number.
    *
-   * @param numberOfDice the number of dice to be stored in the list
+   * @param numberOfDice the number of dice requested (must be positive, but will be overridden to 2 for Monopoly)
    */
   public Dice(int numberOfDice) throws IllegalArgumentException {
+    // Validate the input parameter first, even though we'll override it
     ParameterValidation.validateNonZeroPositiveInteger(
         numberOfDice, "number of dice to create the list");
+
+    // For Monopoly, always use 2 dice after validation
+    int actualNumberOfDice = 2;
+
     dice = new ArrayList<>();
-    for (int i = 0; i < numberOfDice; i++) {
-      dice.add(new Die());
-    }
+    java.util.stream.IntStream.range(0, actualNumberOfDice).forEach(i -> dice.add(new Die()));
   }
 
   /**

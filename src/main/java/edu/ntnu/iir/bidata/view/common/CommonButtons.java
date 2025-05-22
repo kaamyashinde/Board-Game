@@ -229,14 +229,16 @@ public class CommonButtons {
     if (savedGamesDir.exists() && savedGamesDir.isDirectory()) {
       java.io.File[] files = savedGamesDir.listFiles((dir, name) -> name.endsWith(".json"));
       if (files != null) {
-        for (java.io.File file : files) {
-          try {
-            if (file.length() > MAX_SIZE) continue; // Skip large files
-            gameList.getItems().add(file.getName().replace(".json", ""));
-          } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Could not read large files");
-          }
-        }
+        java.util.Arrays.stream(files)
+            .forEach(
+                file -> {
+                  try {
+                    if (file.length() > MAX_SIZE) return; // Skip large files
+                    gameList.getItems().add(file.getName().replace(".json", ""));
+                  } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Could not read large files");
+                  }
+                });
       }
     }
     content.getChildren().addAll(new Label("Select a saved game:"), gameList);

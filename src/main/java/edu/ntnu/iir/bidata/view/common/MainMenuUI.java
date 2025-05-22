@@ -1,35 +1,29 @@
 package edu.ntnu.iir.bidata.view.common;
 
+import java.util.function.Consumer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
-import java.util.function.Consumer;
-import java.util.logging.Logger;
 
 /**
- * MainMenuUI class for the main menu of the game.
- * Pure frontend implementation without backend logic.
+ * MainMenuUI class for the main menu of the game. Pure frontend implementation without backend.
+ * logic.
  */
 public class MainMenuUI {
-  private static final Logger LOGGER = Logger.getLogger(MainMenuUI.class.getName());
-
-  public enum GameType {
-    LUDO,
-    SNAKES_AND_LADDERS,
-    MONOPOLY
-  }
-
   private final Stage primaryStage;
   private final Consumer<GameType> gameTypeCallback;
 
   /**
-   * Creates a new Main Menu UI
+   * Creates a new Main Menu UI.
    *
    * @param primaryStage The primary stage
    * @param gameTypeCallback Callback for when a game type is selected
@@ -40,6 +34,25 @@ public class MainMenuUI {
     setupMainMenu();
   }
 
+  /**
+   * Sets up the main menu of the application, which serves as the entry point for selecting
+   * different games. The main menu comprises the following sections:
+   *
+   * <p>1. A left-hand vertical logo strip made of colored regions. 2. A centered section with a
+   * welcome message and game selection panes for "Snakes & Ladders" and "Monopoly". 3. A
+   * bottom-right corner section displaying credits.
+   *
+   * <p>The method defines the layout structure using a BorderPane and applies styling to the
+   * sections. It also handles callbacks for game selection via the provided game type consumer.
+   *
+   * <p>Components: - The left section is a styled strip with a gradient of purple shades. - The
+   * center section includes a welcome banner and selectable game boxes. - Game panes for each game
+   * are styled with unique colors and are clickable. - The bottom section features a label for
+   * displaying credits.
+   *
+   * <p>This method initializes the scene with the defined layout, applies a common stylesheet, and
+   * sets the primary stage to display the main menu.
+   */
   private void setupMainMenu() {
     primaryStage.setTitle("Game Selection");
 
@@ -49,8 +62,13 @@ public class MainMenuUI {
 
     // --- LEFT: PURPLE LOGO STRIP (WITHOUT TEXT) ---
     Color[] purples = {
-        Color.web("#2d0066"), Color.web("#4b0082"), Color.web("#6a0dad"),
-        Color.web("#7c3aed"), Color.web("#a084e8"), Color.web("#b39ddb"), Color.web("#c3aed6")
+        Color.web("#2d0066"),
+        Color.web("#4b0082"),
+        Color.web("#6a0dad"),
+        Color.web("#7c3aed"),
+        Color.web("#a084e8"),
+        Color.web("#b39ddb"),
+        Color.web("#c3aed6")
     };
     int[] purpleHeights = {40, 60, 40, 30, 20, 40, 30, 20, 40, 30, 20};
 
@@ -75,32 +93,23 @@ public class MainMenuUI {
     HBox menuRow = new HBox(40);
     menuRow.setAlignment(Pos.CENTER);
 
-    // Snakes & Ladders game box
-    StackPane snakesAndLaddersPane = createGamePane(
-        "#c2c2fa",
-        "#2e8b57",
-        "Snakes & Ladders",
-        createSnakesAndLaddersGrid(),
-        () -> gameTypeCallback.accept(GameType.SNAKES_AND_LADDERS)
-    );
+    // Snakes & Ladders game box - removed grid visualization
+    StackPane snakesAndLaddersPane =
+        createGamePane(
+            "#e0ffe0", // Light green background instead of purple (#c2c2fa)
+            "#2e8b57", // Keep the same border color
+            "Snakes & Ladders",
+            "snakes-ladders-label",
+            () -> gameTypeCallback.accept(GameType.SNAKES_AND_LADDERS));
 
-    // Monopoly game box
-    StackPane monopolyPane = createGamePane(
-        "#f7e6c7",
-        "#3b3b6d",
-        "Monopoly",
-        createMonopolyGrid(),
-        () -> gameTypeCallback.accept(GameType.MONOPOLY)
-    );
-
-    // Ludo game box - commented out for now
-    /*StackPane ludoPane = createGamePane(
-        "#c2c2fa",
-        "#e69a28",
-        "Ludo",
-        createLudoGrid(),
-        () -> gameTypeCallback.accept(GameType.LUDO)
-    );*/
+    // Monopoly game box - removed grid visualization
+    StackPane monopolyPane =
+        createGamePane(
+            "#f7e6c7",
+            "#3b3b6d",
+            "Monopoly",
+            null,
+            () -> gameTypeCallback.accept(GameType.MONOPOLY));
 
     menuRow.getChildren().setAll(snakesAndLaddersPane, monopolyPane);
     centerBox.getChildren().setAll(welcomePane, menuRow);
@@ -120,23 +129,73 @@ public class MainMenuUI {
   }
 
   /**
-   * Creates a game selection pane with a grid and label
+   * Creates the left‐hand "logo" strip: a vertical stack of colored Regions plus a centered label.
+   * If onClick is non‐null, the whole strip is clickable. If text is empty, no label will be
+   * displayed.
    */
-  private StackPane createGamePane(String bgColor, String borderColor, String gameName, Region gameGrid, Runnable onClick) {
+  private StackPane createLogoStackPane(
+      Color[] colors, int[] heights, String text, Runnable onClick) {
+    VBox stack = new VBox(8);
+    stack.setPadding(new Insets(10, 20, 10, 10));
+    stack.setAlignment(Pos.TOP_LEFT);
+    if (text != null && !text.isEmpty()) {
+      VBox titleContainer = new VBox();
+      titleContainer.setAlignment(Pos.CENTER);
+      titleContainer.setPadding(new Insets(0, 0, 10, 0));
+      Label titleLabel = new Label(text);
+      titleLabel.getStyleClass().add("main-menu-logo-title");
+      titleContainer.getChildren().add(titleLabel);
+      stack.getChildren().add(titleContainer);
+    }
+    java.util.stream.IntStream.range(0, heights.length)
+        .forEach(
+            i -> {
+              Region r = new Region();
+              int w = (i % 3 == 0 ? 40 : (i % 3 == 1 ? 30 : 60));
+              r.setPrefSize(w, heights[i]);
+              r.setStyle(
+                  "-fx-background-radius: 15; "
+                      + "-fx-background-color: "
+                      + toHexString(colors[i % colors.length])
+                      + ";");
+              stack.getChildren().add(r);
+            });
+    StackPane pane = new StackPane(stack);
+    pane.setPrefWidth(180);
+    pane.setAlignment(Pos.CENTER);
+    if (onClick != null) {
+      pane.setOnMouseClicked(e -> onClick.run());
+      pane.setCursor(Cursor.HAND);
+    }
+    return pane;
+  }
+
+  /**
+   * Creates a game selection pane with a label (without grid visualization).
+   * Modified to remove grid visualization and display only the game title.
+   *
+   * @param bgColor The background color for the pane
+   * @param borderColor The border color for the pane
+   * @param gameName The name of the game to display
+   * @param additionalLabelClass Optional additional CSS class for the label (can be null)
+   * @param onClick The callback to execute when the pane is clicked
+   */
+  private StackPane createGamePane(
+      String bgColor, String borderColor, String gameName, String additionalLabelClass, Runnable onClick) {
     StackPane gamePane = new StackPane();
     gamePane.setPrefSize(220, 200);
     gamePane.getStyleClass().add("main-menu-game-pane");
     // The colors need to stay in the style as they are dynamic parameters
     gamePane.setStyle(
-        "-fx-background-color: " + bgColor + "; " +
-            "-fx-border-color: " + borderColor + ";"
-    );
+        "-fx-background-color: " + bgColor + "; " + "-fx-border-color: " + borderColor + ";");
 
     Label gameLabel = new Label(gameName);
     gameLabel.getStyleClass().add("main-menu-game-label");
+    if (additionalLabelClass != null && !additionalLabelClass.isEmpty()) {
+      gameLabel.getStyleClass().add(additionalLabelClass);
+    }
 
-    StackPane gameContent = new StackPane(gameGrid, gameLabel);
-    gamePane.getChildren().add(gameContent);
+    gamePane.getChildren().add(gameLabel);
 
     // Make the box clickable
     if (onClick != null) {
@@ -147,145 +206,20 @@ public class MainMenuUI {
     return gamePane;
   }
 
-  /**
-   * Creates a Snakes & Ladders grid for visualization
-   */
-  private GridPane createSnakesAndLaddersGrid() {
-    GridPane boardGrid = new GridPane();
-    int size = 6;
-    for (int i = 0; i < size; i++) {
-      for (int j = 0; j < size; j++) {
-        Region sq = new Region();
-        sq.setPrefSize(20, 20);
-        sq.setStyle("-fx-background-color: " + (((i + j) % 2 == 0) ? "#e0ffe0" : "#7ed957") + ";");
-        boardGrid.add(sq, j, i);
-      }
-    }
-    return boardGrid;
-  }
-
-  /**
-   * Creates a Ludo grid for visualization
-   */
-  private GridPane createLudoGrid() {
-    GridPane ludoGrid = new GridPane();
-
-    // Create a simplified Ludo board representation
-    Color[] playerColors = {
-        Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW
-    };
-
-    int size = 5;
-    for (int i = 0; i < size; i++) {
-      for (int j = 0; j < size; j++) {
-        Region sq = new Region();
-        sq.setPrefSize(20, 20);
-
-        // Corner regions are player bases
-        if ((i == 0 && j == 0) || (i == 0 && j == size-1) ||
-            (i == size-1 && j == 0) || (i == size-1 && j == size-1)) {
-          int colorIndex = 0;
-          if (i == 0 && j == 0) colorIndex = 0;
-          else if (i == 0 && j == size-1) colorIndex = 1;
-          else if (i == size-1 && j == 0) colorIndex = 2;
-          else colorIndex = 3;
-
-          sq.setStyle("-fx-background-color: " + toHexString(playerColors[colorIndex]) + ";");
-        } else if (i == size/2 && j == size/2) {
-          // Center square
-          sq.setStyle("-fx-background-color: white;");
-        } else {
-          // Path squares
-          sq.setStyle("-fx-background-color: " + (((i + j) % 2 == 0) ? "#fff0f0" : "#f0f0ff") + ";");
-        }
-        ludoGrid.add(sq, j, i);
-      }
-    }
-
-    return ludoGrid;
-  }
-
-  /**
-   * Creates the left‐hand "logo" strip: a vertical stack of colored Regions
-   * plus a centered label. If onClick is non‐null, the whole strip is clickable.
-   * If text is empty, no label will be displayed.
-   */
-  private StackPane createLogoStackPane(Color[] colors, int[] heights, String text, Runnable onClick) {
-    VBox stack = new VBox(8);
-    stack.setPadding(new Insets(10, 20, 10, 10));
-    stack.setAlignment(Pos.TOP_LEFT);
-
-    // Only add the title container if text is not empty
-    if (text != null && !text.isEmpty()) {
-      // Create a container for the title at the top
-      VBox titleContainer = new VBox();
-      titleContainer.setAlignment(Pos.CENTER);
-      titleContainer.setPadding(new Insets(0, 0, 10, 0));
-
-      // Create the title label
-      Label titleLabel = new Label(text);
-      titleLabel.getStyleClass().add("main-menu-logo-title");
-      titleContainer.getChildren().add(titleLabel);
-
-      // Add title to the top of our stack
-      stack.getChildren().add(titleContainer);
-    }
-
-    // Then add colored regions
-    for (int i = 0; i < heights.length; i++) {
-      Region r = new Region();
-      int w = (i % 3 == 0 ? 40 : (i % 3 == 1 ? 30 : 60));
-      r.setPrefSize(w, heights[i]);
-      r.setStyle(
-          "-fx-background-radius: 15; " +
-              "-fx-background-color: " + toHexString(colors[i % colors.length]) + ";"
-      );
-      stack.getChildren().add(r);
-    }
-
-    StackPane pane = new StackPane(stack);
-    pane.setPrefWidth(180);
-    pane.setAlignment(Pos.CENTER);
-
-    // Make the entire pane clickable if onClick is provided
-    if (onClick != null) {
-      pane.setOnMouseClicked(e -> onClick.run());
-      pane.setCursor(Cursor.HAND);
-    }
-
-    return pane;
-  }
-
-  /**
-   * Converts a JavaFX Color to a hex string
-   */
+  /** Converts a JavaFX Color to a hex string. */
   private String toHexString(Color c) {
-    return String.format("#%02X%02X%02X",
-        (int)(c.getRed() * 255),
-        (int)(c.getGreen() * 255),
-        (int)(c.getBlue() * 255)
-    );
+    return String.format(
+        "#%02X%02X%02X",
+        (int) (c.getRed() * 255), (int) (c.getGreen() * 255), (int) (c.getBlue() * 255));
   }
 
   /**
-   * Creates a Monopoly grid for visualization
+   * Represents the types of games available for selection in the application. This enum is used to
+   * differentiate between various game modes that can be displayed or initiated in the
+   * application's main menu or game setup.
    */
-  private Region createMonopolyGrid() {
-    GridPane grid = new GridPane();
-    grid.setPrefSize(60, 60);
-    for (int i = 0; i < 5; i++) {
-      for (int j = 0; j < 5; j++) {
-        Rectangle rect = new Rectangle(12, 12);
-        if (i == 0 || i == 4 || j == 0 || j == 4) {
-          rect.setFill(Color.web("#3b3b6d"));
-        } else {
-          rect.setFill(Color.web("#f7e6c7"));
-        }
-        rect.setArcWidth(2);
-        rect.setArcHeight(2);
-        grid.add(rect, j, i);
-      }
-    }
-    return grid;
+  public enum GameType {
+    SNAKES_AND_LADDERS,
+    MONOPOLY
   }
 }

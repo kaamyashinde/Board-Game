@@ -33,7 +33,7 @@ public class Tile {
   /**
    * Constructor that creates an instance of the tile with the desired id and tileAction.
    *
-   * @param id     the id of the tile
+   * @param id the id of the tile
    * @param action the action associated with the tile
    * @throws IllegalArgumentException if id is negative
    */
@@ -69,14 +69,16 @@ public class Tile {
    * @throws GameException if the end of the board is reached
    */
   public Tile getNextTile(int steps) {
-    Tile targetTile = this;
-    for (int i = 0; i < steps; i++) {
-      targetTile = targetTile.getNextTile();
-      if (targetTile == null) {
-        throw new GameException("Reached the end of the board");
-      }
-    }
-    return targetTile;
+    Tile[] targetTile = {this};
+    java.util.stream.IntStream.range(0, steps)
+        .forEach(
+            i -> {
+              targetTile[0] = targetTile[0].getNextTile();
+              if (targetTile[0] == null) {
+                throw new GameException("Reached the end of the board");
+              }
+            });
+    return targetTile[0];
   }
 
   /**
@@ -122,15 +124,14 @@ public class Tile {
    * @param o The object to compare to
    * @return true if the objects are equal, false otherwise
    */
-
   @Override
   public boolean equals(Object o) {
-      if (this == o) {
-          return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-          return false;
-      }
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     Tile tile = (Tile) o;
     return id == tile.id;
   }
