@@ -162,34 +162,40 @@ public class SnakesAndLaddersController extends BaseGameController {
    *     move (e.g., "normal", "snake", "ladder")
    */
   public MoveResult movePlayer(String playerName, int roll) {
-    Player foundPlayer =
-        boardGame.getPlayers().stream()
-            .filter(player -> player.getName().equals(playerName))
-            .findFirst()
-            .orElse(null);
-    if (foundPlayer != null) {
-      int start = foundPlayer.getCurrentPosition();
-      int end = start + roll;
-      String type = "normal";
-      if (end > 100) {
-        end = 100;
+    for (Player player : boardGame.getPlayers()) {
+      if (player.getName().equals(playerName)) {
+        int start = player.getCurrentPosition();
+        int end = start + roll;
+        String type = "normal";
+
+        // Ensure we don't go past 100
+        if (end > 100) {
+          end = 100;
+        }
+
+        // Move the player to the new position first
+        int steps = end - start;
+        player.move(steps);
+
+        // Check for snakes
+        if (tileConfig.isSnakeHead(end)) {
+          int tail = tileConfig.getSnakeTail(end);
+          steps = tail - end;
+          player.move(steps);
+          end = tail;
+          type = "snake";
+        }
+        // Check for ladders only if it's a normal move
+        else if (tileConfig.isLadderStart(end)) {
+          int top = tileConfig.getLadderEnd(end);
+          steps = top - end;
+          player.move(steps);
+          end = top;
+          type = "ladder";
+        }
+
+        return new MoveResult(start, end, type);
       }
-      int steps = end - start;
-      foundPlayer.move(steps);
-      if (tileConfig.isSnakeHead(end)) {
-        int tail = tileConfig.getSnakeTail(end);
-        steps = tail - end;
-        foundPlayer.move(steps);
-        end = tail;
-        type = "snake";
-      } else if (tileConfig.isLadderStart(end)) {
-        int top = tileConfig.getLadderEnd(end);
-        steps = top - end;
-        foundPlayer.move(steps);
-        end = top;
-        type = "ladder";
-      }
-      return new MoveResult(start, end, type);
     }
     return new MoveResult(0, 0, "normal");
   }
