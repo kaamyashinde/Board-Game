@@ -29,18 +29,16 @@ class SnakesAndLaddersControllerTest {
 
     private void initializeBoard(Board board) {
         // Add 100 tiles
-        for (int i = 0; i < 100; i++) {
+        java.util.stream.IntStream.range(0, 100).forEach(i -> {
             if (i == 95) {
                 // Create tile 95 with snake action
                 board.addTile(i, new SnakeAction(75));
             } else {
                 board.addTile(i, null);
             }
-        }
+        });
         // Connect each tile to the next
-        for (int i = 0; i < 99; i++) {
-            board.connectTiles(i, board.getTile(i + 1));
-        }
+        java.util.stream.IntStream.range(0, 99).forEach(i -> board.connectTiles(i, board.getTile(i + 1)));
     }
 
     @BeforeEach
@@ -65,9 +63,7 @@ class SnakesAndLaddersControllerTest {
         playerNames = Arrays.asList("Player1", "Player2");
         
         // Add players to the game
-        for (String name : playerNames) {
-            boardGame.addPlayer(name);
-        }
+        playerNames.forEach(name -> boardGame.addPlayer(name));
         
         controller.setPlayerNames(playerNames);
     }

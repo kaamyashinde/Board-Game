@@ -68,9 +68,8 @@ class BoardFactoryTest {
         assertNotNull(board.getEndingTile());
         
         // Verify all tiles are connected
-        for (int i = 0; i < SNAKES_AND_LADDERS_BOARD_SIZE - 1; i++) {
-            assertTrue(board.isValidTileConnection(i, i + 1));
-        }
+        java.util.stream.IntStream.range(0, SNAKES_AND_LADDERS_BOARD_SIZE - 1)
+            .forEach(i -> assertTrue(board.isValidTileConnection(i, i + 1)));
     }
 
     @Test
