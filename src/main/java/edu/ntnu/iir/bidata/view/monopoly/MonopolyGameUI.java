@@ -13,6 +13,7 @@ import edu.ntnu.iir.bidata.model.tile.core.monopoly.PropertyTile;
 import edu.ntnu.iir.bidata.view.common.CommonButtons;
 import edu.ntnu.iir.bidata.view.common.JavaFXGameUI;
 import edu.ntnu.iir.bidata.view.common.DiceView;
+import edu.ntnu.iir.bidata.view.animation.MonopolyAnimator;
 import java.util.*;
 import java.util.logging.Logger;
 import javafx.geometry.Insets;
@@ -37,6 +38,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
   private static final int TILE_SIZE = 60;
   private final Map<Integer, StackPane> tilePanes = new HashMap<>();
   private final Map<Player, ImageView> playerTokens = new HashMap<>();
+  private final Map<String, ImageView> playerTokensByName = new HashMap<>();
   private final Button rollDiceButton = new Button("Roll Dice");
   private final Button buyButton = new Button("Buy");
   private final Button skipButton = new Button("Skip");
@@ -55,6 +57,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
   private final DiceView diceView = new DiceView();
   private final Stage primaryStage;
   protected BoardGame boardGame;
+  private MonopolyAnimator animator;
 
   @Setter private MonopolyController controller;
   private final edu.ntnu.iir.bidata.model.utils.GameMediator mediator;
@@ -82,13 +85,22 @@ public class MonopolyGameUI extends JavaFXGameUI {
       m.register((sender, event) -> {
         if ("nextPlayer".equals(event)) {
           javafx.application.Platform.runLater(() -> {
-            updatePlayerInfoPanel();
-            updatePlayerTokens();
-            updateRollDiceButtonState();
+            refreshPlayerInfo();
+            refreshPlayerTokens();
+            refreshButtonStates();
           });
         }
       });
     }
+  }
+
+  // Getter methods for animator access
+  public Map<Integer, StackPane> getTilePanes() {
+    return tilePanes;
+  }
+
+  public Map<String, ImageView> getPlayerTokensByName() {
+    return playerTokensByName;
   }
 
   public void setupUI() {
@@ -161,7 +173,10 @@ public class MonopolyGameUI extends JavaFXGameUI {
     primaryStage.setMinHeight(600);
 
     // Initialize the board
-    initializeBoard();
+    setupBoard();
+
+    // Initialize animator after board is set up
+    animator = new MonopolyAnimator(this, tilePanes, playerTokensByName);
 
     // Add stylesheets
     getScene().getStylesheets().add(getClass().getResource("/monopoly.css").toExternalForm());
@@ -169,8 +184,24 @@ public class MonopolyGameUI extends JavaFXGameUI {
   }
 
   private void handleRollDice() {
+    // Check if animation is in progress
+    if (animator != null && animator.isAnimationInProgress()) {
+      LOGGER.info("Animation in progress, ignoring dice roll");
+      return;
+    }
+
+    // Store current state before any changes
+    Player currentPlayer = getBoardGame().getCurrentPlayer();
+    int originalPos = currentPlayer.getCurrentPosition();
+    String playerName = currentPlayer.getName();
+
+    // Let controller handle the move (this will update the player's position)
     controller.handlePlayerMove();
-    // Show dice value
+
+    // Get the final position after the controller processed the move
+    int finalPos = currentPlayer.getCurrentPosition();
+
+    // Show dice values
     int[] diceValues = controller.getLastDiceRolls();
     if (diceValues != null && diceValues.length == 2) {
       diceView.setValues(diceValues[0], diceValues[1]);
@@ -179,7 +210,53 @@ public class MonopolyGameUI extends JavaFXGameUI {
     } else {
       diceView.setValues(1, 1);
     }
-    // Optionally, display the sum somewhere if needed
+
+    // Check for special cases like "Go to Jail"
+    if (controller.isCurrentPlayerInJail() && isJailPosition(finalPos)) {
+      // Direct jail movement
+      animator.animateGoToJail(playerName, finalPos, this::update);
+    } else if (originalPos != finalPos) {
+      // Normal movement - but first reset player to original position for animation
+      // We'll let the animation handle the visual movement
+      movePlayerBackToPosition(currentPlayer, originalPos);
+
+      // Then animate to the final position
+      int boardSize = getBoardGame().getBoard().getSizeOfBoard();
+      animator.animateMovement(playerName, originalPos, finalPos, boardSize, () -> {
+        // After animation, ensure player is at correct position and update UI
+        movePlayerToPosition(currentPlayer, finalPos);
+        update();
+      });
+    } else {
+      // No movement needed, just update UI
+      update();
+    }
+  }
+
+  /**
+   * Temporarily moves a player back to a position for animation purposes
+   */
+  private void movePlayerBackToPosition(Player player, int position) {
+    // Find the target tile
+    Tile targetTile = getBoardGame().getBoard().getTile(position);
+    player.setCurrentTile(targetTile);
+  }
+
+  /**
+   * Moves a player to a specific position
+   */
+  private void movePlayerToPosition(Player player, int position) {
+    // Find the target tile
+    Tile targetTile = getBoardGame().getBoard().getTile(position);
+    player.setCurrentTile(targetTile);
+  }
+
+  /**
+   * Checks if the position is a jail position
+   */
+  private boolean isJailPosition(int position) {
+    Tile tile = getBoardGame().getBoard().getTile(position);
+    return tile instanceof JailTile;
   }
 
   private void handleBuyProperty() {
@@ -204,12 +281,12 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
   @Override
   public void update() {
-    updatePlayerInfoPanel();
-    updatePlayerTokens();
-    updateRollDiceButtonState();
+    refreshPlayerInfo();
+    refreshPlayerTokens();
+    refreshButtonStates();
   }
 
-  private void updatePlayerInfoPanel() {
+  private void refreshPlayerInfo() {
     LOGGER.info("Clearing playerInfoPanel and updating player info...");
     playerInfoPanel.getChildren().clear();
     int playerCount = 0;
@@ -239,48 +316,81 @@ public class MonopolyGameUI extends JavaFXGameUI {
     LOGGER.info("Total players added to playerInfoPanel: " + playerCount);
   }
 
-  private void updatePlayerTokens() {
-    // Remove all tokens
+  private void refreshPlayerTokens() {
+    // Only update if animation is not in progress
+    if (animator != null && animator.isAnimationInProgress()) {
+      return;
+    }
+
+    // Remove all tokens from tile panes
     for (StackPane pane : tilePanes.values()) {
       pane.getChildren().removeIf(n -> n instanceof ImageView);
     }
-    // Add tokens for each player
+
+    // Add tokens for each player using the animator's placement method
     for (Player player : getBoardGame().getPlayers()) {
       int pos = player.getCurrentTile() != null ? player.getCurrentTile().getId() : 0;
-      StackPane tilePane = tilePanes.get(pos);
-      ImageView token = playerTokens.get(player);
-      if (token == null) {
-        String tokenImage = player.getTokenImage();
-        if (tokenImage != null && !tokenImage.isEmpty()) {
-          Image img = new Image(getClass().getResourceAsStream("/tokens/" + tokenImage));
-          token = new ImageView(img);
-          token.setFitWidth(32);
-          token.setFitHeight(48);
-        } else {
-          token = new ImageView();
-          token.setFitWidth(32);
-          token.setFitHeight(48);
+      ImageView token = getOrCreatePlayerToken(player);
+
+      // Use animator's method to properly place the token
+      if (animator != null) {
+        animator.moveTokenToTile(token, pos);
+      } else {
+        // Fallback: place directly in tile pane
+        StackPane tilePane = tilePanes.get(pos);
+        if (tilePane != null) {
+          tilePane.getChildren().add(token);
         }
-        playerTokens.put(player, token);
       }
-      tilePane.getChildren().add(token);
     }
   }
 
-  private void updateRollDiceButtonState() {
+  private ImageView getOrCreatePlayerToken(Player player) {
+    ImageView token = playerTokens.get(player);
+    if (token == null) {
+      String tokenImage = player.getTokenImage();
+      if (tokenImage != null && !tokenImage.isEmpty()) {
+        try {
+          Image img = new Image(getClass().getResourceAsStream("/tokens/" + tokenImage));
+          token = new ImageView(img);
+        } catch (Exception e) {
+          LOGGER.warning("Could not load token image: " + tokenImage + ", using default");
+          token = new ImageView();
+        }
+      } else {
+        token = new ImageView();
+      }
+
+      // Set token size
+      token.setFitWidth(24);
+      token.setFitHeight(36);
+      token.setPreserveRatio(true);
+
+      // Ensure token is visible and on top
+      token.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 2, 0, 1, 1);");
+      token.toFront();
+
+      playerTokens.put(player, token);
+      playerTokensByName.put(player.getName(), token);
+    }
+    return token;
+  }
+
+  private void refreshButtonStates() {
     Player current = getBoardGame().getCurrentPlayer();
     boolean isGameOver = getBoardGame().isGameOver();
     boolean awaitingBuy = controller.isAwaitingPlayerAction();
     boolean awaitingRent = controller.isAwaitingRentAction();
     boolean inJail = controller.isCurrentPlayerInJail();
-    boolean rollDiceActive = current != null && !isGameOver && !awaitingBuy && !awaitingRent && !inJail;
+    boolean animationInProgress = animator != null && animator.isAnimationInProgress();
+    boolean rollDiceActive = current != null && !isGameOver && !awaitingBuy && !awaitingRent && !inJail && !animationInProgress;
 
     rollDiceButton.setDisable(!rollDiceActive);
-    buyButton.setDisable(rollDiceActive || isGameOver || awaitingRent || inJail);
-    skipButton.setDisable(rollDiceActive || isGameOver || awaitingRent || inJail);
-    payRentButton.setDisable(rollDiceActive || isGameOver || awaitingBuy || inJail);
-    jailRollButton.setDisable(isGameOver || !inJail);
-    jailPayButton.setDisable(isGameOver || !inJail);
+    buyButton.setDisable(rollDiceActive || isGameOver || awaitingRent || inJail || animationInProgress);
+    skipButton.setDisable(rollDiceActive || isGameOver || awaitingRent || inJail || animationInProgress);
+    payRentButton.setDisable(rollDiceActive || isGameOver || awaitingBuy || inJail || animationInProgress);
+    jailRollButton.setDisable(isGameOver || !inJail || animationInProgress);
+    jailPayButton.setDisable(isGameOver || !inJail || animationInProgress);
   }
 
   @Override
@@ -296,7 +406,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
     this.boardGame = boardGame;
     // Register as observer to the new boardGame
     this.boardGame.addObserver(this);
-    initializeBoard();
+    setupBoard();
     update();
   }
 
@@ -309,12 +419,13 @@ public class MonopolyGameUI extends JavaFXGameUI {
     return n;
   }
 
-  private void initializeBoard() {
+  private void setupBoard() {
     boardPane.getChildren().clear();
     tilePanes.clear();
     int boardSize = getBoardGame().getBoard().getSizeOfBoard();
     int gridDim = getGridDimForBoardSize(boardSize);
     int tileIndex = 0;
+
     // Top row (left to right)
     for (int col = 0; col < gridDim && tileIndex < boardSize; col++) {
       Tile tile = getBoardGame().getBoard().getTile(tileIndex);
@@ -323,6 +434,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
       tilePanes.put(tileIndex, tilePane);
       tileIndex++;
     }
+
     // Right column (top to bottom, excluding top)
     for (int row = 1; row < gridDim - 1 && tileIndex < boardSize; row++) {
       Tile tile = getBoardGame().getBoard().getTile(tileIndex);
@@ -331,6 +443,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
       tilePanes.put(tileIndex, tilePane);
       tileIndex++;
     }
+
     // Bottom row (right to left)
     for (int col = gridDim - 1; col >= 0 && tileIndex < boardSize; col--) {
       Tile tile = getBoardGame().getBoard().getTile(tileIndex);
@@ -339,6 +452,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
       tilePanes.put(tileIndex, tilePane);
       tileIndex++;
     }
+
     // Left column (bottom to top, excluding top and bottom)
     for (int row = gridDim - 2; row > 0 && tileIndex < boardSize; row--) {
       Tile tile = getBoardGame().getBoard().getTile(tileIndex);
@@ -372,9 +486,9 @@ public class MonopolyGameUI extends JavaFXGameUI {
       GridPane.setValignment(centerArea, javafx.geometry.VPos.CENTER);
     }
 
-    updatePlayerInfoPanel();
-    updatePlayerTokens();
-    updateRollDiceButtonState();
+    refreshPlayerInfo();
+    refreshPlayerTokens();
+    refreshButtonStates();
   }
 
   private StackPane createTilePane(Tile tile) {
@@ -441,8 +555,8 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
   @Override
   public void refreshUIFromBoardGame() {
-    updatePlayerInfoPanel();
-    updatePlayerTokens();
-    updateRollDiceButtonState();
+    refreshPlayerInfo();
+    refreshPlayerTokens();
+    refreshButtonStates();
   }
 }
