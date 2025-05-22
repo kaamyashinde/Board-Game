@@ -17,6 +17,7 @@ import edu.ntnu.iir.bidata.model.utils.GameMediator;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson;
 import edu.ntnu.iir.bidata.controller.MonopolyController;
 import edu.ntnu.iir.bidata.view.common.PlayerSelectionResult;
+import edu.ntnu.iir.bidata.model.tile.config.TileConfiguration;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -195,11 +196,13 @@ public class JavaFXBoardGameLauncher extends Application {
       Board board = BoardFactory.createSnakesAndLaddersBoard(100, players);
       BoardGame boardGame = new BoardGame(board, 2);
       boardGame.setPlayers(players);
+      TileConfiguration config = new TileConfiguration(boardGame.getLevel());
       SnakesAndLaddersController controller = new SnakesAndLaddersController(
         boardGame,
         new BoardGameFileWriterGson(),
         new BoardGameFileReaderGson(),
-        mediator
+        mediator,
+        config
       );
       SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(boardGame, stage, controller, players, mediator);
 
@@ -230,11 +233,13 @@ public class JavaFXBoardGameLauncher extends Application {
       
       // Create view and controller
       GameMediator mediator = new DefaultGameMediator();
+      TileConfiguration config = new TileConfiguration(boardGame.getLevel());
       SnakesAndLaddersController controller = new SnakesAndLaddersController(
         boardGame,
         new BoardGameFileWriterGson(),
         new BoardGameFileReaderGson(),
-        mediator
+        mediator,
+        config
       );
       SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(boardGame, stage, controller, players, mediator);
 

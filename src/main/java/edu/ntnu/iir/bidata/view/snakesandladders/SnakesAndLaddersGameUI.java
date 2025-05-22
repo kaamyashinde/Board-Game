@@ -3,6 +3,7 @@ package edu.ntnu.iir.bidata.view.snakesandladders;
 import edu.ntnu.iir.bidata.controller.SnakesAndLaddersController;
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.Observer;
+import edu.ntnu.iir.bidata.model.exception.GameException;
 import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.view.common.CommonButtons;
 import edu.ntnu.iir.bidata.view.common.DiceView;
@@ -59,6 +60,7 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
   private double boardImageOffsetY = 0;
   private ImageView boardView;
   private String boardImagePath;
+  private String currentPlayer;
 
   @Inject
   public SnakesAndLaddersGameUI(BoardGame boardGame, Stage primaryStage, SnakesAndLaddersController controller, List<Player> playerNames, GameMediator mediator) {
@@ -281,13 +283,13 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
    * Roll the dice and move the current player
    */
   private void rollDiceAndMove() {
-    if (controller == null) {
+  try  { if (controller == null) {
       return;
     }
 
     rollDiceBtn.setDisable(true);
 
-    String currentPlayer = controller.getCurrentSnakesAndLaddersPlayerName();
+   currentPlayer = controller.getCurrentSnakesAndLaddersPlayerName();
 
     controller.rollDice();
     int[] rolls = controller.getLastDiceRolls();
@@ -316,10 +318,12 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
           updatePlayerPosition(currentPlayer);
 
           if (result.type.equals("snake")) {
+            LOGGER.info(currentPlayer + " hit a snake! Moving from " + result.start + " to " + result.end);
             displaySnakeOrLadderMessage(currentPlayer, result.start, result.end, "snake");
             // Update position again after snake
             updatePlayerPosition(currentPlayer);
           } else if (result.type.equals("ladder")) {
+            LOGGER.info(currentPlayer + " hit a ladder! Moving from " + result.start + " to " + result.end);
             displaySnakeOrLadderMessage(currentPlayer, result.start, result.end, "ladder");
             // Update position again after ladder
             updatePlayerPosition(currentPlayer);
@@ -335,7 +339,10 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
           updateCurrentPlayerIndicator(controller.getCurrentSnakesAndLaddersPlayerName());
           rollDiceBtn.setDisable(false);
         });
-    pause.play();
+    pause.play();} catch (GameException e) {
+      LOGGER.info("🏆 " + currentPlayer + " WINS! 🏆");
+      statusLabel.setText("🏆 " + currentPlayer + " WINS! 🏆");
+    }
   }
 
   /**
@@ -469,11 +476,11 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
     }
 
     // Flip row because the board starts from the bottom
-    row = gridSize - row;
-
-    // Calculate pixel coordinates (adding offset to center token in tile)
+    int displayRow = gridSize - row;
     int x = col * TILE_SIZE + TILE_SIZE / 2;
-    int y = row * TILE_SIZE + TILE_SIZE / 2;
+    int y = displayRow * TILE_SIZE + TILE_SIZE / 2;
+
+    LOGGER.info(String.format("Tile %d -> (row=%d, col=%d) -> (x=%d, y=%d)", position, displayRow, col, x, y));
 
     return new int[] {x, y};
   }
