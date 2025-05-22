@@ -210,8 +210,8 @@ public class MonopolyMenuUI {
     root.setCenter(centerBox);
 
     Scene scene = new Scene(root, 1200, 800);
-    scene.getStylesheets().add(getClass().getResource("/monopoly.css").toExternalForm());
-    scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+    scene.getStylesheets().add(getClass().getResource("/style/monopoly.css").toExternalForm());
+    scene.getStylesheets().add(getClass().getResource("/style/styles.css").toExternalForm());
     primaryStage.setScene(scene);
     primaryStage.show();
   }

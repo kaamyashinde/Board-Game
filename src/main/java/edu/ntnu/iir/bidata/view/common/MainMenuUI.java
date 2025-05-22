@@ -123,7 +123,7 @@ public class MainMenuUI {
     root.setBottom(creditPane);
 
     Scene scene = new Scene(root, 1000, 700);
-    scene.getStylesheets().add(getClass().getResource("/common.css").toExternalForm());
+    scene.getStylesheets().add(getClass().getResource("/style/common.css").toExternalForm());
     primaryStage.setScene(scene);
     primaryStage.show();
   }

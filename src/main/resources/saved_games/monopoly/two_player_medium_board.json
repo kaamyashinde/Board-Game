@@ -1,0 +1,249 @@
+{
+  "currentPlayerIndex": 0,
+  "players": [
+    {
+      "currentTile": {
+        "id": 9
+      },
+      "tokenImage": "token_green.png",
+      "money": 1360,
+      "playerType": "MONOPOLY",
+      "name": "Katrina",
+      "position": 9
+    },
+    {
+      "currentTile": {
+        "id": 12
+      },
+      "tokenImage": "token_purple.png",
+      "money": 1340,
+      "playerType": "MONOPOLY",
+      "name": "Kareena",
+      "position": 12
+    }
+  ],
+  "dice": {
+    "dice": [
+      {
+        "lastRolledValue": 6
+      },
+      {
+        "lastRolledValue": 6
+      }
+    ]
+  },
+  "board": {
+    "tiles": {
+      "22": {
+        "nextTileId": 23,
+        "price": 220,
+        "id": 22,
+        "type": "PropertyTile",
+        "rent": 44,
+        "group": 2
+      },
+      "23": {
+        "nextTileId": 24,
+        "price": 220,
+        "id": 23,
+        "type": "PropertyTile",
+        "rent": 44,
+        "group": 2
+      },
+      "24": {
+        "nextTileId": 25,
+        "price": 220,
+        "id": 24,
+        "type": "PropertyTile",
+        "rent": 44,
+        "group": 2
+      },
+      "25": {
+        "nextTileId": 26,
+        "id": 25,
+        "type": "Tile"
+      },
+      "26": {
+        "nextTileId": 27,
+        "price": 240,
+        "id": 26,
+        "type": "PropertyTile",
+        "rent": 48,
+        "group": 3
+      },
+      "27": {
+        "nextTileId": 0,
+        "price": 240,
+        "id": 27,
+        "type": "PropertyTile",
+        "rent": 48,
+        "group": 3
+      },
+      "10": {
+        "nextTileId": 11,
+        "price": 140,
+        "id": 10,
+        "type": "PropertyTile",
+        "rent": 28,
+        "group": 2
+      },
+      "11": {
+        "nextTileId": 12,
+        "id": 11,
+        "type": "Tile"
+      },
+      "12": {
+        "owner": "Kareena",
+        "nextTileId": 13,
+        "price": 160,
+        "id": 12,
+        "type": "PropertyTile",
+        "rent": 32,
+        "group": 3
+      },
+      "13": {
+        "nextTileId": 14,
+        "price": 160,
+        "id": 13,
+        "type": "PropertyTile",
+        "rent": 32,
+        "group": 3
+      },
+      "14": {
+        "nextTileId": 15,
+        "id": 14,
+        "type": "FreeParkingTile"
+      },
+      "15": {
+        "nextTileId": 16,
+        "price": 180,
+        "id": 15,
+        "type": "PropertyTile",
+        "rent": 36,
+        "group": 0
+      },
+      "16": {
+        "nextTileId": 17,
+        "price": 180,
+        "id": 16,
+        "type": "PropertyTile",
+        "rent": 36,
+        "group": 0
+      },
+      "17": {
+        "nextTileId": 18,
+        "price": 180,
+        "id": 17,
+        "type": "PropertyTile",
+        "rent": 36,
+        "group": 0
+      },
+      "18": {
+        "nextTileId": 19,
+        "id": 18,
+        "type": "Tile"
+      },
+      "19": {
+        "nextTileId": 20,
+        "price": 200,
+        "id": 19,
+        "type": "PropertyTile",
+        "rent": 40,
+        "group": 1
+      },
+      "0": {
+        "nextTileId": 1,
+        "action": {
+          "type": "CollectMoneyAction"
+        },
+        "id": 0,
+        "type": "GoTile"
+      },
+      "1": {
+        "nextTileId": 2,
+        "price": 100,
+        "id": 1,
+        "type": "PropertyTile",
+        "rent": 20,
+        "group": 0
+      },
+      "2": {
+        "nextTileId": 3,
+        "price": 100,
+        "id": 2,
+        "type": "PropertyTile",
+        "rent": 20,
+        "group": 0
+      },
+      "3": {
+        "nextTileId": 4,
+        "price": 100,
+        "id": 3,
+        "type": "PropertyTile",
+        "rent": 20,
+        "group": 0
+      },
+      "4": {
+        "nextTileId": 5,
+        "id": 4,
+        "type": "Tile"
+      },
+      "5": {
+        "nextTileId": 6,
+        "price": 120,
+        "id": 5,
+        "type": "PropertyTile",
+        "rent": 24,
+        "group": 1
+      },
+      "6": {
+        "nextTileId": 7,
+        "price": 120,
+        "id": 6,
+        "type": "PropertyTile",
+        "rent": 24,
+        "group": 1
+      },
+      "7": {
+        "nextTileId": 8,
+        "action": {
+          "type": "GoToJailAction",
+          "jailTileId": 21
+        },
+        "id": 7,
+        "type": "Tile"
+      },
+      "8": {
+        "nextTileId": 9,
+        "price": 140,
+        "id": 8,
+        "type": "PropertyTile",
+        "rent": 28,
+        "group": 2
+      },
+      "9": {
+        "owner": "Katrina",
+        "nextTileId": 10,
+        "price": 140,
+        "id": 9,
+        "type": "PropertyTile",
+        "rent": 28,
+        "group": 2
+      },
+      "20": {
+        "nextTileId": 21,
+        "price": 200,
+        "id": 20,
+        "type": "PropertyTile",
+        "rent": 40,
+        "group": 1
+      },
+      "21": {
+        "nextTileId": 22,
+        "id": 21,
+        "type": "JailTile"
+      }
+    },
+    "boardSize": 28
+  }
+}

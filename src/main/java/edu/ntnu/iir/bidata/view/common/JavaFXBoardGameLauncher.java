@@ -251,8 +251,8 @@ public class JavaFXBoardGameLauncher extends Application {
       scene
           .getStylesheets()
           .addAll(
-              getClass().getResource("/styles.css").toExternalForm(),
-              getClass().getResource("/snakesandladders.css").toExternalForm());
+              getClass().getResource("/style/styles.css").toExternalForm(),
+              getClass().getResource("/style/snakesandladders.css").toExternalForm());
       stage.setScene(scene);
       stage.show();
     } catch (Exception e) {

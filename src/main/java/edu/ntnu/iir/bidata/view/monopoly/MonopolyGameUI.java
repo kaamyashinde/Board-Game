@@ -288,8 +288,8 @@ public class MonopolyGameUI extends JavaFXGameUI {
     animator = new MonopolyAnimator(this, tilePanes, playerTokensByName);
 
     // Add stylesheets
-    getScene().getStylesheets().add(getClass().getResource("/monopoly.css").toExternalForm());
-    getScene().getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+    getScene().getStylesheets().add(getClass().getResource("/style/monopoly.css").toExternalForm());
+    getScene().getStylesheets().add(getClass().getResource("/style/styles.css").toExternalForm());
   }
 
   /**
