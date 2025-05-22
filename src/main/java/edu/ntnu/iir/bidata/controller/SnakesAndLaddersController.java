@@ -119,9 +119,9 @@ public class SnakesAndLaddersController extends BaseGameController {
         int end = start + roll;
         String type = "normal";
 
-        // Ensure we don't go past 100
+        // Skip turn if player would overshoot 100
         if (end > 100) {
-          end = 100;
+          return new MoveResult(start, start, "skip");
         }
 
         // Move the player to the new position first
