@@ -36,10 +36,10 @@ public class DiceTest {
     Assertions.assertEquals(numberOfDice, values.length);
 
     // Check that each die's value is between 1 and 6
-    for (int value : values) {
-      Assertions.assertTrue(value >= 1 && value <= 6,
-          "Die value should be between 1 and 6, but was: " + value);
-    }
+    java.util.Arrays.stream(values).forEach(value ->
+        Assertions.assertTrue(value >= 1 && value <= 6,
+            "Die value should be between 1 and 6, but was: " + value)
+    );
   }
 
   @Test
@@ -51,10 +51,7 @@ public class DiceTest {
 
     // Calculate the sum by iterating over all dice values
     int[] values = dice.getLastRolledValues();
-    int calculatedSum = 0;
-    for (int value : values) {
-      calculatedSum += value;
-    }
+    int calculatedSum = java.util.Arrays.stream(values).sum();
 
     // Verify that the sum matches the method result
     Assertions.assertEquals(calculatedSum, dice.sumOfRolledValues());
@@ -71,12 +68,8 @@ public class DiceTest {
     
     // It's possible but very unlikely that both rolls are identical
     boolean different = false;
-    for (int i = 0; i < firstRoll.length; i++) {
-      if (firstRoll[i] != secondRoll[i]) {
-        different = true;
-        break;
-      }
-    }
+    different = java.util.stream.IntStream.range(0, firstRoll.length)
+        .anyMatch(i -> firstRoll[i] != secondRoll[i]);
     Assertions.assertTrue(different, "Multiple rolls should produce different results");
   }
 }

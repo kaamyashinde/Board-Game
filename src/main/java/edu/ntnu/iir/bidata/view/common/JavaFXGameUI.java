@@ -4,19 +4,14 @@ import edu.ntnu.iir.bidata.controller.GameController;
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.Observer;
 import edu.ntnu.iir.bidata.model.player.Player;
-import edu.ntnu.iir.bidata.model.tile.core.Tile;
-import edu.ntnu.iir.bidata.model.tile.core.TileAction;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextInputDialog;
@@ -26,12 +21,14 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import java.io.File;
-import java.util.Optional;
 
+/**
+ * Represents an abstract JavaFX-based graphical user interface (GUI) for a board game. The class
+ * manages the layout, rendering, and interactions with game elements, updating the interface to
+ * reflect the current state of the game. This class implements the Observer pattern to listen to
+ * updates in the game model.
+ */
 public abstract class JavaFXGameUI implements Observer {
 
   protected final BoardGame boardGame;
@@ -51,6 +48,15 @@ public abstract class JavaFXGameUI implements Observer {
   protected boolean isPaused = false;
   protected GameController controller;
 
+  /**
+   * Constructs a new JavaFXGameUI instance to manage the graphical user interface for a board game.
+   * This constructor initializes the main UI components, binds them to the game data, and sets up
+   * observers for game updates. Subclasses must call {@code setupUI()} in their constructor to
+   * complete the initialization and properly configure the user interface.
+   *
+   * @param boardGame the {@code BoardGame} instance that this UI will represent and interact with
+   * @param primaryStage the primary {@code Stage} where the game UI will be displayed
+   */
   public JavaFXGameUI(BoardGame boardGame, Stage primaryStage) {
     this.boardGame = boardGame;
     this.primaryStage = primaryStage;
@@ -70,9 +76,7 @@ public abstract class JavaFXGameUI implements Observer {
     // Subclasses must call setupUI() in their constructor
   }
 
-  /**
-   * Template method for setting up the UI. Subclasses should call this in their constructor.
-   */
+  /** Template method for setting up the UI. Subclasses should call this in their constructor. */
   protected void setupUI() {
     BorderPane root = new BorderPane();
     root.setPadding(new Insets(20));
@@ -100,9 +104,7 @@ public abstract class JavaFXGameUI implements Observer {
     primaryStage.setScene(scene);
   }
 
-  /**
-   * Protected method for setting up the board pane. Subclasses can override for custom boards.
-   */
+  /** Protected method for setting up the board pane. Subclasses can override for custom boards. */
   protected void setupBoardPane() {
     boardPane.setPadding(new Insets(20));
     boardPane.setHgap(2);
@@ -111,9 +113,7 @@ public abstract class JavaFXGameUI implements Observer {
     // Default: no tiles. Subclasses should implement their own tile setup.
   }
 
-  /**
-   * Protected method for setting up the player info panel.
-   */
+  /** Protected method for setting up the player info panel. */
   protected void setupPlayerInfoPanel() {
     playerInfoPane.setPadding(new Insets(20));
     playerInfoPane.getStyleClass().add("player-info-panel");
@@ -124,9 +124,7 @@ public abstract class JavaFXGameUI implements Observer {
     playerInfoPane.getChildren().addAll(title, currentPlayerLabel, diceRollLabel);
   }
 
-  /**
-   * Protected method for setting up the game info panel.
-   */
+  /** Protected method for setting up the game info panel. */
   protected void setupGameInfoPanel() {
     gameInfoPane.setPadding(new Insets(20));
     gameInfoPane.getStyleClass().add("control-panel");
@@ -136,189 +134,159 @@ public abstract class JavaFXGameUI implements Observer {
     gameInfoPane.getChildren().addAll(title, statusLabel);
   }
 
-  public void showWelcomeMessage() {
-    Platform.runLater(() -> {
-      statusLabel.setText("Welcome to Snakes and Ladders!");
-      primaryStage.show();
-    });
+  /**
+   * Updates the game UI to reflect the current state of the game.
+   *
+   * <p>This method is executed on the JavaFX application thread and performs the following actions:
+   * 1. Updates the game board by calling the {@code updateBoard()} method. 2. Retrieves the current
+   * player from the {@code boardGame} and updates the UI labels to display the current player's
+   * name and their turn status. 3. Checks if the game is over. If the game is over, retrieves the
+   * winner and displays the winner's information using the {@code showWinner(Player winner)}
+   * method.
+   */
+  @Override
+  public void update() {
+    Platform.runLater(
+        () -> {
+          updateBoard();
+          Player currentPlayer = boardGame.getCurrentPlayer();
+          if (currentPlayer != null) {
+            currentPlayerLabel.setText("Current Player: " + currentPlayer.getName());
+            statusLabel.setText(currentPlayer.getName() + "'s turn to roll the dice!");
+          }
+          if (boardGame.isGameOver()) {
+            Player winner = boardGame.getWinner();
+            if (winner != null) {
+              showWinner(winner);
+            }
+          }
+        });
   }
 
-  public void showPlayerTurn(Player player) {
-    Platform.runLater(() -> {
-      currentPlayerLabel.setText("Current Player: " + player.getName());
-      statusLabel.setText(player.getName() + "'s turn to roll the dice!");
-
-      if (!playerTokens.containsKey(player)) {
-        Circle token = createPlayerToken(player, playerTokens.size() + 1);
-        playerTokens.put(player, token);
-        updatePlayerPosition(player);
-      }
-    });
+  /**
+   * Updates the game board by refreshing the position of all player tokens.
+   *
+   * <p>This method executes on the JavaFX application thread to ensure thread safety while
+   * manipulating UI components. It iterates through all players in the game and calls the {@code
+   * updatePlayerPosition} method to update each player's token to reflect their current position on
+   * the board.
+   */
+  public void updateBoard() {
+    Platform.runLater(
+        () -> {
+          playerTokens.keySet().forEach(this::updatePlayerPosition);
+        });
   }
 
-  private Circle createPlayerToken(Player player, int playerNumber) {
-    Circle token = new Circle(20);
-    token.getStyleClass().add("player-token");
-    token.getStyleClass().add("player-token-" + playerNumber);
-    return token;
+  /**
+   * Updates the UI to display the winning player and game outcome.
+   *
+   * <p>This method is run on the JavaFX application thread to ensure thread safety when updating UI
+   * components. It sets the current player label and status label to show the winner's name,
+   * applies a success style to the status label, and disables the next turn button to conclude the
+   * game.
+   *
+   * @param winner the player who has won the game
+   */
+  public void showWinner(Player winner) {
+    Platform.runLater(
+        () -> {
+          currentPlayerLabel.setText("Winner: " + winner.getName() + "!");
+          statusLabel.setText("🎉 " + winner.getName() + " has won the game! 🎉");
+          statusLabel.getStyleClass().add("success-label");
+          nextTurnButton.setDisable(true);
+        });
   }
 
+  /**
+   * Updates the position of the player's token on the game board. This method removes the player's
+   * token from its current position and places it on the new position determined by the player's
+   * current tile.
+   *
+   * @param player the player whose token position needs to be updated
+   */
   private void updatePlayerPosition(Player player) {
     Circle token = playerTokens.get(player);
     if (token != null) {
       int position = player.getCurrentTile().getId();
       StackPane tilePane = tilePanes.get(position);
-
-      for (StackPane pane : tilePanes.values()) {
-        pane.getChildren().remove(token);
-      }
-
+      tilePanes.values().forEach(pane -> pane.getChildren().remove(token));
       tilePane.getChildren().add(token);
     }
   }
 
-  public void showDiceRoll(Player player, int rollResult) {
-    Platform.runLater(() -> {
-      diceRollLabel.setText(player.getName() + " rolled: " + rollResult);
-      diceView.setValue(rollResult);
-      statusLabel.setText(player.getName() + " moves " + rollResult + " spaces!");
-    });
-  }
-
-  public void showTileAction(Player player, TileAction action) {
-    Platform.runLater(() -> {
-      diceRollLabel.setText(player.getName() + " triggered: " + action.getDescription());
-      statusLabel.setText(player.getName() + " " + action.getDescription() + "!");
-    });
-  }
-
-  public void setNextTurnAction(Runnable action) {
-    nextTurnButton.setOnAction(e -> action.run());
-  }
-
-  public void setPauseAction(Runnable action) {
-    pauseButton.setOnAction(e -> {
-      isPaused = !isPaused;
-      pauseButton.setText(isPaused ? "Resume" : "Pause");
-      action.run();
-    });
-  }
-
-  public void setSaveAction(Runnable action) {
-    saveButton.setOnAction(e -> {
-      TextInputDialog dialog = new TextInputDialog();
-      dialog.setTitle("Save Game");
-      dialog.setHeaderText("Enter a name for your saved game");
-      dialog.setContentText("Game name:");
-
-      Optional<String> result = dialog.showAndWait();
-      result.ifPresent(gameName -> {
-        action.run();
-        statusLabel.setText("Game saved as: " + gameName);
-      });
-    });
-  }
-
-  @Override
-  public void update() {
-    Platform.runLater(() -> {
-      updateBoard();
-      Player currentPlayer = boardGame.getCurrentPlayer();
-      if (currentPlayer != null) {
-        currentPlayerLabel.setText("Current Player: " + currentPlayer.getName());
-        statusLabel.setText(currentPlayer.getName() + "'s turn to roll the dice!");
-      }
-      if (boardGame.isGameOver()) {
-        Player winner = boardGame.getWinner();
-        if (winner != null) {
-          showWinner(winner);
-        }
-      }
-    });
-  }
-
-  public void updateBoard() {
-    Platform.runLater(() -> {
-      for (Player player : playerTokens.keySet()) {
-        updatePlayerPosition(player);
-      }
-    });
-  }
-
-  public void showWinner(Player winner) {
-    Platform.runLater(() -> {
-      currentPlayerLabel.setText("Winner: " + winner.getName() + "!");
-      statusLabel.setText("🎉 " + winner.getName() + " has won the game! 🎉");
-      statusLabel.getStyleClass().add("success-label");
-      nextTurnButton.setDisable(true);
-    });
-  }
-
+  /**
+   * Sets the game controller for this UI and initializes the game controls.
+   *
+   * @param controller the {@code GameController} instance to be associated with this UI
+   */
   public void setController(GameController controller) {
     this.controller = controller;
     setupGameControls();
   }
 
+  /**
+   * Configures the game control buttons and their associated actions.
+   *
+   * <p>This method sets up event handlers for the pause and save buttons. When the pause button is
+   * clicked, the game toggles between paused and resumed states, updating the button text and
+   * status label accordingly. When the save button is clicked, a dialog is displayed for the user
+   * to input a save game name, and an attempt is made to save the game using the provided name.
+   *
+   * <p>Preconditions: - The `controller` instance must not be null.
+   *
+   * <p>Postconditions: - The pause button toggles the game's paused/resumed state when clicked. -
+   * The save button displays a dialog to input the save name and attempts to save the game.
+   *
+   * <p>Exceptions: - If an error occurs during the save operation, an error message is displayed in
+   * the status label.
+   */
   private void setupGameControls() {
     if (controller == null) return;
 
-    pauseButton.setOnAction(e -> {
-      if (isPaused) {
-        controller.resumeGame();
-        pauseButton.setText("Pause");
-        statusLabel.setText("Game resumed");
-      } else {
-        controller.pauseGame();
-        pauseButton.setText("Resume");
-        statusLabel.setText("Game paused");
-      }
-      isPaused = !isPaused;
-    });
+    pauseButton.setOnAction(
+        e -> {
+          if (isPaused) {
+            controller.resumeGame();
+            pauseButton.setText("Pause");
+            statusLabel.setText("Game resumed");
+          } else {
+            controller.pauseGame();
+            pauseButton.setText("Resume");
+            statusLabel.setText("Game paused");
+          }
+          isPaused = !isPaused;
+        });
 
-    saveButton.setOnAction(e -> {
-      TextInputDialog dialog = new TextInputDialog();
-      dialog.setTitle("Save Game");
-      dialog.setHeaderText("Enter a name for your saved game");
-      dialog.setContentText("Game name:");
+    saveButton.setOnAction(
+        e -> {
+          TextInputDialog dialog = new TextInputDialog();
+          dialog.setTitle("Save Game");
+          dialog.setHeaderText("Enter a name for your saved game");
+          dialog.setContentText("Game name:");
 
-      Optional<String> result = dialog.showAndWait();
-      result.ifPresent(gameName -> {
-        try {
-          //controller.saveGame(gameName);
-          statusLabel.setText("Game saved as: " + gameName);
-        } catch (Exception ex) {
-          statusLabel.setText("Error saving game: " + ex.getMessage());
-        }
-      });
-    });
+          Optional<String> result = dialog.showAndWait();
+          result.ifPresent(
+              gameName -> {
+                try {
+                  // controller.saveGame(gameName);
+                  statusLabel.setText("Game saved as: " + gameName);
+                } catch (Exception ex) {
+                  statusLabel.setText("Error saving game: " + ex.getMessage());
+                }
+              });
+        });
   }
 
-  /**
-   * Abstract method for refreshing the UI from the board game state.
-   */
-  public abstract void refreshUIFromBoardGame();
-
-  /**
-   * Abstract method to get the main scene for this UI.
-   */
+  /** Abstract method to get the main scene for this UI. */
   public abstract Scene getScene();
 
-  protected VBox getPlayerInfoPane() {
-    return playerInfoPane;
-  }
-
-  protected HBox getGameControls() {
-    HBox gameControls = new HBox(10);
-    gameControls.setAlignment(Pos.CENTER);
-    gameControls.getChildren().addAll(pauseButton, saveButton);
-    return gameControls;
-  }
-
+  /**
+   * Retrieves the current instance of the BoardGame associated with this UI.
+   *
+   * @return the current BoardGame instance
+   */
   protected BoardGame getBoardGame() {
     return boardGame;
   }
-
-  protected Map<Integer, StackPane> getTilePanes() {
-    return tilePanes;
-  }
-} 
+}

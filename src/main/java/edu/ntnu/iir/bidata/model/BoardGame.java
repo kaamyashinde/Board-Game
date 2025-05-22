@@ -10,11 +10,10 @@ import edu.ntnu.iir.bidata.model.tile.actions.game.SwitchPositionAction;
 import edu.ntnu.iir.bidata.model.tile.actions.movement.HopFiveStepsAction;
 import edu.ntnu.iir.bidata.model.tile.core.Tile;
 import edu.ntnu.iir.bidata.model.tile.core.TileAction;
-import edu.ntnu.iir.bidata.model.utils.ParameterValidation;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Getter;
 import java.util.Objects;
+import lombok.Getter;
 
 /**
  * A facade class that handles the main game logic and coordinates between different components.
@@ -63,41 +62,6 @@ public class BoardGame implements Observable {
   }
 
   /**
-   * Initializes the board by creating and connecting all tiles.
-   */
-  private void initializeBoard() {
-    // Create all tiles first
-    for (int i = 0; i < board.getSizeOfBoard(); i++) {
-      TileAction action = null;
-      // Add different tile actions at specific positions
-      if (i == 3) {
-        action = new HopFiveStepsAction();
-      } else if (i == 7) {
-        action = new GoToTileAction(12); // Go to tile 12
-      } else if (i == 5) {
-        action = new LoseTurnAction();
-      } else if (i == 15) {
-        action = new SwitchPositionAction(players);
-      }
-      if (!board.addTile(i, action)) {
-        throw new GameException("Failed to add tile at position " + i);
-      }
-    }
-
-    // Connect all tiles using the Board class's method
-    for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
-      board.connectTiles(i, board.getTile(i + 1));
-    }
-
-    // Validate all tile connections
-    for (int i = 0; i < board.getSizeOfBoard() - 1; i++) {
-      if (!board.isValidTileConnection(i, i + 1)) {
-        throw new GameException("Invalid tile connection between tiles " + i + " and " + (i + 1));
-      }
-    }
-  }
-
-  /**
    * Adds a player to the game.
    *
    * @param playerName The name of the player to add
@@ -132,9 +96,7 @@ public class BoardGame implements Observable {
     }
 
     // Set all players to starting position
-    for (Player player : players) {
-      player.setCurrentTile(startingTile);
-    }
+    players.forEach(player -> player.setCurrentTile(startingTile));
 
     currentPlayerIndex = 0;
     gameOver = false;
@@ -196,12 +158,17 @@ public class BoardGame implements Observable {
       }
       currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
       notifyObservers();
-      return new MoveResult(playerName, prevPos, posAfterMove, posAfterAction, diceValues,
-          actionDesc);
+      return new MoveResult(
+          playerName, prevPos, posAfterMove, posAfterAction, diceValues, actionDesc);
     } catch (GameException e) {
       gameOver = true;
       notifyObservers();
-      return new MoveResult(playerName, prevPos, posAfterMove, posAfterAction, diceValues,
+      return new MoveResult(
+          playerName,
+          prevPos,
+          posAfterMove,
+          posAfterAction,
+          diceValues,
           actionDesc + " (GameException: " + e.getMessage() + ")");
     }
   }
@@ -260,14 +227,57 @@ public class BoardGame implements Observable {
   @Override
   public void notifyObservers() {
     if (observers == null) observers = new ArrayList<>();
-    for (Observer observer : observers) {
-      observer.update();
-    }
+    observers.forEach(Observer::update);
   }
 
   /**
-   * Result object for a move, containing all relevant info for display.
+   * Sets the players for the game.
+   *
+   * @param players The new list of players
    */
+  public void setPlayers(List<Player> players) {
+    this.players.clear();
+    this.players.addAll(players);
+    // Reset player positions to starting tile
+    Tile startingTile = board.getStartingTile();
+    this.players.forEach(player -> player.setCurrentTile(startingTile));
+    notifyObservers();
+  }
+
+  public void setCurrentPlayerIndex(int index) {
+    this.currentPlayerIndex = index;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        board, players, dice, currentPlayerIndex, gameOver, gameInitialized, roundNumber, level);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null || getClass() != obj.getClass()) return false;
+    BoardGame other = (BoardGame) obj;
+    return board.equals(other.board)
+        && players.equals(other.players)
+        && dice.equals(other.dice)
+        && currentPlayerIndex == other.currentPlayerIndex
+        && gameOver == other.gameOver
+        && gameInitialized == other.gameInitialized
+        && roundNumber == other.roundNumber
+        && level.equals(other.level);
+  }
+
+  public String getLevel() {
+    return level;
+  }
+
+  public void setLevel(String level) {
+    this.level = (level == null ? "medium" : level);
+  }
+
+  /** Result object for a move, containing all relevant info for display. */
   public static class MoveResult {
 
     public final String playerName;
@@ -277,8 +287,25 @@ public class BoardGame implements Observable {
     public final int[] diceValues;
     public final String actionDesc;
 
-    public MoveResult(String playerName, int prevPos, int posAfterMove, int posAfterAction,
-        int[] diceValues, String actionDesc) {
+    /**
+     * Creates a result object holding detailed information about a player's move in the game.
+     *
+     * @param playerName The name of the player making the move
+     * @param prevPos The player's position on the board before the move
+     * @param posAfterMove The player's position on the board after the move, but before any actions
+     *     are applied
+     * @param posAfterAction The player's position on the board after any actions on the landed tile
+     *     are applied
+     * @param diceValues The values rolled on the dice for this move
+     * @param actionDesc A description of the action carried out on the landed tile, if any
+     */
+    public MoveResult(
+        String playerName,
+        int prevPos,
+        int posAfterMove,
+        int posAfterAction,
+        int[] diceValues,
+        String actionDesc) {
       this.playerName = playerName;
       this.prevPos = prevPos;
       this.posAfterMove = posAfterMove;
@@ -287,46 +314,4 @@ public class BoardGame implements Observable {
       this.actionDesc = actionDesc;
     }
   }
-
-  /**
-   * Sets the players for the game.
-   * @param players The new list of players
-   */
-  public void setPlayers(List<Player> players) {
-    this.players.clear();
-    this.players.addAll(players);
-    // Reset player positions to starting tile
-    Tile startingTile = board.getStartingTile();
-    for (Player player : this.players) {
-      player.setCurrentTile(startingTile);
-    }
-    notifyObservers();
-  }
-
-  public void setCurrentPlayerIndex(int index) {
-    this.currentPlayerIndex = index;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null || getClass() != obj.getClass()) return false;
-    BoardGame other = (BoardGame) obj;
-    return board.equals(other.board) &&
-           players.equals(other.players) &&
-           dice.equals(other.dice) &&
-           currentPlayerIndex == other.currentPlayerIndex &&
-           gameOver == other.gameOver &&
-           gameInitialized == other.gameInitialized &&
-           roundNumber == other.roundNumber &&
-           level.equals(other.level);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(board, players, dice, currentPlayerIndex, gameOver, gameInitialized, roundNumber, level);
-  }
-
-  public String getLevel() { return level; }
-  public void setLevel(String level) { this.level = (level == null ? "medium" : level); }
 }

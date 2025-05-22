@@ -27,9 +27,7 @@ public class Dice {
     ParameterValidation.validateNonZeroPositiveInteger(
         numberOfDice, "number of dice to create the list");
     dice = new ArrayList<>();
-    for (int i = 0; i < numberOfDice; i++) {
-      dice.add(new Die());
-    }
+    java.util.stream.IntStream.range(0, numberOfDice).forEach(i -> dice.add(new Die()));
   }
 
   /**
