@@ -221,7 +221,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
   /**
    * Handles the logic for the "Roll Dice" action with proper animation flow.
-   * Animation happens first, then game logic is processed.
+   * Animation happens first, then game logic is processed WITHOUT rolling dice again.
    */
   private void handleRollDice() {
     // Check if animation is in progress
@@ -235,23 +235,21 @@ public class MonopolyGameUI extends JavaFXGameUI {
     int originalPos = currentPlayer.getCurrentPosition();
     String playerName = currentPlayer.getName();
 
-    // Roll dice first to get the values for display and calculation
+    // Roll dice ONCE here for both display and movement calculation
     boardGame.getDice().rollAllDice();
     int[] diceValues = boardGame.getCurrentDiceValues();
-    int diceSum = java.util.Arrays.stream(diceValues).sum();
 
-    // Update dice view immediately when dice are rolled
-    if (diceValues != null && diceValues.length >= 2) {
-      diceView.setValues(diceValues[0], diceValues[1]);
-      actionLabel.setText(playerName + " rolled " + diceValues[0] + " and " + diceValues[1] + " (Total: " + diceSum + ")");
-    } else if (diceValues != null && diceValues.length == 1) {
-      diceView.setValues(diceValues[0], diceValues[0]);
-      actionLabel.setText(playerName + " rolled " + diceValues[0]);
-    } else {
-      diceView.setValues(1, 1);
-      actionLabel.setText(playerName + " rolled 1 and 1 (Total: 2)");
-      diceSum = 2;
+    // Ensure we have exactly 2 dice values
+    if (diceValues == null || diceValues.length != 2) {
+      LOGGER.warning("Invalid dice values, defaulting to [1,1]");
+      diceValues = new int[]{1, 1};
     }
+
+    int diceSum = diceValues[0] + diceValues[1];
+
+    // Update dice view and action label
+    diceView.setValues(diceValues[0], diceValues[1]);
+    actionLabel.setText(playerName + " rolled " + diceValues[0] + " and " + diceValues[1] + " (Total: " + diceSum + ")");
 
     // Calculate final position without actually moving the player yet
     int boardSize = getBoardGame().getBoard().getSizeOfBoard();
@@ -271,22 +269,72 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
         // After reaching "Go to Jail" tile, animate to jail
         animator.animateGoToJail(playerName, jailPos, () -> {
-          // Now let controller handle the actual game logic
-          controller.handlePlayerMove();
+          // Manually move the player to the calculated position since dice were already rolled
+          movePlayerToPosition(currentPlayer, calculatedFinalPos);
+
+          // Handle the tile action and game logic WITHOUT rolling dice again
+          handleTileActionAfterMove(currentPlayer, calculatedFinalPos);
+
           update();
         });
       });
     } else {
       // Normal movement
       animator.animateMovement(playerName, originalPos, calculatedFinalPos, boardSize, () -> {
-        // After animation completes, let controller handle the game logic
-        controller.handlePlayerMove();
+        // Manually move the player to the calculated position since dice were already rolled
+        movePlayerToPosition(currentPlayer, calculatedFinalPos);
+
+        // Handle the tile action and game logic WITHOUT rolling dice again
+        handleTileActionAfterMove(currentPlayer, calculatedFinalPos);
 
         // Update action label based on what happened
         updateActionLabelAfterMove(playerName, calculatedFinalPos);
         update();
       });
     }
+  }
+
+  /**
+   * Manually moves a player to a specific position without rolling dice
+   */
+  private void movePlayerToPosition(Player player, int position) {
+    Tile targetTile = getBoardGame().getBoard().getTile(position);
+    player.setCurrentTile(targetTile);
+  }
+
+  /**
+   * Handles tile actions after the player has moved (without rolling dice again)
+   */
+  private void handleTileActionAfterMove(Player currentPlayer, int position) {
+    Tile currentTile = getBoardGame().getBoard().getTile(position);
+
+    if (currentTile instanceof PropertyTile propertyTile) {
+      if (propertyTile.getOwner() == null) {
+        // Property is available for purchase
+        LOGGER.info("Property at position " + propertyTile.getId() + " is available for purchase");
+        controller.setAwaitingPlayerAction(true);
+        controller.setPendingPropertyTile(propertyTile);
+        boardGame.notifyObservers();
+        return;
+      } else if (propertyTile.getOwner() != currentPlayer) {
+        // Player needs to pay rent
+        LOGGER.info(currentPlayer.getName() + " must pay rent for property at position " + propertyTile.getId());
+        controller.setAwaitingRentAction(true);
+        controller.setPendingRentPropertyTile(propertyTile);
+        boardGame.notifyObservers();
+        return;
+      }
+    } else if (currentTile.getAction() != null) {
+      currentTile.getAction().executeAction(currentPlayer, currentTile);
+      // If the player is now in jail, end their turn immediately
+      if (currentPlayer instanceof SimpleMonopolyPlayer && ((SimpleMonopolyPlayer) currentPlayer).isInJail()) {
+        mediator.notify(this, "nextPlayer");
+        return;
+      }
+    }
+
+    // No action needed, move to next player
+    mediator.notify(this, "nextPlayer");
   }
 
   /**
