@@ -56,9 +56,7 @@ public class GameController {
   public void setPlayerNames(List<String> playerNames) {
     this.playerNames = playerNames;
     // Initialize positions for all players
-    for (String playerName : playerNames) {
-      playerPositions.put(playerName, 0);
-    }
+    playerNames.forEach(playerName -> playerPositions.put(playerName, 0));
     LOGGER.info("Setting player names: " + playerNames);
   }
 

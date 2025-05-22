@@ -42,14 +42,12 @@ public class SnakesAndLaddersController extends BaseGameController {
   public void setPlayerNames(List<String> playerNames) {
     super.setPlayerNames(playerNames);
     // Initialize positions for all players
-    for (String playerName : playerNames) {
-      for (Player player : boardGame.getPlayers()) {
-        if (player.getName().equals(playerName)) {
-          player.setCurrentTile(boardGame.getBoard().getTile(0));
-          break;
-        }
-      }
-    }
+    playerNames.forEach(playerName ->
+        boardGame.getPlayers().stream()
+            .filter(player -> player.getName().equals(playerName))
+            .findFirst()
+            .ifPresent(player -> player.setCurrentTile(boardGame.getBoard().getTile(0)))
+    );
     LOGGER.info("Setting player names: " + playerNames);
   }
 
@@ -93,7 +91,7 @@ public class SnakesAndLaddersController extends BaseGameController {
     int[] values = boardGame.getCurrentDiceValues();
     int sum = 0;
     if (values != null) {
-      for (int v : values) sum += v;
+        sum = java.util.Arrays.stream(values).sum();
     }
     return sum;
   }
@@ -111,40 +109,33 @@ public class SnakesAndLaddersController extends BaseGameController {
   }
 
   public MoveResult movePlayer(String playerName, int roll) {
-    for (Player player : boardGame.getPlayers()) {
-      if (player.getName().equals(playerName)) {
-        int start = player.getCurrentPosition();
+    Player foundPlayer = boardGame.getPlayers().stream()
+        .filter(player -> player.getName().equals(playerName))
+        .findFirst()
+        .orElse(null);
+    if (foundPlayer != null) {
+        int start = foundPlayer.getCurrentPosition();
         int end = start + roll;
         String type = "normal";
-
-        // Ensure we don't go past 100
         if (end > 100) {
-          end = 100;
+            end = 100;
         }
-
-        // Move the player to the new position first
         int steps = end - start;
-        player.move(steps);
-
-        // Check for snakes
+        foundPlayer.move(steps);
         if (tileConfig.isSnakeHead(end)) {
-          int tail = tileConfig.getSnakeTail(end);
-          steps = tail - end;
-          player.move(steps);
-          end = tail;
-          type = "snake";
+            int tail = tileConfig.getSnakeTail(end);
+            steps = tail - end;
+            foundPlayer.move(steps);
+            end = tail;
+            type = "snake";
+        } else if (tileConfig.isLadderStart(end)) {
+            int top = tileConfig.getLadderEnd(end);
+            steps = top - end;
+            foundPlayer.move(steps);
+            end = top;
+            type = "ladder";
         }
-        // Check for ladders only if it's a normal move
-        else if (tileConfig.isLadderStart(end)) {
-          int top = tileConfig.getLadderEnd(end);
-          steps = top - end;
-          player.move(steps);
-          end = top;
-          type = "ladder";
-        }
-
         return new MoveResult(start, end, type);
-      }
     }
     return new MoveResult(0, 0, "normal");
   }
@@ -156,12 +147,11 @@ public class SnakesAndLaddersController extends BaseGameController {
   }
 
   public int getPlayerPosition(String playerName) {
-    for (Player player : boardGame.getPlayers()) {
-      if (player.getName().equals(playerName)) {
-        return player.getCurrentPosition();
-      }
-    }
-    return 0;
+    return boardGame.getPlayers().stream()
+        .filter(player -> player.getName().equals(playerName))
+        .map(Player::getCurrentPosition)
+        .findFirst()
+        .orElse(0);
   }
 
   public void loadSnakesAndLadderGame(String savePath) {
@@ -169,15 +159,14 @@ public class SnakesAndLaddersController extends BaseGameController {
   }
 
   public void updateSnakesAndLaddersPosition(String playerName, int position) {
-    for (Player player : boardGame.getPlayers()) {
-      if (player.getName().equals(playerName)) {
-        // Move the player to the correct tile
-        int steps = position - player.getCurrentPosition();
-        player.move(steps);
-        LOGGER.info(playerName + " moved to position " + position);
-        return;
-      }
-    }
+    boardGame.getPlayers().stream()
+        .filter(player -> player.getName().equals(playerName))
+        .findFirst()
+        .ifPresent(player -> {
+            int steps = position - player.getCurrentPosition();
+            player.move(steps);
+            LOGGER.info(playerName + " moved to position " + position);
+        });
   }
 
   public void loadGameFromPath(Path savePath) {
@@ -185,9 +174,9 @@ public class SnakesAndLaddersController extends BaseGameController {
       BoardGame loadedGame = boardGameReader.readBoardGame(savePath);
       this.boardGame = loadedGame;
       this.gameStarted = true;
-      for (Player player : loadedGame.getPlayers()) {
-        updateSnakesAndLaddersPosition(player.getName(), player.getCurrentPosition());
-      }
+      loadedGame.getPlayers().forEach(player ->
+          updateSnakesAndLaddersPosition(player.getName(), player.getCurrentPosition())
+      );
       boardGame.setCurrentPlayerIndex(loadedGame.getCurrentPlayerIndex());
       boardGame.notifyObservers();
       LOGGER.info("Game loaded from: " + savePath);

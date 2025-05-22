@@ -102,13 +102,7 @@ public class MonopolyController extends BaseGameController {
         SimpleMonopolyPlayer currentPlayer = (SimpleMonopolyPlayer) boardGame.getCurrentPlayer();
         boardGame.getDice().rollAllDice();
         int[] diceValues = boardGame.getCurrentDiceValues();
-        boolean rolledSix = false;
-        for (int value : diceValues) {
-            if (value == 6) {
-                rolledSix = true;
-                break;
-            }
-        }
+        boolean rolledSix = java.util.Arrays.stream(diceValues).anyMatch(value -> value == 6);
         if (rolledSix) {
             currentPlayer.setInJail(false);
         }
@@ -147,10 +141,7 @@ public class MonopolyController extends BaseGameController {
         // Roll the dice before moving
         boardGame.getDice().rollAllDice();
         int[] diceValues = boardGame.getCurrentDiceValues();
-        int steps = 0;
-        for (int value : diceValues) {
-            steps += value;
-        }
+        int steps = java.util.Arrays.stream(diceValues).sum();
         // Move the player
         currentPlayer.move(steps);
         LOGGER.info(currentPlayer.getName() + " moved " + steps + " steps");
@@ -237,7 +228,7 @@ public class MonopolyController extends BaseGameController {
         int[] values = boardGame.getCurrentDiceValues();
         int sum = 0;
         if (values != null) {
-            for (int v : values) sum += v;
+            sum = java.util.Arrays.stream(values).sum();
         }
         return sum;
     }
