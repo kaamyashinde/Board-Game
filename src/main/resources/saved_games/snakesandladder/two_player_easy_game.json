@@ -1,0 +1,533 @@
+{
+  "board": {
+    "tiles": {
+      "0": {
+        "id": 0,
+        "type": "Tile",
+        "nextTileId": 1
+      },
+      "1": {
+        "id": 1,
+        "type": "Tile",
+        "nextTileId": 2
+      },
+      "2": {
+        "id": 2,
+        "type": "Tile",
+        "nextTileId": 3
+      },
+      "3": {
+        "id": 3,
+        "type": "Tile",
+        "nextTileId": 4
+      },
+      "4": {
+        "id": 4,
+        "type": "Tile",
+        "nextTileId": 5,
+        "action": {
+          "type": "LadderAction",
+          "topTileId": 16
+        }
+      },
+      "5": {
+        "id": 5,
+        "type": "Tile",
+        "nextTileId": 6
+      },
+      "6": {
+        "id": 6,
+        "type": "Tile",
+        "nextTileId": 7
+      },
+      "7": {
+        "id": 7,
+        "type": "Tile",
+        "nextTileId": 8
+      },
+      "8": {
+        "id": 8,
+        "type": "Tile",
+        "nextTileId": 9
+      },
+      "9": {
+        "id": 9,
+        "type": "Tile",
+        "nextTileId": 10
+      },
+      "10": {
+        "id": 10,
+        "type": "Tile",
+        "nextTileId": 11
+      },
+      "11": {
+        "id": 11,
+        "type": "Tile",
+        "nextTileId": 12
+      },
+      "12": {
+        "id": 12,
+        "type": "Tile",
+        "nextTileId": 13
+      },
+      "13": {
+        "id": 13,
+        "type": "Tile",
+        "nextTileId": 14
+      },
+      "14": {
+        "id": 14,
+        "type": "Tile",
+        "nextTileId": 15
+      },
+      "15": {
+        "id": 15,
+        "type": "Tile",
+        "nextTileId": 16
+      },
+      "16": {
+        "id": 16,
+        "type": "Tile",
+        "nextTileId": 17
+      },
+      "17": {
+        "id": 17,
+        "type": "Tile",
+        "nextTileId": 18
+      },
+      "18": {
+        "id": 18,
+        "type": "Tile",
+        "nextTileId": 19
+      },
+      "19": {
+        "id": 19,
+        "type": "Tile",
+        "nextTileId": 20,
+        "action": {
+          "type": "LadderAction",
+          "topTileId": 40
+        }
+      },
+      "20": {
+        "id": 20,
+        "type": "Tile",
+        "nextTileId": 21
+      },
+      "21": {
+        "id": 21,
+        "type": "Tile",
+        "nextTileId": 22
+      },
+      "22": {
+        "id": 22,
+        "type": "Tile",
+        "nextTileId": 23
+      },
+      "23": {
+        "id": 23,
+        "type": "Tile",
+        "nextTileId": 24
+      },
+      "24": {
+        "id": 24,
+        "type": "Tile",
+        "nextTileId": 25
+      },
+      "25": {
+        "id": 25,
+        "type": "Tile",
+        "nextTileId": 26
+      },
+      "26": {
+        "id": 26,
+        "type": "Tile",
+        "nextTileId": 27
+      },
+      "27": {
+        "id": 27,
+        "type": "Tile",
+        "nextTileId": 28
+      },
+      "28": {
+        "id": 28,
+        "type": "Tile",
+        "nextTileId": 29,
+        "action": {
+          "type": "LadderAction",
+          "topTileId": 47
+        }
+      },
+      "29": {
+        "id": 29,
+        "type": "Tile",
+        "nextTileId": 30
+      },
+      "30": {
+        "id": 30,
+        "type": "Tile",
+        "nextTileId": 31
+      },
+      "31": {
+        "id": 31,
+        "type": "Tile",
+        "nextTileId": 32
+      },
+      "32": {
+        "id": 32,
+        "type": "Tile",
+        "nextTileId": 33
+      },
+      "33": {
+        "id": 33,
+        "type": "Tile",
+        "nextTileId": 34
+      },
+      "34": {
+        "id": 34,
+        "type": "Tile",
+        "nextTileId": 35
+      },
+      "35": {
+        "id": 35,
+        "type": "Tile",
+        "nextTileId": 36
+      },
+      "36": {
+        "id": 36,
+        "type": "Tile",
+        "nextTileId": 37
+      },
+      "37": {
+        "id": 37,
+        "type": "Tile",
+        "nextTileId": 38
+      },
+      "38": {
+        "id": 38,
+        "type": "Tile",
+        "nextTileId": 39
+      },
+      "39": {
+        "id": 39,
+        "type": "Tile",
+        "nextTileId": 40
+      },
+      "40": {
+        "id": 40,
+        "type": "Tile",
+        "nextTileId": 41
+      },
+      "41": {
+        "id": 41,
+        "type": "Tile",
+        "nextTileId": 42
+      },
+      "42": {
+        "id": 42,
+        "type": "Tile",
+        "nextTileId": 43
+      },
+      "43": {
+        "id": 43,
+        "type": "Tile",
+        "nextTileId": 44
+      },
+      "44": {
+        "id": 44,
+        "type": "Tile",
+        "nextTileId": 45
+      },
+      "45": {
+        "id": 45,
+        "type": "Tile",
+        "nextTileId": 46
+      },
+      "46": {
+        "id": 46,
+        "type": "Tile",
+        "nextTileId": 47
+      },
+      "47": {
+        "id": 47,
+        "type": "Tile",
+        "nextTileId": 48
+      },
+      "48": {
+        "id": 48,
+        "type": "Tile",
+        "nextTileId": 49
+      },
+      "49": {
+        "id": 49,
+        "type": "Tile",
+        "nextTileId": 50,
+        "action": {
+          "type": "SnakeAction",
+          "tailTileId": 31
+        }
+      },
+      "50": {
+        "id": 50,
+        "type": "Tile",
+        "nextTileId": 51
+      },
+      "51": {
+        "id": 51,
+        "type": "Tile",
+        "nextTileId": 52
+      },
+      "52": {
+        "id": 52,
+        "type": "Tile",
+        "nextTileId": 53,
+        "action": {
+          "type": "LadderAction",
+          "topTileId": 70
+        }
+      },
+      "53": {
+        "id": 53,
+        "type": "Tile",
+        "nextTileId": 54
+      },
+      "54": {
+        "id": 54,
+        "type": "Tile",
+        "nextTileId": 55
+      },
+      "55": {
+        "id": 55,
+        "type": "Tile",
+        "nextTileId": 56
+      },
+      "56": {
+        "id": 56,
+        "type": "Tile",
+        "nextTileId": 57
+      },
+      "57": {
+        "id": 57,
+        "type": "Tile",
+        "nextTileId": 58,
+        "action": {
+          "type": "LadderAction",
+          "topTileId": 85
+        }
+      },
+      "58": {
+        "id": 58,
+        "type": "Tile",
+        "nextTileId": 59,
+        "action": {
+          "type": "SnakeAction",
+          "tailTileId": 24
+        }
+      },
+      "59": {
+        "id": 59,
+        "type": "Tile",
+        "nextTileId": 60
+      },
+      "60": {
+        "id": 60,
+        "type": "Tile",
+        "nextTileId": 61
+      },
+      "61": {
+        "id": 61,
+        "type": "Tile",
+        "nextTileId": 62
+      },
+      "62": {
+        "id": 62,
+        "type": "Tile",
+        "nextTileId": 63,
+        "action": {
+          "type": "LadderAction",
+          "topTileId": 80
+        }
+      },
+      "63": {
+        "id": 63,
+        "type": "Tile",
+        "nextTileId": 64
+      },
+      "64": {
+        "id": 64,
+        "type": "Tile",
+        "nextTileId": 65
+      },
+      "65": {
+        "id": 65,
+        "type": "Tile",
+        "nextTileId": 66
+      },
+      "66": {
+        "id": 66,
+        "type": "Tile",
+        "nextTileId": 67
+      },
+      "67": {
+        "id": 67,
+        "type": "Tile",
+        "nextTileId": 68
+      },
+      "68": {
+        "id": 68,
+        "type": "Tile",
+        "nextTileId": 69
+      },
+      "69": {
+        "id": 69,
+        "type": "Tile",
+        "nextTileId": 70
+      },
+      "70": {
+        "id": 70,
+        "type": "Tile",
+        "nextTileId": 71
+      },
+      "71": {
+        "id": 71,
+        "type": "Tile",
+        "nextTileId": 72
+      },
+      "72": {
+        "id": 72,
+        "type": "Tile",
+        "nextTileId": 73
+      },
+      "73": {
+        "id": 73,
+        "type": "Tile",
+        "nextTileId": 74
+      },
+      "74": {
+        "id": 74,
+        "type": "Tile",
+        "nextTileId": 75
+      },
+      "75": {
+        "id": 75,
+        "type": "Tile",
+        "nextTileId": 76
+      },
+      "76": {
+        "id": 76,
+        "type": "Tile",
+        "nextTileId": 77
+      },
+      "77": {
+        "id": 77,
+        "type": "Tile",
+        "nextTileId": 78
+      },
+      "78": {
+        "id": 78,
+        "type": "Tile",
+        "nextTileId": 79
+      },
+      "79": {
+        "id": 79,
+        "type": "Tile",
+        "nextTileId": 80
+      },
+      "80": {
+        "id": 80,
+        "type": "Tile",
+        "nextTileId": 81
+      },
+      "81": {
+        "id": 81,
+        "type": "Tile",
+        "nextTileId": 82
+      },
+      "82": {
+        "id": 82,
+        "type": "Tile",
+        "nextTileId": 83,
+        "action": {
+          "type": "SnakeAction",
+          "tailTileId": 78
+        }
+      },
+      "83": {
+        "id": 83,
+        "type": "Tile",
+        "nextTileId": 84
+      },
+      "84": {
+        "id": 84,
+        "type": "Tile",
+        "nextTileId": 85
+      },
+      "85": {
+        "id": 85,
+        "type": "Tile",
+        "nextTileId": 86
+      },
+      "86": {
+        "id": 86,
+        "type": "Tile",
+        "nextTileId": 87
+      },
+      "87": {
+        "id": 87,
+        "type": "Tile",
+        "nextTileId": 88
+      },
+      "88": {
+        "id": 88,
+        "type": "Tile",
+        "nextTileId": 89,
+        "action": {
+          "type": "SnakeAction",
+          "tailTileId": 45
+        }
+      },
+      "89": {
+        "id": 89,
+        "type": "Tile"
+      }
+    },
+    "boardSize": 90
+  },
+  "players": [
+    {
+      "name": "Tom",
+      "currentTile": {
+        "id": 11,
+        "type": "Tile",
+        "nextTileId": 12
+      },
+      "skipNextTurn": false,
+      "tokenImage": "token_blue.png"
+    },
+    {
+      "name": "Kareena",
+      "currentTile": {
+        "id": 16,
+        "type": "Tile",
+        "nextTileId": 17
+      },
+      "skipNextTurn": false,
+      "tokenImage": "token_purple.png"
+    }
+  ],
+  "dice": {
+    "dice": [
+      {
+        "lastRolledValue": 3
+      },
+      {
+        "lastRolledValue": 1
+      }
+    ]
+  },
+  "currentPlayerIndex": 0,
+  "gameOver": false,
+  "gameInitialized": true,
+  "roundNumber": 1,
+  "level": "easy"
+}
