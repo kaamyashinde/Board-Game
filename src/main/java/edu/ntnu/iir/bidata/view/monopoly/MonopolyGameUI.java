@@ -212,7 +212,6 @@ public class MonopolyGameUI extends JavaFXGameUI {
     // Action label for game feedback
     actionLabel.getStyleClass().add("monopoly-action-label");
     actionLabel.setText("Ready to play! Roll the dice to start.");
-    actionLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333; -fx-text-alignment: center;");
     actionLabel.setWrapText(true);
     actionLabel.setPrefWidth(800);
     actionLabel.setMaxHeight(50); // Increased height for action label
@@ -227,7 +226,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
     controls.setAlignment(Pos.CENTER);
     controls.getStyleClass().add("monopoly-game-controls");
 
-    // Create buttons with calculated sizes
+    // Create buttons with calculated sizes and CSS classes
     rollDiceButton.getStyleClass().add("monopoly-roll-dice-button");
     rollDiceButton.setOnAction(e -> handleRollDice());
     rollDiceButton.setPrefSize(buttonSizes.rollDiceWidth, buttonSizes.height);
@@ -260,8 +259,8 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
     diceView.getStyleClass().add("monopoly-dice-view");
 
-    // Set font size for all buttons
-    String buttonFontStyle = "-fx-font-size: " + buttonSizes.fontSize + "px; -fx-font-weight: bold;";
+    // Set font size for all buttons using inline style (only for dynamic sizing)
+    String buttonFontStyle = "-fx-font-size: " + buttonSizes.fontSize + "px;";
     rollDiceButton.setStyle(buttonFontStyle);
     buyButton.setStyle(buttonFontStyle);
     skipButton.setStyle(buttonFontStyle);
@@ -364,8 +363,8 @@ public class MonopolyGameUI extends JavaFXGameUI {
     jailPayButton.setPrefSize(sizes.jailPayWidth, sizes.height);
     jailPayButton.setMinWidth(sizes.jailPayWidth);
 
-    // Update font sizes
-    String fontStyle = "-fx-font-size: " + sizes.fontSize + "px; -fx-font-weight: bold;";
+    // Update font sizes (only dynamic property that needs inline style)
+    String fontStyle = "-fx-font-size: " + sizes.fontSize + "px;";
     rollDiceButton.setStyle(fontStyle);
     buyButton.setStyle(fontStyle);
     skipButton.setStyle(fontStyle);
@@ -529,11 +528,10 @@ public class MonopolyGameUI extends JavaFXGameUI {
     if (currentPlayer != null) {
       Label currentPlayerLabel = new Label("🎯 " + currentPlayer.getName() + "'s Turn");
       currentPlayerLabel.getStyleClass().add("monopoly-current-player-label");
-      currentPlayerLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c5aa0; -fx-padding: 10px; -fx-background-color: #e3f2fd; -fx-background-radius: 5px;");
       playerInfoPanel.getChildren().add(currentPlayerLabel);
 
       Label separator = new Label("─────────────────");
-      separator.setStyle("-fx-text-fill: #cccccc;");
+      separator.getStyleClass().add("monopoly-separator");
       playerInfoPanel.getChildren().add(separator);
     }
 
@@ -544,26 +542,24 @@ public class MonopolyGameUI extends JavaFXGameUI {
         playerBox.getStyleClass().add("monopoly-player-box");
 
         if (player == currentPlayer) {
-          playerBox.setStyle("-fx-background-color: #f0f8ff; -fx-border-color: #4169e1; -fx-border-width: 2px; -fx-border-radius: 8px; -fx-background-radius: 8px;");
-        } else {
-          playerBox.setStyle("-fx-background-color: #f9f9f9; -fx-border-color: #ddd; -fx-border-width: 1px; -fx-border-radius: 5px; -fx-background-radius: 5px;");
+          playerBox.getStyleClass().add("current-player");
         }
 
         Label nameLabel = new Label("👤 " + monopolyPlayer.getName());
-        nameLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;");
+        nameLabel.getStyleClass().add("monopoly-player-name");
 
         Label moneyLabel = new Label("💰 $" + monopolyPlayer.getMoney());
-        moneyLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #4caf50; -fx-font-weight: bold;");
+        moneyLabel.getStyleClass().add("monopoly-player-money");
 
         Label positionLabel = new Label("📍 Tile #" + monopolyPlayer.getCurrentTile().getId());
-        positionLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #666;");
+        positionLabel.getStyleClass().add("monopoly-player-position");
 
         Label propertiesLabel = new Label("🏠 Properties: " + monopolyPlayer.getOwnedProperties().size());
-        propertiesLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #666;");
+        propertiesLabel.getStyleClass().add("monopoly-player-properties");
 
         if (monopolyPlayer.isInJail()) {
           Label jailLabel = new Label("🔒 IN JAIL");
-          jailLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #f44336; -fx-font-weight: bold; -fx-background-color: #ffebee; -fx-padding: 3px; -fx-background-radius: 3px;");
+          jailLabel.getStyleClass().add("monopoly-player-jail");
           playerBox.getChildren().addAll(nameLabel, moneyLabel, positionLabel, propertiesLabel, jailLabel);
         } else {
           playerBox.getChildren().addAll(nameLabel, moneyLabel, positionLabel, propertiesLabel);
@@ -746,7 +742,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
       javafx.scene.text.Text monopolyText = new javafx.scene.text.Text("MONOPOLY");
       monopolyText.getStyleClass().add("monopoly-center-text");
-      monopolyText.setStyle("-fx-font-size: " + Math.max(16, centerSize / 8) + "px; -fx-font-weight: bold; -fx-fill: #4169e1;");
+      monopolyText.setStyle("-fx-font-size: " + Math.max(16, centerSize / 8) + "px;");
 
       centerArea.getChildren().addAll(centerRect, monopolyText);
       boardPane.add(centerArea, 1, 1, gridDim - 2, gridDim - 2);
@@ -800,7 +796,7 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
       Label label = new Label("$" + pt.getPrice());
       label.getStyleClass().add("monopoly-tile-label");
-      label.setStyle("-fx-font-size: " + Math.max(8, tileSize / 8) + "px; -fx-font-weight: bold;");
+      label.setStyle("-fx-font-size: " + Math.max(8, tileSize / 8) + "px;");
 
       StackPane mainArea = new StackPane(mainRect, label);
       propertyContainer.getChildren().addAll(colorBar, mainArea);
@@ -813,25 +809,26 @@ public class MonopolyGameUI extends JavaFXGameUI {
 
       Label label = new Label();
       label.getStyleClass().add("monopoly-tile-label");
-      label.setStyle("-fx-font-size: " + Math.max(8, tileSize / 10) + "px; -fx-font-weight: bold;");
+      label.setStyle("-fx-font-size: " + Math.max(8, tileSize / 10) + "px;");
 
       if (tile instanceof GoTile) {
+        rect.getStyleClass().add("go-tile-color");
         rect.setFill(Color.web("#90EE90"));
         label.setText("GO");
-        label.setStyle(label.getStyle() + " -fx-text-fill: #006400;");
       } else if (tile instanceof JailTile) {
+        rect.getStyleClass().add("jail-tile-color");
         rect.setFill(Color.web("#FFB6C1"));
         label.setText("JAIL");
-        label.setStyle(label.getStyle() + " -fx-text-fill: #8B0000;");
       } else if (tile instanceof FreeParkingTile) {
+        rect.getStyleClass().add("free-parking-tile-color");
         rect.setFill(Color.web("#F0E68C"));
         label.setText("FREE\nPARKING");
-        label.setStyle(label.getStyle() + " -fx-text-fill: #B8860B;");
       } else if (tile.getAction() instanceof GoToJailAction) {
+        rect.getStyleClass().add("go-to-jail-tile-color");
         rect.setFill(Color.web("#FFA07A"));
         label.setText("GO TO\nJAIL");
-        label.setStyle(label.getStyle() + " -fx-text-fill: #8B0000;");
       } else {
+        rect.getStyleClass().add("default-tile-color");
         rect.setFill(Color.web("#F5F5F5"));
         label.setText("");
       }

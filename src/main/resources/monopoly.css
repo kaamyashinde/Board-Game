@@ -44,7 +44,9 @@
   -fx-scale-x: 1.05;
   -fx-scale-y: 1.05;
   -fx-transition: all 0.3s ease;
-}/* Special tile styles */
+}
+
+/* Special tile styles */
 .go-tile {
   -fx-fill: #90EE90;  /* Light green */
   -fx-background-color: #90EE90;
@@ -68,7 +70,9 @@
 .blank-tile {
   -fx-fill: #D3D3D3;  /* Light gray */
   -fx-background-color: #D3D3D3;
-}/* Base styles */
+}
+
+/* Base styles */
 .root {
   -fx-background-color: #f0f2f5;
   -fx-font-family: 'Segoe UI', Arial, sans-serif;
@@ -400,6 +404,10 @@
   -fx-background-color: #f0f0f0;
 }
 
+.monopoly-board-scroll {
+  -fx-background-color: transparent;
+}
+
 .monopoly-board-pane {
   -fx-hgap: 2;
   -fx-vgap: 2;
@@ -415,6 +423,10 @@
   -fx-border-color: #cccccc;
   -fx-border-width: 1;
   -fx-pref-width: 200;
+}
+
+.monopoly-player-scroll {
+  -fx-background-color: transparent;
 }
 
 .monopoly-game-controls {
@@ -502,17 +514,103 @@
   -fx-font-size: 14px;
   -fx-font-weight: bold;
   -fx-text-fill: #333;
+  -fx-text-alignment: center;
+  -fx-wrap-text: true;
+}
+
+.monopoly-current-player-label {
+  -fx-font-size: 16px;
+  -fx-font-weight: bold;
+  -fx-text-fill: #2c5aa0;
+  -fx-padding: 10;
+  -fx-background-color: #e3f2fd;
+  -fx-background-radius: 5;
 }
 
 .monopoly-player-box {
-  -fx-padding: 20;
-  -fx-background-color: white;
-  -fx-border-color: #cccccc;
+  -fx-padding: 12;
+  -fx-background-color: #f9f9f9;
+  -fx-border-color: #ddd;
   -fx-border-width: 1;
+  -fx-border-radius: 5;
+  -fx-background-radius: 5;
+}
+
+.monopoly-player-box.current-player {
+  -fx-background-color: #f0f8ff;
+  -fx-border-color: #4169e1;
+  -fx-border-width: 2;
+  -fx-border-radius: 8;
+  -fx-background-radius: 8;
 }
 
 .monopoly-player-name {
+  -fx-font-size: 14px;
   -fx-font-weight: bold;
+  -fx-text-fill: #333;
+}
+
+.monopoly-player-money {
+  -fx-font-size: 12px;
+  -fx-text-fill: #4caf50;
+  -fx-font-weight: bold;
+}
+
+.monopoly-player-position {
+  -fx-font-size: 11px;
+  -fx-text-fill: #666;
+}
+
+.monopoly-player-properties {
+  -fx-font-size: 11px;
+  -fx-text-fill: #666;
+}
+
+.monopoly-player-jail {
+  -fx-font-size: 12px;
+  -fx-text-fill: #f44336;
+  -fx-font-weight: bold;
+  -fx-background-color: #ffebee;
+  -fx-padding: 3;
+  -fx-background-radius: 3;
+}
+
+.monopoly-separator {
+  -fx-text-fill: #cccccc;
+}
+
+/* Property tile styles */
+.property-tile-container {
+  -fx-background-color: transparent;
+}
+
+.property-color-bar {
+  -fx-stroke: transparent;
+}
+
+/* Special tile colors */
+.go-tile-color {
+  -fx-fill: #90EE90;
+  -fx-text-fill: #006400;
+}
+
+.jail-tile-color {
+  -fx-fill: #FFB6C1;
+  -fx-text-fill: #8B0000;
+}
+
+.free-parking-tile-color {
+  -fx-fill: #F0E68C;
+  -fx-text-fill: #B8860B;
+}
+
+.go-to-jail-tile-color {
+  -fx-fill: #FFA07A;
+  -fx-text-fill: #8B0000;
+}
+
+.default-tile-color {
+  -fx-fill: #F5F5F5;
 }
 
 /* MonopolyMenuUI Styles */
@@ -544,4 +642,97 @@
 .monopolyPlayerCountLabelClass {
   -fx-font-size: 14px;
   -fx-text-fill: #3b3b6d;
+}
+
+/* PlayerSelectionUI Styles */
+.player-selection-root {
+  -fx-background-color: #f5fff5;
+  -fx-background-radius: 20;
+}
+
+.player-selection-title-pane {
+  -fx-background-color: #BDEBC8;
+  -fx-background-radius: 15;
+}
+
+.player-selection-title-label {
+  -fx-font-size: 16px;
+  -fx-font-weight: bold;
+}
+
+.player-selection-button {
+  -fx-background-color: #BDEBC8;
+  -fx-text-fill: black;
+  -fx-font-size: 16px;
+  -fx-background-radius: 25;
+  -fx-padding: 10;
+}
+
+.player-selection-status-label {
+  -fx-text-fill: #006400;
+  -fx-font-size: 14px;
+}
+
+/* MainMenuUI Styles */
+.main-menu-root {
+  -fx-background-color: #f5fff5;
+}
+
+.main-menu-welcome-pane {
+  -fx-background-color: #bfc2fa;
+  -fx-background-radius: 20;
+}
+
+.main-menu-welcome-label {
+  -fx-font-size: 30px;
+  -fx-font-family: serif;
+  -fx-font-weight: bold;
+}
+
+.main-menu-game-pane {
+  -fx-background-radius: 18;
+  -fx-border-width: 3;
+  -fx-border-radius: 18;
+}
+
+.main-menu-game-label {
+  -fx-font-size: 18px;
+  -fx-font-weight: bold;
+  -fx-text-fill: white;
+  -fx-background-color: rgba(0, 100, 0, 0.7);
+  -fx-padding: 5 10;
+  -fx-background-radius: 10;
+}
+
+.main-menu-credit-label {
+  -fx-font-size: 10px;
+  -fx-background-color: #ecebff;
+  -fx-background-radius: 10;
+  -fx-padding: 2 8 2 8;
+}
+
+/* ——— Generic helpers ——— */
+.bold-label {
+  -fx-font-weight: bold;
+}
+
+/* Red warning frame around "MAX 5 PLAYERS" */
+.player-selection-limit-warning {
+  -fx-border-color: red;
+  -fx-border-radius: 15;
+  -fx-border-width: 2;
+}
+
+/* Optional text at the top of the colourful left logo strip  */
+.main-menu-logo-title {
+  -fx-font-size: 18px;
+  -fx-font-weight: bold;
+}
+
+/* Style for the new instructions label */
+.player-selection-instructions-label {
+  -fx-text-fill: #333333;
+  -fx-font-size: 14px;
+  -fx-font-style: italic;
+  -fx-padding: 5 0 5 0;
 }
