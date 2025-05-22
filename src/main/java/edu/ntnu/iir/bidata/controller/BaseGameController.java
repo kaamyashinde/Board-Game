@@ -22,29 +22,35 @@ public abstract class BaseGameController {
   protected List<String> playerNames;
   @Getter @Setter protected boolean diceRolled = false;
 
+  /**
+   * Constructs a BaseGameController with the specified BoardGame instance.
+   * Initializes the controller with the provided board game and logs the initialization.
+   *
+   * @param boardGame the BoardGame instance that this controller will manage
+   */
   protected BaseGameController(BoardGame boardGame) {
     this.boardGame = boardGame;
     LOGGER.info("BaseGameController initialized");
   }
 
-  /** Sets the player names for the game */
+  /** Sets the player names for the game. */
   public void setPlayerNames(List<String> playerNames) {
     this.playerNames = playerNames;
     LOGGER.info("Setting player names: " + playerNames);
   }
 
-  /** Starts the game */
+  /** Starts the game. */
   public void startGame() {
     LOGGER.info("Starting new game");
     boardGame.startGame();
   }
 
-  /** Gets the current player's name */
+  /** Gets the current player's name. */
   public String getCurrentPlayerName() {
     return playerNames.get(currentPlayerIndex);
   }
 
-  /** Moves to the next player */
+  /** Moves to the next player. */
   protected void nextPlayer() {
     currentPlayerIndex = (currentPlayerIndex + 1) % playerNames.size();
     boardGame.setCurrentPlayerIndex(currentPlayerIndex);
@@ -52,7 +58,7 @@ public abstract class BaseGameController {
     boardGame.notifyObservers();
   }
 
-  /** Abstract method to handle player movement Must be implemented by specific game controllers */
+  /** Abstract method to handle player movement Must be implemented by specific game controllers. */
   public abstract void handlePlayerMove();
 
   /** Saves a board game to be opened later. */

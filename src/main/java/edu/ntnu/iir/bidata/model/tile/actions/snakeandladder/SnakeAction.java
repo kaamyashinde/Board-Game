@@ -15,8 +15,7 @@ public class SnakeAction implements TileAction {
   /**
    * Creates a new SnakeAction that will move the player to the tail of the snake.
    *
-   * @param tailTileId The ID of the tile at the tail of the snake (must be lower than current
-   *                   tile)
+   * @param tailTileId The ID of the tile at the tail of the snake (must be lower than current tile)
    */
   public SnakeAction(int tailTileId) {
     if (tailTileId <= 0) {
@@ -37,8 +36,6 @@ public class SnakeAction implements TileAction {
 
     if (targetTile != null && targetTile.getId() == tailTileId) {
       player.setCurrentTile(targetTile);
-      System.out.println(
-          player.getName() + " encountered a snake! Slid down to tile " + tailTileId + "!");
     }
   }
 
@@ -50,4 +47,4 @@ public class SnakeAction implements TileAction {
   public int getTailTileId() {
     return tailTileId;
   }
-} 
+}

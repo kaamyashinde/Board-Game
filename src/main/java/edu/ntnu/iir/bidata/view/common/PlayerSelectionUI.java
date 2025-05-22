@@ -1,29 +1,41 @@
 package edu.ntnu.iir.bidata.view.common;
 
+import edu.ntnu.iir.bidata.Inject;
+import edu.ntnu.iir.bidata.filehandling.player.PlayerFileReaderCSV;
+import edu.ntnu.iir.bidata.model.player.Player;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Toggle;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
-import edu.ntnu.iir.bidata.Inject;
 
 /**
- * UI for player selection, including loading players from CSV files and selecting which ones to use.
- * Simplified layout with more intuitive workflow.
+ * UI for player selection, including loading players from CSV files and selecting which ones to
+ * use. Simplified layout with more intuitive workflow.
  */
 public class PlayerSelectionUI {
   private final Stage stage;
@@ -31,11 +43,16 @@ public class PlayerSelectionUI {
   private final ObservableList<String> selectedPlayersList = FXCollections.observableArrayList();
   private final ListView<String> availablePlayersListView = new ListView<>(availablePlayersList);
   private final ListView<String> selectedPlayersListView = new ListView<>(selectedPlayersList);
-  private Label statusLabel;
   private final Map<String, String> playerTokenMap = new HashMap<>(); // player name -> token image
-  private final List<String> availableTokens = new ArrayList<>(
-      List.of("token_blue.png", "token_green.png", "token_purple.png", "token_red.png", "token_yellow.png")
-  );
+  private final List<String> availableTokens =
+      new ArrayList<>(
+          List.of(
+              "token_blue.png",
+              "token_green.png",
+              "token_purple.png",
+              "token_red.png",
+              "token_yellow.png"));
+  private Label statusLabel;
 
   /**
    * Creates a new player selection UI overlay.
@@ -53,6 +70,21 @@ public class PlayerSelectionUI {
     setupUI();
   }
 
+  /**
+   * Sets up the user interface for the player selection screen.
+   *
+   * <p>This method initializes and arranges all UI components required for the player selection
+   * screen, including: - A root BorderPane layout with padding and styling. - Central content with
+   * buttons, list views, and labels for selecting players. - Buttons for loading players from a CSV
+   * file and adding players manually, grouped together at the top. - Two list views displaying
+   * "Available Players" and "Selected Players" with custom cell factories. - Control buttons for
+   * selecting, removing, and clearing players. - Player limit indicators for the minimum and
+   * maximum player count. - An instructions label for guiding the user. - A status label for
+   * providing feedback to the user. - A "DONE" button for closing the UI.
+   *
+   * <p>Additionally, the method includes double-click functionality on both list views for quicker
+   * player selection and removal. Styling is applied from a CSS file referenced in the scene.
+   */
   private void setupUI() {
     BorderPane root = new BorderPane();
     root.setPadding(new Insets(20));
@@ -134,7 +166,9 @@ public class PlayerSelectionUI {
 
     StackPane maxPlayersPane = new StackPane();
     maxPlayersPane.setPrefSize(200, 50);
-    maxPlayersPane.getStyleClass().addAll("player-selection-title-pane", "player-selection-limit-warning");
+    maxPlayersPane
+        .getStyleClass()
+        .addAll("player-selection-title-pane", "player-selection-limit-warning");
     Label maxPlayersLabel = new Label("MAX 5 PLAYERS");
     maxPlayersLabel.getStyleClass().add("player-selection-title-label");
     maxPlayersPane.getChildren().add(maxPlayersLabel);
@@ -155,7 +189,8 @@ public class PlayerSelectionUI {
     centerContent.getChildren().add(statusLabel);
 
     // Add instructions text
-    Label instructionsLabel = new Label("Press on the players you want and click \"Select\" to choose them for the game");
+    Label instructionsLabel =
+        new Label("Press on the players you want and click \"Select\" to choose them for the game");
     instructionsLabel.getStyleClass().add("player-selection-instructions-label");
     centerContent.getChildren().add(instructionsLabel);
 
@@ -175,29 +210,45 @@ public class PlayerSelectionUI {
     stage.setScene(scene);
 
     // Add double-click functionality for quicker selection
-    availablePlayersListView.setOnMouseClicked(event -> {
-      if (event.getClickCount() == 2) {
-        selectPlayer();
-      }
-    });
+    availablePlayersListView.setOnMouseClicked(
+        event -> {
+          if (event.getClickCount() == 2) {
+            selectPlayer();
+          }
+        });
 
-    selectedPlayersListView.setOnMouseClicked(event -> {
-      if (event.getClickCount() == 2) {
-        removeSelectedPlayer();
-      }
-    });
+    selectedPlayersListView.setOnMouseClicked(
+        event -> {
+          if (event.getClickCount() == 2) {
+            removeSelectedPlayer();
+          }
+        });
   }
 
   /**
-   * Show the player selection dialog
+   * Creates a styled button with specified text, width, and height, and applies a predefined style
+   * class to the button.
    *
-   * @return List of selected player names
+   * @param text the text to be displayed on the button
+   * @param width the preferred width of the button
+   * @param height the preferred height of the button
+   * @return a Button instance with the specified properties and styles applied
    */
-  public List<String> showAndWait() {
-    stage.showAndWait();
-    return new ArrayList<>(selectedPlayersList);
+  private Button createStyledButton(String text, int width, int height) {
+    Button button = new Button(text);
+    button.setPrefWidth(width);
+    button.setPrefHeight(height);
+    button.getStyleClass().add("player-selection-button");
+    return button;
   }
 
+  /**
+   * Loads player details from a predefined CSV file located in the resources folder.
+   *
+   * <p>The method reads the CSV file, parses its contents to create Player objects, and populates
+   * the list of available players. Each player's name and optional token image are extracted.
+   * Duplicate or empty player names are
+   */
   private void loadPlayersFromCSV() {
     try {
       // Load from the built-in CSV file in resources folder
@@ -210,70 +261,54 @@ public class PlayerSelectionUI {
       }
 
       // Use the new method to read directly from InputStream
-      java.util.List<edu.ntnu.iir.bidata.model.player.Player> loadedPlayers =
-          new edu.ntnu.iir.bidata.filehandling.player.PlayerFileReaderCSV().readPlayersFromInputStream(inputStream);
+      java.util.List<Player> loadedPlayers =
+          new PlayerFileReaderCSV().readPlayersFromInputStream(inputStream);
 
       // Clear existing available players
       availablePlayersList.clear();
 
       // Add all loaded players to available list
-      for (edu.ntnu.iir.bidata.model.player.Player player : loadedPlayers) {
-        String name = player.getName();
-        String token = player.getTokenImage();
-        if (!name.isEmpty() && !availablePlayersList.contains(name)) {
-          availablePlayersList.add(name);
-          if (token != null && !token.isEmpty()) {
-            playerTokenMap.put(name, token);
-          }
-        }
-      }
+      loadedPlayers.forEach(
+          player -> {
+            String name = player.getName();
+            String token = player.getTokenImage();
+            if (!name.isEmpty() && !availablePlayersList.contains(name)) {
+              availablePlayersList.add(name);
+              if (token != null && !token.isEmpty()) {
+                playerTokenMap.put(name, token);
+              }
+            }
+          });
 
       inputStream.close();
-      statusLabel.setText("Loaded " + availablePlayersList.size() + " available players. Select the ones you want to play with.");
+      statusLabel.setText(
+          "Loaded "
+              + availablePlayersList.size()
+              + " available players. Select the ones you want to play with.");
 
     } catch (Exception e) {
       statusLabel.setText("Error loading built-in CSV: " + e.getMessage());
     }
   }
 
-  private void selectPlayer() {
-    String selectedPlayer = availablePlayersListView.getSelectionModel().getSelectedItem();
-    if (selectedPlayer != null) {
-      if (selectedPlayersList.size() >= 5) {
-        statusLabel.setText("Maximum 5 players allowed!");
-        return;
-      }
-      if (!selectedPlayersList.contains(selectedPlayer)) {
-        // Prompt for token selection if not already assigned
-        if (!playerTokenMap.containsKey(selectedPlayer)) {
-          showTokenSelectionDialog(selectedPlayer);
-        } else {
-          selectedPlayersList.add(selectedPlayer);
-          statusLabel.setText("Added " + selectedPlayer + " to selected players");
-        }
-      } else {
-        statusLabel.setText(selectedPlayer + " is already selected!");
-      }
-    } else {
-      statusLabel.setText("Please select a player from the available list first!");
-    }
-  }
-
-  private void removeSelectedPlayer() {
-    String selectedPlayer = selectedPlayersListView.getSelectionModel().getSelectedItem();
-    if (selectedPlayer != null) {
-      selectedPlayersList.remove(selectedPlayer);
-      statusLabel.setText("Removed " + selectedPlayer + " from selected players");
-    } else {
-      statusLabel.setText("Please select a player from the selected list first!");
-    }
-  }
-
-  private void clearAllSelectedPlayers() {
-    selectedPlayersList.clear();
-    statusLabel.setText("Cleared all selected players");
-  }
-
+  /**
+   * Displays a dialog that allows the user to add a new player with a specified name and token.
+   *
+   * <p>The dialog consists of the following elements: - A title pane indicating the purpose of the
+   * dialog. - A text field for entering the player's name. - A token selection section where tokens
+   * not already in use by selected players are displayed as options with associated images. - An
+   * "ADD" button to confirm and process the addition of the new player.
+   *
+   * <p>Validation ensures the entered name is not empty, the selected token is unique among the
+   * already selected players, and the name does not conflict with existing available players. If
+   * validation passes, the player's name and token are added to the appropriate data structures.
+   *
+   * <p>The dialog uses modal behavior, blocking interaction with other windows until the dialog is
+   * dismissed. Upon adding a player successfully, the dialog is closed automatically.
+   *
+   * <p>The UI styling is applied using a predefined CSS file and specific style classes. Feedback
+   * messages are displayed via a status label when input validation fails or upon success.
+   */
   private void showAddPlayerDialog() {
     Stage addDialog = new Stage();
     addDialog.initOwner(stage);
@@ -311,58 +346,63 @@ public class PlayerSelectionUI {
     tokenBox.setAlignment(Pos.CENTER);
     // Only exclude tokens already used by selected players
     java.util.Set<String> usedTokens = new java.util.HashSet<>();
-    for (String selectedPlayer : selectedPlayersList) {
-      String usedToken = playerTokenMap.get(selectedPlayer);
-      if (usedToken != null) {
-        usedTokens.add(usedToken);
-      }
-    }
-    for (String token : availableTokens) {
-      if (!usedTokens.contains(token)) {
-        RadioButton rb = new RadioButton();
-        rb.setToggleGroup(tokenGroup);
-        ImageView iv = new ImageView(new Image(getClass().getResourceAsStream("/tokens/" + token)));
-        iv.setFitWidth(32);
-        iv.setFitHeight(48);
-        rb.setGraphic(iv);
-        rb.setUserData(token);
-        tokenBox.getChildren().add(rb);
-      }
-    }
+    selectedPlayersList.forEach(
+        selectedPlayer -> {
+          String usedToken = playerTokenMap.get(selectedPlayer);
+          if (usedToken != null) {
+            usedTokens.add(usedToken);
+          }
+        });
+    availableTokens.forEach(
+        token -> {
+          if (!usedTokens.contains(token)) {
+            RadioButton rb = new RadioButton();
+            rb.setToggleGroup(tokenGroup);
+            ImageView iv =
+                new ImageView(new Image(getClass().getResourceAsStream("/tokens/" + token)));
+            iv.setFitWidth(32);
+            iv.setFitHeight(48);
+            rb.setGraphic(iv);
+            rb.setUserData(token);
+            tokenBox.getChildren().add(rb);
+          }
+        });
 
     Button addButton = createStyledButton("ADD", 120, 40);
 
     layout.getChildren().addAll(titlePane, nameBox, tokenLabel, tokenBox, addButton);
 
-    addButton.setOnAction(e -> {
-      String name = nameField.getText().trim();
-      Toggle selectedToggle = tokenGroup.getSelectedToggle();
-      if (name.isEmpty()) {
-        statusLabel.setText("Player name cannot be empty!");
-        return;
-      }
-      if (selectedToggle == null) {
-        statusLabel.setText("Please select a token!");
-        return;
-      }
-      String token = (String) selectedToggle.getUserData();
-      if (availablePlayersList.contains(name)) {
-        statusLabel.setText("Player " + name + " already exists in available players!");
-        return;
-      }
-      // Only check for token conflict among selected players
-      for (String selectedPlayer : selectedPlayersList) {
-        String usedToken = playerTokenMap.get(selectedPlayer);
-        if (token.equals(usedToken)) {
-          statusLabel.setText("Token already taken!");
-          return;
-        }
-      }
-      availablePlayersList.add(name);
-      playerTokenMap.put(name, token);
-      statusLabel.setText("Added " + name + " to available players with token " + token);
-      addDialog.close();
-    });
+    addButton.setOnAction(
+        e -> {
+          String name = nameField.getText().trim();
+          Toggle selectedToggle = tokenGroup.getSelectedToggle();
+          if (name.isEmpty()) {
+            statusLabel.setText("Player name cannot be empty!");
+            return;
+          }
+          if (selectedToggle == null) {
+            statusLabel.setText("Please select a token!");
+            return;
+          }
+          String token = (String) selectedToggle.getUserData();
+          if (availablePlayersList.contains(name)) {
+            statusLabel.setText("Player " + name + " already exists in available players!");
+            return;
+          }
+          // Only check for token conflict among selected players
+          selectedPlayersList.forEach(
+              selectedPlayer -> {
+                String usedToken = playerTokenMap.get(selectedPlayer);
+                if (token.equals(usedToken)) {
+                  statusLabel.setText("Token already taken!");
+                  return;
+                }
+              });
+          availablePlayersList.add(name);
+          playerTokenMap.put(name, token);
+          statusLabel.setText("Added " + name + " to available players with token " + token);
+          addDialog.close();
+        });
 
     Scene scene = new Scene(layout, 400, 300);
     scene.getStylesheets().add(getClass().getResource("/common.css").toExternalForm());
@@ -370,6 +410,97 @@ public class PlayerSelectionUI {
     addDialog.showAndWait();
   }
 
+  /**
+   * Handles the logic for selecting a player from the list of available players.
+   *
+   * <p>This method allows the user to select a player and add them to the list of selected players,
+   * ensuring certain constraints are met: - A maximum of 5 players can be selected at any given
+   * time. - Duplicate player selections are not allowed. - If the player is being selected for the
+   * first time, a token assignment dialog is displayed.
+   *
+   * <p>The method performs the following actions: 1. Retrieves the currently selected player from
+   * the UI component managing available players. 2. Validates if a player is selected and checks if
+   * the player is already in the list of selected players. 3. Ensures that the total number of
+   * selected players does not exceed the allowed limit. 4. Displays a token selection dialog for
+   * unassigned players or adds the player directly if a token is already assigned. 5. Updates the
+   * status label with relevant messages to provide feedback regarding the outcome.
+   *
+   * <p>Feedback scenarios handled: - If no player is selected, a prompt is displayed asking the
+   * user to select a player. - If the selected player is already chosen, a message indicating the
+   * duplicate selection is shown. - If the maximum player limit is reached, an error message is
+   * displayed. - Confirmation messages are displayed when a player is successfully added to the
+   * list.
+   *
+   * <p>Unique tokens are assigned via a separate dialog and mapped to the selected player's name if
+   * necessary.
+   */
+  private void selectPlayer() {
+    String selectedPlayer = availablePlayersListView.getSelectionModel().getSelectedItem();
+    if (selectedPlayer != null) {
+      if (selectedPlayersList.size() >= 5) {
+        statusLabel.setText("Maximum 5 players allowed!");
+        return;
+      }
+      if (!selectedPlayersList.contains(selectedPlayer)) {
+        // Prompt for token selection if not already assigned
+        if (!playerTokenMap.containsKey(selectedPlayer)) {
+          showTokenSelectionDialog(selectedPlayer);
+        } else {
+          selectedPlayersList.add(selectedPlayer);
+          statusLabel.setText("Added " + selectedPlayer + " to selected players");
+        }
+      } else {
+        statusLabel.setText(selectedPlayer + " is already selected!");
+      }
+    } else {
+      statusLabel.setText("Please select a player from the available list first!");
+    }
+  }
+
+  /**
+   * Removes the currently selected player from the list of selected players.
+   *
+   * <p>This method checks if a player is selected in the selected players list view. If a player is
+   * selected, it removes the player from the `selectedPlayersList` and updates the status label to
+   * confirm the removal. If no player is selected, the status label prompts the user to select a
+   * player first.
+   *
+   * <p>The method ensures that the user receives feedback about the action taken or the necessary
+   * steps to perform the operation correctly.
+   */
+  private void removeSelectedPlayer() {
+    String selectedPlayer = selectedPlayersListView.getSelectionModel().getSelectedItem();
+    if (selectedPlayer != null) {
+      selectedPlayersList.remove(selectedPlayer);
+      statusLabel.setText("Removed " + selectedPlayer + " from selected players");
+    } else {
+      statusLabel.setText("Please select a player from the selected list first!");
+    }
+  }
+
+  /**
+   * Clears all selected players from the selection list.
+   *
+   * <p>This method empties the list of currently selected players and updates the status label to
+   * indicate that all selected players have been removed. It ensures that the UI remains consistent
+   * by reflecting these changes appropriately.
+   */
+  private void clearAllSelectedPlayers() {
+    selectedPlayersList.clear();
+    statusLabel.setText("Cleared all selected players");
+  }
+
+  /**
+   * Displays a dialog for selecting a token for the specified player.
+   *
+   * <p>The dialog provides a list of available tokens as toggleable options. It ensures that tokens
+   * already in use by other players are excluded. A status label is updated with feedback if a
+   * token selection is invalid or when the selection is successful. The selected token is mapped to
+   * the given player name, and that player is added to the list of selected players. The method
+   * uses a modal dialog that blocks interaction with other windows until closed.
+   *
+   * @param playerName the name of the player for whom a token selection is to be made
+   */
   private void showTokenSelectionDialog(String playerName) {
     Stage tokenDialog = new Stage();
     tokenDialog.initOwner(stage);
@@ -388,43 +519,47 @@ public class PlayerSelectionUI {
     tokenBox.setAlignment(Pos.CENTER);
     // Only exclude tokens already used by selected players
     java.util.Set<String> usedTokens = new java.util.HashSet<>();
-    for (String selectedPlayer : selectedPlayersList) {
-      String usedToken = playerTokenMap.get(selectedPlayer);
-      if (usedToken != null) {
-        usedTokens.add(usedToken);
-      }
-    }
-    for (String token : availableTokens) {
-      if (!usedTokens.contains(token)) {
-        RadioButton rb = new RadioButton();
-        rb.setToggleGroup(tokenGroup);
-        ImageView iv = new ImageView(new Image(getClass().getResourceAsStream("/tokens/" + token)));
-        iv.setFitWidth(32);
-        iv.setFitHeight(48);
-        rb.setGraphic(iv);
-        rb.setUserData(token);
-        tokenBox.getChildren().add(rb);
-      }
-    }
+    selectedPlayersList.forEach(
+        selectedPlayer -> {
+          String usedToken = playerTokenMap.get(selectedPlayer);
+          if (usedToken != null) {
+            usedTokens.add(usedToken);
+          }
+        });
+    availableTokens.forEach(
+        token -> {
+          if (!usedTokens.contains(token)) {
+            RadioButton rb = new RadioButton();
+            rb.setToggleGroup(tokenGroup);
+            ImageView iv =
+                new ImageView(new Image(getClass().getResourceAsStream("/tokens/" + token)));
+            iv.setFitWidth(32);
+            iv.setFitHeight(48);
+            rb.setGraphic(iv);
+            rb.setUserData(token);
+            tokenBox.getChildren().add(rb);
+          }
+        });
     Button selectButton = createStyledButton("SELECT", 120, 40);
     layout.getChildren().addAll(tokenLabel, tokenBox, selectButton);
 
-    selectButton.setOnAction(e -> {
-      Toggle selectedToggle = tokenGroup.getSelectedToggle();
-      if (selectedToggle == null) {
-        statusLabel.setText("Please select a token!");
-        return;
-      }
-      String token = (String) selectedToggle.getUserData();
-      if (playerTokenMap.containsValue(token)) {
-        statusLabel.setText("Token already taken!");
-        return;
-      }
-      playerTokenMap.put(playerName, token);
-      selectedPlayersList.add(playerName);
-      statusLabel.setText("Added " + playerName + " to selected players with token " + token);
-      tokenDialog.close();
-    });
+    selectButton.setOnAction(
+        e -> {
+          Toggle selectedToggle = tokenGroup.getSelectedToggle();
+          if (selectedToggle == null) {
+            statusLabel.setText("Please select a token!");
+            return;
+          }
+          String token = (String) selectedToggle.getUserData();
+          if (playerTokenMap.containsValue(token)) {
+            statusLabel.setText("Token already taken!");
+            return;
+          }
+          playerTokenMap.put(playerName, token);
+          selectedPlayersList.add(playerName);
+          statusLabel.setText("Added " + playerName + " to selected players with token " + token);
+          tokenDialog.close();
+        });
 
     Scene scene = new Scene(layout, 400, 200);
     scene.getStylesheets().add(getClass().getResource("/common.css").toExternalForm());
@@ -432,21 +567,26 @@ public class PlayerSelectionUI {
     tokenDialog.showAndWait();
   }
 
+  /**
+   * Show the player selection dialog.
+   *
+   * @return List of selected player names
+   */
+  public List<String> showAndWait() {
+    stage.showAndWait();
+    return new ArrayList<>(selectedPlayersList);
+  }
+
+  /**
+   * Retrieves a map that associates player names with their corresponding tokens.
+   *
+   * @return a new map containing the current player-to-token mappings
+   */
   public Map<String, String> getPlayerTokenMap() {
     return new HashMap<>(playerTokenMap);
   }
 
-  private Button createStyledButton(String text, int width, int height) {
-    Button button = new Button(text);
-    button.setPrefWidth(width);
-    button.setPrefHeight(height);
-    button.getStyleClass().add("player-selection-button");
-    return button;
-  }
-
-  /**
-   * Custom cell factory for the players list view
-   */
+  /** Custom cell factory for the players list view. */
   private class PlayerListCell extends ListCell<String> {
     @Override
     protected void updateItem(String item, boolean empty) {

@@ -1,33 +1,30 @@
 package edu.ntnu.iir.bidata.view.common;
 
+import edu.ntnu.iir.bidata.controller.MonopolyController;
 import edu.ntnu.iir.bidata.controller.SnakesAndLaddersController;
+import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson;
+import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson;
 import edu.ntnu.iir.bidata.model.BoardGame;
 import edu.ntnu.iir.bidata.model.board.Board;
 import edu.ntnu.iir.bidata.model.board.BoardFactory;
 import edu.ntnu.iir.bidata.model.board.MonopolyBoardFactory;
 import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.model.player.SimpleMonopolyPlayer;
-import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI;
-import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersMenuUI;
-import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson;
-import edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI;
-import edu.ntnu.iir.bidata.view.monopoly.MonopolyMenuUI;
+import edu.ntnu.iir.bidata.model.tile.config.TileConfiguration;
 import edu.ntnu.iir.bidata.model.utils.DefaultGameMediator;
 import edu.ntnu.iir.bidata.model.utils.GameMediator;
-import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson;
-import edu.ntnu.iir.bidata.controller.MonopolyController;
-import edu.ntnu.iir.bidata.view.common.PlayerSelectionResult;
-import edu.ntnu.iir.bidata.model.tile.config.TileConfiguration;
-
+import edu.ntnu.iir.bidata.view.monopoly.MonopolyGameUI;
+import edu.ntnu.iir.bidata.view.monopoly.MonopolyMenuUI;
+import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersGameUI;
+import edu.ntnu.iir.bidata.view.snakesandladders.SnakesAndLaddersMenuUI;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
-import javafx.stage.Stage;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import javafx.scene.Scene;
-import java.util.Map;
+import javafx.stage.Stage;
 
 /**
  * JavaFX application launcher for the board games UI. This class only handles UI navigation between
@@ -38,27 +35,7 @@ public class JavaFXBoardGameLauncher extends Application {
   private static final Logger LOGGER = Logger.getLogger(JavaFXBoardGameLauncher.class.getName());
   private static volatile JavaFXBoardGameLauncher instance;
 
-  /**
-   * Enum representing the different types of games available
-   */
-  private enum GameType {
-    SNAKES_AND_LADDERS,
-    MONOPOLY
-  }
-
-  /**
-   * Start the application and show the main menu
-   */
-  @Override
-  public void start(Stage primaryStage) {
-    LOGGER.info("Starting JavaFX Board Game Launcher");
-    instance = this;
-    showMainMenu(primaryStage);
-  }
-
-  /**
-   * Get the singleton instance of the launcher
-   */
+  /** Get the singleton instance of the launcher. */
   public static JavaFXBoardGameLauncher getInstance() {
     if (instance == null) {
       synchronized (JavaFXBoardGameLauncher.class) {
@@ -80,6 +57,14 @@ public class JavaFXBoardGameLauncher extends Application {
     launch(args);
   }
 
+  /** Start the application and show the main menu. */
+  @Override
+  public void start(Stage primaryStage) {
+    LOGGER.info("Starting JavaFX Board Game Launcher");
+    instance = this;
+    showMainMenu(primaryStage);
+  }
+
   /**
    * Displays the main menu UI.
    *
@@ -87,43 +72,51 @@ public class JavaFXBoardGameLauncher extends Application {
    */
   public void showMainMenu(Stage stage) {
     LOGGER.info("Showing main menu");
-    MainMenuUI menuUI = new MainMenuUI(stage,
-        gameType -> {
-            switch (gameType) {
+    MainMenuUI menuUI =
+        new MainMenuUI(
+            stage,
+            gameType -> {
+              switch (gameType) {
                 case SNAKES_AND_LADDERS -> showSnakesAndLaddersMenu(stage);
                 case MONOPOLY -> showMonopolyMenu(stage);
-            }
-        });
+                default -> LOGGER.warning("Unknown game type: " + gameType);
+              }
+            });
   }
 
   /**
-   * Handles the player selection callback for game menus.
-   * Converts selected player names to Player objects and shows the appropriate game board.
+   * Handles the player selection callback for game menus. Converts selected player names to Player
+   * objects and shows the appropriate game board.
    *
    * @param stage The primary stage to show the game on
    * @param selection PlayerSelectionResult containing player names and token mapping
    * @param gameType The type of game to show (LUDO or SNAKES_AND_LADDERS)
    */
-  private void handlePlayerSelection(Stage stage, PlayerSelectionResult selection, GameType gameType) {
+  private void handlePlayerSelection(
+      Stage stage, PlayerSelectionResult selection, GameType gameType) {
     switch (gameType) {
       case SNAKES_AND_LADDERS -> {
         // For Snakes and Ladders, use generic Player with token image
-        List<Player> players = selection.playerNames.stream()
-          .map(name -> new Player(name, selection.playerTokens.get(name)))
-          .toList();
+        List<Player> players =
+            selection.playerNames.stream()
+                .map(name -> new Player(name, selection.playerTokens.get(name)))
+                .toList();
         showSnakesAndLaddersGameBoard(stage, players);
       }
       case MONOPOLY -> {
         // For Monopoly, use SimpleMonopolyPlayer with token image
-        List<SimpleMonopolyPlayer> players = selection.playerNames.stream()
-          .map(name -> {
-            SimpleMonopolyPlayer p = new SimpleMonopolyPlayer(name);
-            p.setTokenImage(selection.playerTokens.get(name));
-            return p;
-          })
-          .toList();
+        List<SimpleMonopolyPlayer> players =
+            selection.playerNames.stream()
+                .map(
+                    name -> {
+                      SimpleMonopolyPlayer p = new SimpleMonopolyPlayer(name);
+                      p.setTokenImage(selection.playerTokens.get(name));
+                      return p;
+                    })
+                .toList();
         showMonopolyGameBoard(stage, players);
       }
+      default -> LOGGER.warning("Unknown game type: " + gameType);
     }
   }
 
@@ -135,8 +128,10 @@ public class JavaFXBoardGameLauncher extends Application {
    */
   public void showSnakesAndLaddersMenu(Stage stage) {
     LOGGER.info("Showing Snakes and Ladders menu");
-    SnakesAndLaddersMenuUI menuUI = new SnakesAndLaddersMenuUI(stage,
-        selection -> handlePlayerSelection(stage, selection, GameType.SNAKES_AND_LADDERS));
+    SnakesAndLaddersMenuUI menuUI =
+        new SnakesAndLaddersMenuUI(
+            stage,
+            selection -> handlePlayerSelection(stage, selection, GameType.SNAKES_AND_LADDERS));
   }
 
   /**
@@ -146,14 +141,15 @@ public class JavaFXBoardGameLauncher extends Application {
    */
   public void showMonopolyMenu(Stage stage) {
     LOGGER.info("Showing Monopoly menu");
-    MonopolyMenuUI menuUI = new MonopolyMenuUI(stage,
-        selection -> handlePlayerSelection(stage, selection, GameType.MONOPOLY));
+    MonopolyMenuUI menuUI =
+        new MonopolyMenuUI(
+            stage, selection -> handlePlayerSelection(stage, selection, GameType.MONOPOLY));
   }
 
   /**
    * Displays the Monopoly game board UI.
    *
-   * @param stage   The primary stage to show the game on
+   * @param stage The primary stage to show the game on
    * @param players The list of player names to use in the game
    */
   private void showMonopolyGameBoard(Stage stage, List<SimpleMonopolyPlayer> players) {
@@ -166,12 +162,9 @@ public class JavaFXBoardGameLauncher extends Application {
 
       // Dependency injection wiring
       GameMediator mediator = new DefaultGameMediator();
-      MonopolyController controller = new MonopolyController(
-        boardGame,
-        new BoardGameFileWriterGson(),
-        new BoardGameFileReaderGson(),
-        mediator
-      );
+      MonopolyController controller =
+          new MonopolyController(
+              boardGame, new BoardGameFileWriterGson(), new BoardGameFileReaderGson(), mediator);
       MonopolyGameUI monopolyGameUI = new MonopolyGameUI(boardGame, stage, controller, mediator);
       stage.setScene(monopolyGameUI.getScene());
       stage.show();
@@ -179,12 +172,12 @@ public class JavaFXBoardGameLauncher extends Application {
       LOGGER.log(Level.SEVERE, "Error initializing Monopoly game", e);
     }
   }
-  
+
   /**
-   * Displays the Snakes and Ladders game board UI.
-   * Optimized version that avoids adding players twice.
+   * Displays the Snakes and Ladders game board UI. Optimized version that avoids adding players
+   * twice.
    *
-   * @param stage   The primary stage to show the game on
+   * @param stage The primary stage to show the game on
    * @param players The list of players to use in the game
    */
   private void showSnakesAndLaddersGameBoard(Stage stage, List<Player> players) {
@@ -197,14 +190,15 @@ public class JavaFXBoardGameLauncher extends Application {
       BoardGame boardGame = new BoardGame(board, 2);
       boardGame.setPlayers(players);
       TileConfiguration config = new TileConfiguration(boardGame.getLevel());
-      SnakesAndLaddersController controller = new SnakesAndLaddersController(
-        boardGame,
-        new BoardGameFileWriterGson(),
-        new BoardGameFileReaderGson(),
-        mediator,
-        config
-      );
-      SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(boardGame, stage, controller, players, mediator);
+      SnakesAndLaddersController controller =
+          new SnakesAndLaddersController(
+              boardGame,
+              new BoardGameFileWriterGson(),
+              new BoardGameFileReaderGson(),
+              mediator,
+              config);
+      SnakesAndLaddersGameUI gameUI =
+          new SnakesAndLaddersGameUI(boardGame, stage, controller, players, mediator);
 
       boardGame.addObserver(gameUI);
 
@@ -228,38 +222,47 @@ public class JavaFXBoardGameLauncher extends Application {
     try {
       // Create controller and load game
       BoardGameFileReaderGson reader = new BoardGameFileReaderGson();
-      BoardGame boardGame = reader.readBoardGame(Paths.get("src/main/resources/saved_games", gameName + ".json"));
+      BoardGame boardGame =
+          reader.readBoardGame(Paths.get("src/main/resources/saved_games", gameName + ".json"));
       List<Player> players = boardGame.getPlayers();
-      
+
       // Create view and controller
       GameMediator mediator = new DefaultGameMediator();
       TileConfiguration config = new TileConfiguration(boardGame.getLevel());
-      SnakesAndLaddersController controller = new SnakesAndLaddersController(
-        boardGame,
-        new BoardGameFileWriterGson(),
-        new BoardGameFileReaderGson(),
-        mediator,
-        config
-      );
-      SnakesAndLaddersGameUI gameUI = new SnakesAndLaddersGameUI(boardGame, stage, controller, players, mediator);
+      SnakesAndLaddersController controller =
+          new SnakesAndLaddersController(
+              boardGame,
+              new BoardGameFileWriterGson(),
+              new BoardGameFileReaderGson(),
+              mediator,
+              config);
+      SnakesAndLaddersGameUI gameUI =
+          new SnakesAndLaddersGameUI(boardGame, stage, controller, players, mediator);
 
       // Register UI as observer
       boardGame.addObserver(gameUI);
-      
+
       // Load game state and start
       controller.loadSnakesAndLadderGame(gameName);
       controller.startGame();
-      
+
       // Create and set the scene
       Scene scene = new Scene(gameUI.getRoot(), 1200, 800);
-      scene.getStylesheets().addAll(
-        getClass().getResource("/styles.css").toExternalForm(),
-        getClass().getResource("/snakesandladders.css").toExternalForm()
-      );
+      scene
+          .getStylesheets()
+          .addAll(
+              getClass().getResource("/styles.css").toExternalForm(),
+              getClass().getResource("/snakesandladders.css").toExternalForm());
       stage.setScene(scene);
       stage.show();
     } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Error loading Snakes and Ladders game", e);
     }
   }
- }
+
+  /** Enum representing the different types of games available. */
+  private enum GameType {
+    SNAKES_AND_LADDERS,
+    MONOPOLY
+  }
+}

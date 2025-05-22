@@ -2,14 +2,12 @@ package edu.ntnu.iir.bidata.filehandling.boardgame;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import edu.ntnu.iir.bidata.Inject;
 import edu.ntnu.iir.bidata.filehandling.boardgame.utils.TileSerializer;
 import edu.ntnu.iir.bidata.model.BoardGame;
-import edu.ntnu.iir.bidata.model.player.Player;
 import edu.ntnu.iir.bidata.model.player.SimpleMonopolyPlayer;
 import edu.ntnu.iir.bidata.model.tile.core.Tile;
 import edu.ntnu.iir.bidata.model.tile.core.monopoly.PropertyTile;
-import edu.ntnu.iir.bidata.model.tile.actions.monopoly.GoToJailAction;
-import edu.ntnu.iir.bidata.filehandling.boardgame.TileActionTypeAdapterFactory;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -19,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import edu.ntnu.iir.bidata.Inject;
 
 /**
  * Implementation of the BoardGameFileWriter interface using Gson for JSON serialization. This class
@@ -28,6 +25,20 @@ import edu.ntnu.iir.bidata.Inject;
 public class BoardGameFileWriterGson implements BoardGameFileWriter {
   private final Gson gson;
 
+  /**
+   * A constructor for the {@code BoardGameFileWriterGson} class, responsible for initializing a
+   * Gson instance with custom configurations for serializing and deserializing board game
+   * components.
+   *
+   * <p>The Gson instance is configured with:
+   * <li>Pretty-printing for readable JSON output.
+   * <li>A custom serializer for the {@code Tile} class using {@code TileSerializer}.
+   * <li>A custom type adapter factory for supporting extended behavior in handling different types
+   *     of tiles through {@code TileActionTypeAdapterFactory}.
+   *
+   *     <p>This constructor is annotated with {@code @Inject}, allowing it to be used in dependency
+   *     injection frameworks.
+   */
   @Inject
   public BoardGameFileWriterGson() {
     this.gson =
@@ -81,26 +92,30 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
 
     // Serialize essential tile data
     Map<String, Map<String, Object>> tilesData = new HashMap<>();
-    for (Map.Entry<Integer, Tile> entry : boardGame.getBoard().getTiles().entrySet()) {
-      Tile tile = entry.getValue();
-      Map<String, Object> tileData = new HashMap<>();
-      tileData.put("id", tile.getId());
-      tileData.put("type", tile.getClass().getSimpleName());
-      if (tile.getNextTile() != null) {
-        tileData.put("nextTileId", tile.getNextTile().getId());
-      }
-      if (tile instanceof PropertyTile propertyTile) {
-        tileData.put("price", propertyTile.getPrice());
-        tileData.put("rent", propertyTile.getRent());
-        tileData.put("group", propertyTile.getGroup());
-        tileData.put(
-            "owner", propertyTile.getOwner() != null ? propertyTile.getOwner().getName() : null);
-      }
-      if (tile.getAction() != null) {
-        tileData.put("action", gson.toJsonTree(tile.getAction()));
-      }
-      tilesData.put(String.valueOf(tile.getId()), tileData);
-    }
+    boardGame
+        .getBoard()
+        .getTiles()
+        .forEach(
+            (id, tile) -> {
+              Map<String, Object> tileData = new HashMap<>();
+              tileData.put("id", tile.getId());
+              tileData.put("type", tile.getClass().getSimpleName());
+              if (tile.getNextTile() != null) {
+                tileData.put("nextTileId", tile.getNextTile().getId());
+              }
+              if (tile instanceof PropertyTile propertyTile) {
+                tileData.put("price", propertyTile.getPrice());
+                tileData.put("rent", propertyTile.getRent());
+                tileData.put("group", propertyTile.getGroup());
+                tileData.put(
+                    "owner",
+                    propertyTile.getOwner() != null ? propertyTile.getOwner().getName() : null);
+              }
+              if (tile.getAction() != null) {
+                tileData.put("action", gson.toJsonTree(tile.getAction()));
+              }
+              tilesData.put(String.valueOf(tile.getId()), tileData);
+            });
     Map<String, Object> boardData = new HashMap<>();
     boardData.put("tiles", tilesData);
     boardData.put("boardSize", boardGame.getBoard().getSizeOfBoard());
@@ -109,19 +124,22 @@ public class BoardGameFileWriterGson implements BoardGameFileWriter {
 
     // Serialize player data
     List<Map<String, Object>> playersData = new ArrayList<>();
-    for (Player player : boardGame.getPlayers()) {
-      Map<String, Object> playerData = new HashMap<>();
-      playerData.put("name", player.getName());
-      playerData.put("money", ((SimpleMonopolyPlayer) player).getMoney());
-      playerData.put("position", player.getCurrentTile().getId());
-      // Write currentTile as an object for compatibility with the reader
-      Map<String, Object> currentTileObj = new HashMap<>();
-      currentTileObj.put("id", player.getCurrentTile().getId());
-      playerData.put("currentTile", currentTileObj);
-      playerData.put("playerType", "MONOPOLY");
-      playerData.put("tokenImage", player.getTokenImage());
-      playersData.add(playerData);
-    }
+    boardGame
+        .getPlayers()
+        .forEach(
+            player -> {
+              Map<String, Object> playerData = new HashMap<>();
+              playerData.put("name", player.getName());
+              playerData.put("money", ((SimpleMonopolyPlayer) player).getMoney());
+              playerData.put("position", player.getCurrentTile().getId());
+              // Write currentTile as an object for compatibility with the reader
+              Map<String, Object> currentTileObj = new HashMap<>();
+              currentTileObj.put("id", player.getCurrentTile().getId());
+              playerData.put("currentTile", currentTileObj);
+              playerData.put("playerType", "MONOPOLY");
+              playerData.put("tokenImage", player.getTokenImage());
+              playersData.add(playerData);
+            });
     simplifiedGame.put("players", playersData);
 
     // Serialize current player index

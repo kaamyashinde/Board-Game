@@ -5,6 +5,7 @@ import edu.ntnu.iir.bidata.model.tile.core.Tile;
 import edu.ntnu.iir.bidata.model.tile.core.TileAction;
 import edu.ntnu.iir.bidata.model.utils.ParameterValidation;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import lombok.Getter;
 
@@ -31,9 +32,7 @@ public class Board {
     this.boardSize = sizeOfBoard;
   }
 
-  /**
-   * The method that allows the addition of a tile to the board.
-   */
+  /** The method that allows the addition of a tile to the board. */
   public boolean addTile(int id, TileAction action) {
     ParameterValidation.validateTileId(id);
     if (tiles.containsKey(id)) {
@@ -42,6 +41,14 @@ public class Board {
     tiles.put(id, new Tile(id, action));
     return true;
   }
+
+  /**
+   * Adds a tile to the board.
+   *
+   * @param tile the tile to be added
+   * @throws IllegalArgumentException if the tile ID is invalid
+   * @throws GameException if a tile with the same ID already exists on the board
+   */
   public void addTile(Tile tile) {
     ParameterValidation.validateTileId(tile.getId());
     if (tiles.containsKey(tile.getId())) {
@@ -49,11 +56,12 @@ public class Board {
     }
     tiles.put(tile.getId(), tile);
   }
+
   /**
-   * A method that connects the tiles in the board.
+   * Connects a tile on the board to its next tile.
    *
-   * @param id
-   * @param nextTile
+   * @param id the identifier of the current tile to connect
+   * @param nextTile the tile to set as the next tile for the current tile
    */
   public void connectTiles(int id, Tile nextTile) {
     Tile fromTile = tiles.get(id);
@@ -81,11 +89,14 @@ public class Board {
   }
 
   /**
-   * The method that checks if a tile connection is valid.
+   * Determines if a valid connection exists between two tiles on the board.
    *
-   * @param fromId
-   * @param toId
-   * @return true if the connection is valid, false otherwise
+   * <p>A connection is considered valid if the tile with identifier {@code fromId} correctly points
+   * to the tile with identifier {@code toId}.
+   *
+   * @param fromId the identifier of the starting tile
+   * @param toId the identifier of the target tile to check for connection
+   * @return true if a valid connection exists between the tiles, false otherwise
    */
   public boolean isValidTileConnection(int fromId, int toId) {
     Tile fromTile = tiles.get(fromId);
@@ -120,7 +131,7 @@ public class Board {
    *
    * @return the tiles of the board
    */
-  public HashMap<Integer, Tile> getTiles() {
+  public Map<Integer, Tile> getTiles() {
     return tiles;
   }
 
@@ -134,17 +145,28 @@ public class Board {
     return tiles.get(id);
   }
 
+  /**
+   * Generates a hash code for the Board instance based on its state.
+   *
+   * @return an integer hash code derived from the boardSize and tiles fields
+   */
+  @Override
+  public int hashCode() {
+    return Objects.hash(boardSize, tiles);
+  }
+
+  /**
+   * Compares this Board instance with another object to determine equality. Two Board instances are
+   * considered equal if they have the same board size and their tiles are equal.
+   *
+   * @param obj the object to compare with this Board instance
+   * @return true if the specified object is equal to this Board instance, false otherwise
+   */
   @Override
   public boolean equals(Object obj) {
     if (this == obj) return true;
     if (obj == null || getClass() != obj.getClass()) return false;
     Board other = (Board) obj;
-    return boardSize == other.boardSize &&
-           Objects.equals(tiles, other.tiles);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(boardSize, tiles);
+    return boardSize == other.boardSize && Objects.equals(tiles, other.tiles);
   }
 }

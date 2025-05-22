@@ -20,9 +20,7 @@ public class DefaultGameMediator implements GameMediator {
 
     @Override
     public void notify(Object sender, String event) {
-        for (GameMediatorListener listener : listeners) {
-            listener.onEvent(sender, event);
-        }
+        listeners.forEach(listener -> listener.onEvent(sender, event));
     }
 
     public interface GameMediatorListener {

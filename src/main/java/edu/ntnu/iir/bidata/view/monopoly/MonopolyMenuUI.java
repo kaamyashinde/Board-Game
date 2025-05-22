@@ -1,15 +1,18 @@
 package edu.ntnu.iir.bidata.view.monopoly;
 
+import edu.ntnu.iir.bidata.Inject;
 import edu.ntnu.iir.bidata.controller.MonopolyController;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileReaderGson;
 import edu.ntnu.iir.bidata.filehandling.boardgame.BoardGameFileWriterGson;
 import edu.ntnu.iir.bidata.model.BoardGame;
+import edu.ntnu.iir.bidata.model.board.MonopolyBoardFactory;
+import edu.ntnu.iir.bidata.model.player.SimpleMonopolyPlayer;
 import edu.ntnu.iir.bidata.model.utils.DefaultGameMediator;
 import edu.ntnu.iir.bidata.model.utils.GameMediator;
 import edu.ntnu.iir.bidata.view.common.CommonButtons;
 import edu.ntnu.iir.bidata.view.common.JavaFXBoardGameLauncher;
-import edu.ntnu.iir.bidata.view.common.PlayerSelectionUI;
 import edu.ntnu.iir.bidata.view.common.PlayerSelectionResult;
+import edu.ntnu.iir.bidata.view.common.PlayerSelectionUI;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -24,13 +27,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import lombok.Getter;
-import edu.ntnu.iir.bidata.Inject;
-import edu.ntnu.iir.bidata.model.board.MonopolyBoardFactory;
-import edu.ntnu.iir.bidata.model.player.SimpleMonopolyPlayer;
 
 /**
  * Represents the UI for the Monopoly game main menu.
@@ -143,7 +147,11 @@ public class MonopolyMenuUI {
         e -> {
           if (selectedPlayers.size() >= 2) {
             BoardGame boardGame = new BoardGame(MonopolyBoardFactory.createBoard(), 1);
-            boardGame.setPlayers((List) selectedPlayers.stream().map(name -> new SimpleMonopolyPlayer(name, selectedPlayerTokens.get(name))).toList());
+            boardGame.setPlayers(
+                (List)
+                    selectedPlayers.stream()
+                        .map(name -> new SimpleMonopolyPlayer(name, selectedPlayerTokens.get(name)))
+                        .toList());
             MonopolyGameUI gameUI = getMonopolyGameUI(boardGame, true);
             createAndSetScene(gameUI);
           } else {
@@ -161,7 +169,11 @@ public class MonopolyMenuUI {
         e -> {
           if (selectedPlayers.size() >= 2) {
             BoardGame boardGame = new BoardGame(MonopolyBoardFactory.createBoard28(), 1);
-            boardGame.setPlayers((List) selectedPlayers.stream().map(name -> new SimpleMonopolyPlayer(name, selectedPlayerTokens.get(name))).toList());
+            boardGame.setPlayers(
+                (List)
+                    selectedPlayers.stream()
+                        .map(name -> new SimpleMonopolyPlayer(name, selectedPlayerTokens.get(name)))
+                        .toList());
             MonopolyGameUI gameUI = getMonopolyGameUI(boardGame, true);
             createAndSetScene(gameUI);
           } else {
@@ -179,7 +191,11 @@ public class MonopolyMenuUI {
         e -> {
           if (selectedPlayers.size() >= 2) {
             BoardGame boardGame = new BoardGame(MonopolyBoardFactory.createBoard32(), 1);
-            boardGame.setPlayers((List) selectedPlayers.stream().map(name -> new SimpleMonopolyPlayer(name, selectedPlayerTokens.get(name))).toList());
+            boardGame.setPlayers(
+                (List)
+                    selectedPlayers.stream()
+                        .map(name -> new SimpleMonopolyPlayer(name, selectedPlayerTokens.get(name)))
+                        .toList());
             MonopolyGameUI gameUI = getMonopolyGameUI(boardGame, true);
             createAndSetScene(gameUI);
           } else {
@@ -214,11 +230,11 @@ public class MonopolyMenuUI {
     logoStack.setPadding(new Insets(10, 20, 10, 10));
     logoStack.setAlignment(Pos.TOP_LEFT);
     Color[] colors = {
-        Color.web("#3b3b6d"),
-        Color.web("#f7e6c7"),
-        Color.web("#b39ddb"),
-        Color.web("#e69a28"),
-        Color.web("#c2c2fa")
+      Color.web("#3b3b6d"),
+      Color.web("#f7e6c7"),
+      Color.web("#b39ddb"),
+      Color.web("#e69a28"),
+      Color.web("#c2c2fa")
     };
     setUpLogoStackHeight(colors, logoStack);
     return logoStack;
@@ -306,77 +322,29 @@ public class MonopolyMenuUI {
   }
 
   /**
-   * Configures and populates the specified VBox with a stack of color-coded regions, each with
-   * predefined heights and styles based on the provided colors array.
+   * Initializes and returns a MonopolyGameUI instance for the provided board game.
    *
-   * @param colors an array of Color objects used to set the background colors of the regions
-   * @param logoStack the VBox container to which the styled regions will be added
+   * <p>This method sets up a new Monopoly game environment with necessary components such as the
+   * game mediator, game controller, and user interface. It also configures player names in the
+   * controller and starts the game if specified.
+   *
+   * @param boardGame the BoardGame instance representing the Monopoly game data and state
+   * @param startNew a boolean indicating whether to start a new game (true) or continue with an
+   *     existing state (false)
+   * @return a MonopolyGameUI instance configured with the provided board game and related
+   *     components
    */
-  private void setUpLogoStackHeight(Color[] colors, VBox logoStack) {
-    int[] heights = {40, 30, 40, 20, 30, 20, 40, 30, 20, 40, 30};
-    for (int i = 0; i < 11; i++) {
-      Region r = new Region();
-      int operation = i % 3 == 1 ? 30 : 60;
-      r.setPrefSize((i % 3 == 0 ? 40 : operation), heights[i]);
-      r.setStyle(
-          "-fx-background-radius: 15; -fx-background-color: "
-              + toHexString(colors[i % colors.length])
-              + ";");
-      logoStack.getChildren().add(r);
-    }
-  }
-
-  /**
-   * Reads a board game configuration from a JSON file located in the Monopoly game's saved games
-   * directory.
-   *
-   * <p>This method attempts to load a board game file by appending the provided game name with the
-   * ".json" extension and locating it in the "src/main/resources/saved_games/monopoly" directory.
-   * The file is then parsed to create and return a {@code BoardGame} instance.
-   *
-   * @param gameName the name of the board game file (without extension) to read and load
-   * @return the {@code BoardGame} instance created from the loaded file
-   * @throws IOException if an I/O error occurs while reading the board game file
-   */
-  private static BoardGame readBoardGameFromSelectedFile(String gameName) throws IOException {
-    BoardGameFileReaderGson reader = new BoardGameFileReaderGson();
-    return reader.readBoardGame(
-        Paths.get("src/main/resources/saved_games/monopoly", gameName + ".json"));
-  }
-
-  /**
-   * Initializes and returns the UI for the Monopoly game.
-   *
-   * <p>This method creates a new instance of {@code MonopolyGameUI}, sets up a controller for the
-   * game, and registers the UI as an observer for the game state. It also logs essential
-   * information about the current player and their position during initialization and starts the
-   * game using the controller.
-   *
-   * @param boardGame the {@code BoardGame} instance representing the Monopoly game, containing the
-   *     game's state and logic
-   * @return a {@code MonopolyGameUI} instance that serves as the user interface for the Monopoly
-   *     game
-   */
-  private MonopolyGameUI getMonopolyGameUI(BoardGame boardGame) {
-    // Dependency injection wiring
+  private MonopolyGameUI getMonopolyGameUI(BoardGame boardGame, boolean startNew) {
     GameMediator mediator = new DefaultGameMediator();
-    MonopolyController controller = new MonopolyController(
-        boardGame,
-        new BoardGameFileWriterGson(),
-        new BoardGameFileReaderGson(),
-        mediator
-    );
+    MonopolyController controller =
+        new MonopolyController(
+            boardGame, new BoardGameFileWriterGson(), new BoardGameFileReaderGson(), mediator);
     MonopolyGameUI gameUI = new MonopolyGameUI(boardGame, primaryStage, controller, mediator);
-    LOGGER.info(
-        "Game loaded successfully"
-            + boardGame.getCurrentPlayer().getName()
-            + " "
-            + boardGame.getCurrentPlayer().getCurrentPosition());
-    // Register UI as observer
     boardGame.addObserver(gameUI);
-
-    // Load game state and start
-    controller.startGame();
+    // Set player names in controller after loading
+    List<String> playerNames = boardGame.getPlayers().stream().map(p -> p.getName()).toList();
+    controller.setPlayerNames(playerNames);
+    if (startNew) controller.startGame();
     return gameUI;
   }
 
@@ -396,24 +364,44 @@ public class MonopolyMenuUI {
   }
 
   /**
-   * @param boardGame    loaded or fresh game state
-   * @param startNew     if true → controller.startGame(), else skip startGame()
+   * Configures and populates the specified VBox with a stack of color-coded regions, each with
+   * predefined heights and styles based on the provided colors array.
+   *
+   * @param colors an array of Color objects used to set the background colors of the regions
+   * @param logoStack the VBox container to which the styled regions will be added
    */
-  private MonopolyGameUI getMonopolyGameUI(BoardGame boardGame, boolean startNew) {
-    GameMediator mediator = new DefaultGameMediator();
-    MonopolyController controller = new MonopolyController(
-        boardGame,
-        new BoardGameFileWriterGson(),
-        new BoardGameFileReaderGson(),
-        mediator
-    );
-    MonopolyGameUI gameUI = new MonopolyGameUI(boardGame, primaryStage, controller, mediator);
-    boardGame.addObserver(gameUI);
-    // Set player names in controller after loading
-    List<String> playerNames = boardGame.getPlayers().stream().map(p -> p.getName()).toList();
-    controller.setPlayerNames(playerNames);
-    if (startNew) controller.startGame();
-    return gameUI;
+  private void setUpLogoStackHeight(Color[] colors, VBox logoStack) {
+    int[] heights = {40, 30, 40, 20, 30, 20, 40, 30, 20, 40, 30};
+    java.util.stream.IntStream.range(0, 11)
+        .forEach(
+            i -> {
+              Region r = new Region();
+              int operation = i % 3 == 1 ? 30 : 60;
+              r.setPrefSize((i % 3 == 0 ? 40 : operation), heights[i]);
+              r.setStyle(
+                  "-fx-background-radius: 15; -fx-background-color: "
+                      + toHexString(colors[i % colors.length])
+                      + ";");
+              logoStack.getChildren().add(r);
+            });
+  }
+
+  /**
+   * Reads a board game configuration from a JSON file located in the Monopoly game's saved games
+   * directory.
+   *
+   * <p>This method attempts to load a board game file by appending the provided game name with the
+   * ".json" extension and locating it in the "src/main/resources/saved_games/monopoly" directory.
+   * The file is then parsed to create and return a {@code BoardGame} instance.
+   *
+   * @param gameName the name of the board game file (without extension) to read and load
+   * @return the {@code BoardGame} instance created from the loaded file
+   * @throws IOException if an I/O error occurs while reading the board game file
+   */
+  private static BoardGame readBoardGameFromSelectedFile(String gameName) throws IOException {
+    BoardGameFileReaderGson reader = new BoardGameFileReaderGson();
+    return reader.readBoardGame(
+        Paths.get("src/main/resources/saved_games/monopoly", gameName + ".json"));
   }
 
   /**
