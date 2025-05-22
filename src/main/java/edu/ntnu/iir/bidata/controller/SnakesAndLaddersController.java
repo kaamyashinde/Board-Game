@@ -220,6 +220,19 @@ public class SnakesAndLaddersController extends BaseGameController {
   }
 
   /**
+   * Rolls all the dice in the Snakes and Ladders game and updates the game state to reflect that
+   * the dice have been rolled. This method performs the following actions: - Invokes the {@code
+   * rollAllDice} method on the dice associated with the game board to generate new rolled values
+   * for all dice. - Updates the internal dice-rolled state to {@code true}. - Logs the current dice
+   * values after the roll using the game's logger.
+   */
+  public void rollDice() {
+    boardGame.getDice().rollAllDice();
+    diceRolled = true;
+    LOGGER.info("Dice rolled: " + java.util.Arrays.toString(boardGame.getCurrentDiceValues()));
+  }
+
+  /**
    * Advances the turn to the next player in the Snakes and Ladders game.
    *
    * <p>This method updates the current player index to the next player in the game's player list,
