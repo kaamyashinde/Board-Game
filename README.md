@@ -107,13 +107,3 @@ Dave, token_yellow.png
 - **Kaamya Shinde**
 
 ---
-
-## Future Improvements
-
-- Add support for more board games.
-- Implement networked multiplayer.
-- Enhance AI for single-player mode.
-- Improve board customization and editor features.
-- Add more detailed statistics and game history.
-
---- 
