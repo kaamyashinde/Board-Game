@@ -18,7 +18,7 @@ public class LoseTurnAction implements TileAction {
    * player's skipNextTurn flag to true, which will be checked during the next turn to determine if
    * the player should be skipped.
    *
-   * @param player      The player who landed on the tile
+   * @param player The player who landed on the tile
    * @param currentTile The tile the player landed on
    */
   @Override
@@ -36,4 +36,4 @@ public class LoseTurnAction implements TileAction {
   public String getDescription() {
     return "Skip your next turn";
   }
-} 
+}

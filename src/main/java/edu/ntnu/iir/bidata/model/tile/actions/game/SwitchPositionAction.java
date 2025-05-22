@@ -42,7 +42,7 @@ public class SwitchPositionAction implements TileAction {
    * positions will be swapped. If there is no player ahead, no action is taken.
    *
    * @param currentPlayer The player who landed on the tile
-   * @param currentTile   The tile the player landed on
+   * @param currentTile The tile the player landed on
    */
   @Override
   public void executeAction(Player currentPlayer, Tile currentTile) {
@@ -78,7 +78,9 @@ public class SwitchPositionAction implements TileAction {
     return allPlayers.stream()
         .filter(otherPlayer -> otherPlayer != currentPlayer)
         .filter(otherPlayer -> otherPlayer.getCurrentPosition() > currentPosition)
-        .min(java.util.Comparator.comparingInt(otherPlayer -> otherPlayer.getCurrentPosition() - currentPosition))
+        .min(
+            java.util.Comparator.comparingInt(
+                otherPlayer -> otherPlayer.getCurrentPosition() - currentPosition))
         .orElse(null);
   }
-} 
+}

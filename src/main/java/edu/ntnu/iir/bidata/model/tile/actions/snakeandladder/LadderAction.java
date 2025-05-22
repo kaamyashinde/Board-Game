@@ -15,8 +15,7 @@ public class LadderAction implements TileAction {
   /**
    * Creates a new LadderAction that will move the player to the top of the ladder.
    *
-   * @param topTileId The ID of the tile at the top of the ladder (must be higher than current
-   *                  tile)
+   * @param topTileId The ID of the tile at the top of the ladder (must be higher than current tile)
    */
   public LadderAction(int topTileId) {
     if (topTileId <= 0) {
@@ -37,8 +36,6 @@ public class LadderAction implements TileAction {
 
     if (targetTile != null && targetTile.getId() == topTileId) {
       player.setCurrentTile(targetTile);
-      System.out.println(
-          player.getName() + " found a ladder! Climbed up to tile " + topTileId + "!");
     }
   }
 
@@ -50,4 +47,4 @@ public class LadderAction implements TileAction {
   public int getTopTileId() {
     return topTileId;
   }
-} 
+}

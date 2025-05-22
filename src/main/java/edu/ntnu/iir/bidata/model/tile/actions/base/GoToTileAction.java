@@ -34,7 +34,7 @@ public class GoToTileAction implements TileAction {
    * Executes the action by moving the player to the target tile. The player will move forward
    * through the tiles until reaching the target.
    *
-   * @param player      The player who landed on the tile
+   * @param player The player who landed on the tile
    * @param currentTile The tile the player landed on
    * @throws GameException if the target tile cannot be reached
    */
@@ -65,4 +65,4 @@ public class GoToTileAction implements TileAction {
   public int getTargetTileId() {
     return targetTileId;
   }
-} 
+}
