@@ -24,6 +24,8 @@ public class Dice {
    * @param numberOfDice the number of dice to be stored in the list
    */
   public Dice(int numberOfDice) throws IllegalArgumentException {
+    // For Monopoly, always use 2 dice
+    numberOfDice = 2;
     ParameterValidation.validateNonZeroPositiveInteger(
         numberOfDice, "number of dice to create the list");
     dice = new ArrayList<>();
