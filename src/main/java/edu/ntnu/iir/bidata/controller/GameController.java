@@ -164,20 +164,18 @@ public class GameController {
     int newPosition = position;
 
     // Check for snakes
-    for (int[] snake : snakes) {
-      if (snake[0] == position) {
-        newPosition = snake[1];
-        break;
-      }
-    }
+    newPosition = java.util.Arrays.stream(snakes)
+        .filter(snake -> snake[0] == position)
+        .map(snake -> snake[1])
+        .findFirst()
+        .orElse(newPosition);
 
     // Check for ladders
-    for (int[] ladder : ladders) {
-      if (ladder[0] == position) {
-        newPosition = ladder[1];
-        break;
-      }
-    }
+    newPosition = java.util.Arrays.stream(ladders)
+        .filter(ladder -> ladder[0] == position)
+        .map(ladder -> ladder[1])
+        .findFirst()
+        .orElse(newPosition);
 
     return newPosition;
   }
