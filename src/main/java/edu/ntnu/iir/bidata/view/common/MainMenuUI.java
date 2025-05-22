@@ -7,13 +7,11 @@ import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 /**
@@ -64,13 +62,13 @@ public class MainMenuUI {
 
     // --- LEFT: PURPLE LOGO STRIP (WITHOUT TEXT) ---
     Color[] purples = {
-      Color.web("#2d0066"),
-      Color.web("#4b0082"),
-      Color.web("#6a0dad"),
-      Color.web("#7c3aed"),
-      Color.web("#a084e8"),
-      Color.web("#b39ddb"),
-      Color.web("#c3aed6")
+        Color.web("#2d0066"),
+        Color.web("#4b0082"),
+        Color.web("#6a0dad"),
+        Color.web("#7c3aed"),
+        Color.web("#a084e8"),
+        Color.web("#b39ddb"),
+        Color.web("#c3aed6")
     };
     int[] purpleHeights = {40, 60, 40, 30, 20, 40, 30, 20, 40, 30, 20};
 
@@ -95,22 +93,22 @@ public class MainMenuUI {
     HBox menuRow = new HBox(40);
     menuRow.setAlignment(Pos.CENTER);
 
-    // Snakes & Ladders game box
+    // Snakes & Ladders game box - removed grid visualization
     StackPane snakesAndLaddersPane =
         createGamePane(
             "#c2c2fa",
             "#2e8b57",
             "Snakes & Ladders",
-            createSnakesAndLaddersGrid(),
+            "snakes-ladders-label",
             () -> gameTypeCallback.accept(GameType.SNAKES_AND_LADDERS));
 
-    // Monopoly game box
+    // Monopoly game box - removed grid visualization
     StackPane monopolyPane =
         createGamePane(
             "#f7e6c7",
             "#3b3b6d",
             "Monopoly",
-            createMonopolyGrid(),
+            null,
             () -> gameTypeCallback.accept(GameType.MONOPOLY));
 
     menuRow.getChildren().setAll(snakesAndLaddersPane, monopolyPane);
@@ -172,9 +170,18 @@ public class MainMenuUI {
     return pane;
   }
 
-  /** Creates a game selection pane with a grid and label. */
+  /**
+   * Creates a game selection pane with a label (without grid visualization).
+   * Modified to remove grid visualization and display only the game title.
+   *
+   * @param bgColor The background color for the pane
+   * @param borderColor The border color for the pane
+   * @param gameName The name of the game to display
+   * @param additionalLabelClass Optional additional CSS class for the label (can be null)
+   * @param onClick The callback to execute when the pane is clicked
+   */
   private StackPane createGamePane(
-      String bgColor, String borderColor, String gameName, Region gameGrid, Runnable onClick) {
+      String bgColor, String borderColor, String gameName, String additionalLabelClass, Runnable onClick) {
     StackPane gamePane = new StackPane();
     gamePane.setPrefSize(220, 200);
     gamePane.getStyleClass().add("main-menu-game-pane");
@@ -184,9 +191,11 @@ public class MainMenuUI {
 
     Label gameLabel = new Label(gameName);
     gameLabel.getStyleClass().add("main-menu-game-label");
+    if (additionalLabelClass != null && !additionalLabelClass.isEmpty()) {
+      gameLabel.getStyleClass().add(additionalLabelClass);
+    }
 
-    StackPane gameContent = new StackPane(gameGrid, gameLabel);
-    gamePane.getChildren().add(gameContent);
+    gamePane.getChildren().add(gameLabel);
 
     // Make the box clickable
     if (onClick != null) {
@@ -195,52 +204,6 @@ public class MainMenuUI {
     }
 
     return gamePane;
-  }
-
-  /** Creates a Snakes & Ladders grid for visualization. */
-  private GridPane createSnakesAndLaddersGrid() {
-    GridPane boardGrid = new GridPane();
-    int size = 6;
-    java.util.stream.IntStream.range(0, size)
-        .forEach(
-            i -> {
-              java.util.stream.IntStream.range(0, size)
-                  .forEach(
-                      j -> {
-                        Region sq = new Region();
-                        sq.setPrefSize(20, 20);
-                        sq.setStyle(
-                            "-fx-background-color: "
-                                + (((i + j) % 2 == 0) ? "#e0ffe0" : "#7ed957")
-                                + ";");
-                        boardGrid.add(sq, j, i);
-                      });
-            });
-    return boardGrid;
-  }
-
-  /** Creates a Monopoly grid for visualization. */
-  private Region createMonopolyGrid() {
-    GridPane grid = new GridPane();
-    grid.setPrefSize(60, 60);
-    java.util.stream.IntStream.range(0, 5)
-        .forEach(
-            i -> {
-              java.util.stream.IntStream.range(0, 5)
-                  .forEach(
-                      j -> {
-                        Rectangle rect = new Rectangle(12, 12);
-                        if (i == 0 || i == 4 || j == 0 || j == 4) {
-                          rect.setFill(Color.web("#3b3b6d"));
-                        } else {
-                          rect.setFill(Color.web("#f7e6c7"));
-                        }
-                        rect.setArcWidth(2);
-                        rect.setArcHeight(2);
-                        grid.add(rect, j, i);
-                      });
-            });
-    return grid;
   }
 
   /** Converts a JavaFX Color to a hex string. */
