@@ -168,14 +168,23 @@ public class SnakesAndLaddersController extends BaseGameController {
         int end = start + roll;
         String type = "normal";
 
-        // Ensure we don't go past 100
-        if (end > 100) {
-          end = 100;
+        // Ensure we don't go past the board size
+        int boardSize = boardGame.getBoard().getSizeOfBoard();
+        if (end >= boardSize) {
+          // In Snakes and Ladders, you must land exactly on the final tile
+          // If the roll would take you past it, you don't move
+          if (end == boardSize - 1) {
+            // Exact landing on final tile - allow the move
+            end = boardSize - 1;
+          } else {
+            // Overshoot - stay in current position
+            end = start;
+            return new MoveResult(start, end, type);
+          }
         }
 
-        // Move the player to the new position first
         int steps = end - start;
-        player.move(steps);
+        if (steps > 0) player.move(steps);
 
         // Check for snakes
         if (tileConfig.isSnakeHead(end)) {
