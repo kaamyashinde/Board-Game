@@ -53,7 +53,6 @@ public class TileConfiguration {
 
       snakeConfig.put(49, 31);
       snakeConfig.put(58, 24);
-      snakeConfig.put(88, 45);
       snakeConfig.put(82, 78);
       // No move back, skip turn, or switch places for easy
       skipTurns = new int[] {};
