@@ -38,13 +38,17 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import lombok.Getter;
 import lombok.Setter;
 
 /** JavaFX UI implementation for the Monopoly game with scalable board layout and responsive buttons. */
 public class MonopolyGameUI extends JavaFXGameUI {
   private static final Logger LOGGER = Logger.getLogger(MonopolyGameUI.class.getName());
+  // Getter methods for animator access
+  @Getter
   private final Map<Integer, StackPane> tilePanes = new HashMap<>();
   private final Map<Player, ImageView> playerTokens = new HashMap<>();
+  @Getter
   private final Map<String, ImageView> playerTokensByName = new HashMap<>();
   private final Button rollDiceButton = new Button("Roll Dice");
   private final Button buyButton = new Button("Buy");
@@ -130,15 +134,6 @@ public class MonopolyGameUI extends JavaFXGameUI {
             }
           });
     }
-  }
-
-  // Getter methods for animator access
-  public Map<Integer, StackPane> getTilePanes() {
-    return tilePanes;
-  }
-
-  public Map<String, ImageView> getPlayerTokensByName() {
-    return playerTokensByName;
   }
 
   /**
