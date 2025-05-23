@@ -101,7 +101,7 @@ Dave, token_yellow.png
 
 ---
 
-## Further Implementations
+## Future Implementations
 
 Ludo Game (creation is in progress)
 
