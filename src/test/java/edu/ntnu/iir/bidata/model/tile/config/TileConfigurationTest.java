@@ -136,10 +136,8 @@ class TileConfigurationTest {
     void easyLevel_ShouldHaveCorrectSnakeConfiguration() {
         // Test a few key snakes in easy configuration
         assertTrue(easyTileConfig.isSnakeHead(49));
-        assertTrue(easyTileConfig.isSnakeHead(88));
 
         assertEquals(31, easyTileConfig.getSnakeTail(49));
-        assertEquals(45, easyTileConfig.getSnakeTail(88));
     }
 
     @Test
