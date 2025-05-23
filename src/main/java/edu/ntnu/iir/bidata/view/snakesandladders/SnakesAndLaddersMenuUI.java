@@ -204,6 +204,7 @@ public class SnakesAndLaddersMenuUI {
    * @param gameUI the {@code BorderPane} layout to be used as the root of the new scene
    */
   private void createAndSetScene(BorderPane gameUI) {
+    try {
     // SAFETY: Always ensure the root node is not already attached to another scene
     if (gameUI.getScene() != null) {
       // Detach from previous scene to avoid IllegalArgumentException
@@ -217,6 +218,9 @@ public class SnakesAndLaddersMenuUI {
             getClass().getResource("/style/snakesandladders.css").toExternalForm());
     primaryStage.setScene(scene);
     primaryStage.show();
+    } catch (Exception e) {
+      LOGGER.log(Level.SEVERE, "Game UI was null, but application should not crash.");
+    }
   }
 
   /**
