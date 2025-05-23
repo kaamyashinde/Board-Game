@@ -101,6 +101,12 @@ Dave, token_yellow.png
 
 ---
 
+## Further Implementations
+
+Ludo Game (creation is in progress)
+
+---
+
 ## Contributors
 
 - **Durva Parmar**
