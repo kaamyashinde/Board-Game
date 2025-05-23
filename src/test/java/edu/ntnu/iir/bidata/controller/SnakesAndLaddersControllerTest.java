@@ -245,9 +245,22 @@ class SnakesAndLaddersControllerTest {
     SnakesAndLaddersController.MoveResult result = controller.movePlayer("Player1", 5);
 
     assertEquals(97, result.start);
-    assertEquals(97, result.end); // Should stay in place when overshooting
+    assertEquals(98, result.end); // Should bounce back to 98 (100- (97+5-100) = 98)
     assertEquals("normal", result.type);
-    verify(mockPlayer1, never()).move(anyInt()); // No movement should occur
+    verify(mockPlayer1).move(1); // Should move forward 3 to 100, then back 2 to 98
+  }
+
+  @Test
+  void testMovePlayer_BounceBackFromLastTile() {
+    when(mockPlayer1.getCurrentPosition()).thenReturn(99);
+    when(mockBoard.getSizeOfBoard()).thenReturn(101); // 0-100
+
+    SnakesAndLaddersController.MoveResult result = controller.movePlayer("Player1", 5);
+
+    assertEquals(99, result.start);
+    assertEquals(96, result.end); // Should bounce back to 96 (99+5=104, bounce back to 96)
+    assertEquals("normal", result.type);
+    verify(mockPlayer1).move(-3); // Only one move call for bounce back
   }
 
   @Test
