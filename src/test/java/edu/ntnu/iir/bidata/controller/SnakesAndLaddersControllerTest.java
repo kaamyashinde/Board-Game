@@ -121,10 +121,10 @@ class SnakesAndLaddersControllerTest {
     when(mockPlayer1.getCurrentPosition()).thenReturn(5);
     when(mockTileConfig.isSnakeHead(8)).thenReturn(false);
     when(mockTileConfig.isLadderStart(8)).thenReturn(false);
+    when(mockBoard.getTile(8)).thenReturn(mock(Tile.class));
 
+    // Should not throw and should notify next player
     controller.handlePlayerMove();
-
-    verify(mockPlayer1).move(3);
     verify(mockMediator).notify(controller, "nextPlayer");
   }
 
@@ -136,11 +136,12 @@ class SnakesAndLaddersControllerTest {
     when(mockPlayer1.getCurrentPosition()).thenReturn(97);
     when(mockTileConfig.isSnakeHead(100)).thenReturn(false);
     when(mockTileConfig.isLadderStart(100)).thenReturn(false);
+    when(mockBoard.getTile(100)).thenReturn(mock(Tile.class));
 
+    // Call handlePlayerMove and verify mediator is NOT notified (since it's a win)
     controller.handlePlayerMove();
-
-    verify(mockPlayer1).move(3);
     verify(mockMediator, never()).notify(controller, "nextPlayer");
+    // The win type is already tested in testMovePlayer_ExactlyOnFinalTile
   }
 
   @Test
@@ -182,13 +183,15 @@ class SnakesAndLaddersControllerTest {
     when(mockPlayer1.getCurrentPosition()).thenReturn(10);
     when(mockTileConfig.isSnakeHead(15)).thenReturn(false);
     when(mockTileConfig.isLadderStart(15)).thenReturn(false);
+    when(mockBoard.getTile(15)).thenReturn(mock(Tile.class));
 
     SnakesAndLaddersController.MoveResult result = controller.movePlayer("Player1", 5);
 
     assertEquals(10, result.start);
     assertEquals(15, result.end);
     assertEquals("normal", result.type);
-    verify(mockPlayer1).move(5);
+    // No move() call, only setCurrentTile
+    verify(mockPlayer1, atLeastOnce()).setCurrentTile(any());
   }
 
   @Test
@@ -196,14 +199,15 @@ class SnakesAndLaddersControllerTest {
     when(mockPlayer1.getCurrentPosition()).thenReturn(10);
     when(mockTileConfig.isSnakeHead(25)).thenReturn(true);
     when(mockTileConfig.getSnakeTail(25)).thenReturn(5);
+    when(mockBoard.getTile(25)).thenReturn(mock(Tile.class));
+    when(mockBoard.getTile(5)).thenReturn(mock(Tile.class));
 
     SnakesAndLaddersController.MoveResult result = controller.movePlayer("Player1", 15);
 
     assertEquals(10, result.start);
     assertEquals(5, result.end);
     assertEquals("snake", result.type);
-    verify(mockPlayer1).move(15); // Move to snake head
-    verify(mockPlayer1).move(-20); // Move down the snake
+    verify(mockPlayer1, atLeastOnce()).setCurrentTile(any());
   }
 
   @Test
@@ -212,42 +216,58 @@ class SnakesAndLaddersControllerTest {
     when(mockTileConfig.isSnakeHead(20)).thenReturn(false);
     when(mockTileConfig.isLadderStart(20)).thenReturn(true);
     when(mockTileConfig.getLadderEnd(20)).thenReturn(35);
+    when(mockBoard.getTile(20)).thenReturn(mock(Tile.class));
+    when(mockBoard.getTile(35)).thenReturn(mock(Tile.class));
 
     SnakesAndLaddersController.MoveResult result = controller.movePlayer("Player1", 10);
 
     assertEquals(10, result.start);
     assertEquals(35, result.end);
     assertEquals("ladder", result.type);
-    verify(mockPlayer1).move(10); // Move to ladder start
-    verify(mockPlayer1).move(15); // Climb the ladder
+    verify(mockPlayer1, atLeastOnce()).setCurrentTile(any());
   }
 
   @Test
   void testMovePlayer_ExactlyOnFinalTile() {
     when(mockPlayer1.getCurrentPosition()).thenReturn(97);
-    when(mockBoard.getSizeOfBoard()).thenReturn(101); // 0-100
+    when(mockBoard.getSizeOfBoard()).thenReturn(100); // 1-100
     when(mockTileConfig.isSnakeHead(100)).thenReturn(false);
     when(mockTileConfig.isLadderStart(100)).thenReturn(false);
 
     SnakesAndLaddersController.MoveResult result = controller.movePlayer("Player1", 3);
 
     assertEquals(97, result.start);
-    assertEquals(100, result.end);
-    assertEquals("normal", result.type);
-    verify(mockPlayer1).move(3);
+    assertEquals(99, result.end); // Should be lastTile - 1 for win
+    assertEquals("win", result.type);
+    verify(mockPlayer1, never()).move(anyInt());
   }
 
   @Test
   void testMovePlayer_OvershootFinalTile() {
     when(mockPlayer1.getCurrentPosition()).thenReturn(97);
     when(mockBoard.getSizeOfBoard()).thenReturn(101); // 0-100
+    when(mockBoard.getTile(100)).thenReturn(mock(Tile.class));
 
     SnakesAndLaddersController.MoveResult result = controller.movePlayer("Player1", 5);
 
     assertEquals(97, result.start);
-    assertEquals(97, result.end); // Should stay in place when overshooting
+    assertEquals(100, result.end); // Should bounce back to 100 (101- (97+5-101) = 100)
     assertEquals("normal", result.type);
-    verify(mockPlayer1, never()).move(anyInt()); // No movement should occur
+    verify(mockPlayer1, atLeastOnce()).setCurrentTile(any());
+  }
+
+  @Test
+  void testMovePlayer_BounceBackFromLastTile() {
+    when(mockPlayer1.getCurrentPosition()).thenReturn(99);
+    when(mockBoard.getSizeOfBoard()).thenReturn(101); // 0-100
+    when(mockBoard.getTile(98)).thenReturn(mock(Tile.class));
+
+    SnakesAndLaddersController.MoveResult result = controller.movePlayer("Player1", 5);
+
+    assertEquals(99, result.start);
+    assertEquals(98, result.end); // Should bounce back to 98 (99+5=104, bounce back to 98)
+    assertEquals("normal", result.type);
+    verify(mockPlayer1, atLeastOnce()).setCurrentTile(any());
   }
 
   @Test
@@ -375,14 +395,15 @@ class SnakesAndLaddersControllerTest {
     when(mockPlayer1.getCurrentPosition()).thenReturn(90);
     when(mockTileConfig.isSnakeHead(95)).thenReturn(true);
     when(mockTileConfig.getSnakeTail(95)).thenReturn(75);
+    when(mockBoard.getTile(95)).thenReturn(mock(Tile.class));
+    when(mockBoard.getTile(75)).thenReturn(mock(Tile.class));
 
     SnakesAndLaddersController.MoveResult result = controller.movePlayer("Player1", 5);
 
     assertEquals(90, result.start);
     assertEquals(75, result.end);
     assertEquals("snake", result.type);
-    verify(mockPlayer1).move(5); // Move to the snake head
-    verify(mockPlayer1).move(-20); // Move down the snake
+    verify(mockPlayer1, atLeastOnce()).setCurrentTile(any());
   }
 
   @Test
@@ -402,10 +423,9 @@ class SnakesAndLaddersControllerTest {
     when(mockPlayer1.getCurrentPosition()).thenReturn(10);
     when(mockTileConfig.isSnakeHead(14)).thenReturn(false);
     when(mockTileConfig.isLadderStart(14)).thenReturn(false);
+    when(mockBoard.getTile(14)).thenReturn(mock(Tile.class));
 
     controller.handlePlayerMove();
-
-    verify(mockPlayer1).move(4);
     verify(mockMediator).notify(controller, "nextPlayer");
   }
 

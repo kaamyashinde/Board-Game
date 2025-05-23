@@ -440,7 +440,7 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
             updatePlayerPosition(currentPlayer);
 
             if (result.type.equals("snake")) {
-              String snakeMessage = currentPlayer + " hit a snake! Moving from " + result.start + " to " + result.end;
+              String snakeMessage = "🐍 " + currentPlayer + " hit a snake! Moving from " + result.start + " to " + result.end;
               LOGGER.info(snakeMessage);
               displaySnakeOrLadderMessage(currentPlayer, result.start, result.end, "snake");
               // Add to history
@@ -448,7 +448,7 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
               // Update position again after snake
               updatePlayerPosition(currentPlayer);
             } else if (result.type.equals("ladder")) {
-              String ladderMessage = currentPlayer + " hit a ladder! Moving from " + result.start + " to " + result.end;
+              String ladderMessage = "🪜 " + currentPlayer + " hit a ladder! Moving from " + result.start + " to " + result.end;
               LOGGER.info(ladderMessage);
               displaySnakeOrLadderMessage(currentPlayer, result.start, result.end, "ladder");
               // Add to history
@@ -457,11 +457,11 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
               updatePlayerPosition(currentPlayer);
             } else {
               // Normal move
-              String moveMessage = currentPlayer + " moved from " + result.start + " to " + result.end;
+              String moveMessage = "🎲 " + currentPlayer + " moved from " + result.start + " to " + result.end;
               addMessageToHistory(moveMessage);
             }
 
-            if (result.end == 100) {
+            if (result.type.equals("win")) {
               String winMessage = "🏆 " + currentPlayer + " WINS! 🏆";
               statusLabel.setText(winMessage);
               currentTurnLabel.setText(winMessage);

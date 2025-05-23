@@ -124,6 +124,7 @@ public class SnakesAndLaddersController extends BaseGameController {
 
     // Use mediator to notify next player
     mediator.notify(this, "nextPlayer");
+    boardGame.notifyObservers(); // Notify observers after every move
   }
 
   /**
@@ -169,36 +170,30 @@ public class SnakesAndLaddersController extends BaseGameController {
         String type = "normal";
 
         // Ensure we don't go past the board size
-        int boardSize = boardGame.getBoard().getSizeOfBoard();
-        if (end >= boardSize) {
-          // In Snakes and Ladders, you must land exactly on the final tile
-          // If the roll would take you past it, you don't move
-          if (end == boardSize - 1) {
-            // Exact landing on final tile - allow the move
-            end = boardSize - 1;
-          } else {
-            // Overshoot - stay in current position
-            end = start;
-            return new MoveResult(start, end, type);
-          }
+        int lastTile = boardGame.getBoard().getSizeOfBoard();
+        if (end == lastTile) {
+          return new MoveResult(start, end - 1, "win");
+        }
+        if (end > lastTile) {
+          int overshoot = end - lastTile;
+          end = lastTile - overshoot;
         }
 
-        int steps = end - start;
-        if (steps > 0) player.move(steps);
+        if (end != start) {
+          player.setCurrentTile(boardGame.getBoard().getTile(end));
+        }
 
         // Check for snakes
         if (tileConfig.isSnakeHead(end)) {
           int tail = tileConfig.getSnakeTail(end);
-          steps = tail - end;
-          player.move(steps);
+          player.setCurrentTile(boardGame.getBoard().getTile(tail));
           end = tail;
           type = "snake";
         }
         // Check for ladders only if it's a normal move
         else if (tileConfig.isLadderStart(end)) {
           int top = tileConfig.getLadderEnd(end);
-          steps = top - end;
-          player.move(steps);
+          player.setCurrentTile(boardGame.getBoard().getTile(top));
           end = top;
           type = "ladder";
         }
