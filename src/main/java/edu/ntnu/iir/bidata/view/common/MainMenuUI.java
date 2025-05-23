@@ -5,6 +5,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -12,7 +13,9 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 /**
  * MainMenuUI class for the main menu of the game. Pure frontend implementation without backend.
@@ -76,7 +79,7 @@ public class MainMenuUI {
     StackPane leftLogo = createLogoStackPane(purples, purpleHeights, "", null);
     root.setLeft(leftLogo);
 
-    // --- CENTER: "WELCOME" + two rounded rectangles ---
+    // --- CENTER: "WELCOME" + game selection boxes ---
     VBox centerBox = new VBox(30);
     centerBox.setAlignment(Pos.TOP_CENTER);
     centerBox.setPadding(new Insets(40, 0, 0, 0));
@@ -93,25 +96,34 @@ public class MainMenuUI {
     HBox menuRow = new HBox(40);
     menuRow.setAlignment(Pos.CENTER);
 
-    // Snakes & Ladders game box - removed grid visualization
+    // Snakes & Ladders game box
     StackPane snakesAndLaddersPane =
         createGamePane(
-            "#e0ffe0", // Light green background instead of purple (#c2c2fa)
-            "#2e8b57", // Keep the same border color
+            "#e0ffe0", // Light green background
+            "#2e8b57", // Green border
             "Snakes & Ladders",
             "snakes-ladders-label",
             () -> gameTypeCallback.accept(GameType.SNAKES_AND_LADDERS));
 
-    // Monopoly game box - removed grid visualization
+    // Monopoly game box
     StackPane monopolyPane =
         createGamePane(
-            "#f7e6c7",
-            "#3b3b6d",
+            "#f7e6c7", // Light yellow/beige
+            "#3b3b6d", // Dark blue
             "Monopoly",
             null,
             () -> gameTypeCallback.accept(GameType.MONOPOLY));
 
-    menuRow.getChildren().setAll(snakesAndLaddersPane, monopolyPane);
+    // Ludo game box - with gray coloring and a popup
+    StackPane ludoPane =
+        createGamePane(
+            "#d3d3d3", // Light gray background
+            "#808080", // Gray border
+            "Ludo",
+            "ludo-game-label",
+            () -> showGameInProgressPopup());
+
+    menuRow.getChildren().setAll(snakesAndLaddersPane, monopolyPane, ludoPane);
     centerBox.getChildren().setAll(welcomePane, menuRow);
     root.setCenter(centerBox);
 
@@ -126,6 +138,36 @@ public class MainMenuUI {
     scene.getStylesheets().add(getClass().getResource("/style/common.css").toExternalForm());
     primaryStage.setScene(scene);
     primaryStage.show();
+  }
+
+  /**
+   * Shows a popup dialog indicating that the Ludo game is currently in development.
+   */
+  private void showGameInProgressPopup() {
+    Stage popupStage = new Stage(StageStyle.UTILITY);
+    popupStage.initModality(Modality.APPLICATION_MODAL);
+    popupStage.initOwner(primaryStage);
+    popupStage.setTitle("Game Status");
+
+    VBox popupContent = new VBox(20);
+    popupContent.setPadding(new Insets(20));
+    popupContent.setAlignment(Pos.CENTER);
+    popupContent.getStyleClass().add("popup-dialog");
+
+    Label messageLabel = new Label("Game creation in progress, not ready yet.");
+    messageLabel.getStyleClass().add("popup-message-label");
+
+    Button closeButton = new Button("Close");
+    closeButton.getStyleClass().add("popup-close-button");
+    closeButton.setOnAction(e -> popupStage.close());
+
+    popupContent.getChildren().addAll(messageLabel, closeButton);
+
+    Scene popupScene = new Scene(popupContent, 300, 150);
+    popupScene.getStylesheets().add(getClass().getResource("/style/common.css").toExternalForm());
+
+    popupStage.setScene(popupScene);
+    popupStage.show();
   }
 
   /**
@@ -195,7 +237,19 @@ public class MainMenuUI {
       gameLabel.getStyleClass().add(additionalLabelClass);
     }
 
-    gamePane.getChildren().add(gameLabel);
+    // Add "Creation in Progress" note for Ludo
+    if (gameName.equals("Ludo")) {
+      VBox content = new VBox(20);
+      content.setAlignment(Pos.CENTER);
+
+      Label statusLabel = new Label("(Creation in Progress)");
+      statusLabel.getStyleClass().add("ludo-status-label");
+
+      content.getChildren().addAll(gameLabel, statusLabel);
+      gamePane.getChildren().add(content);
+    } else {
+      gamePane.getChildren().add(gameLabel);
+    }
 
     // Make the box clickable
     if (onClick != null) {
