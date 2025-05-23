@@ -71,7 +71,7 @@ public class TileConfiguration {
       snakeConfig.put(65, 8);
       snakeConfig.put(70, 32);
       snakeConfig.put(85, 42);
-      snakeConfig.put(90, 71);
+      snakeConfig.put(89, 71);
       snakeConfig.put(94, 66);
       snakeConfig.put(99, 83);
       // No move back, skip turn, or switch places for hard
@@ -80,13 +80,20 @@ public class TileConfiguration {
     } else {
       LOGGER.info("Medium level configuration");
       // Medium (default) configuration
-      ladderConfig.put(3, 12);
-      ladderConfig.put(15, 22);
-      ladderConfig.put(22, 25);
+      ladderConfig.put(3, 36);
+      ladderConfig.put(8, 12);
+      ladderConfig.put(14, 26);
+      ladderConfig.put(31, 73);
+      ladderConfig.put(59, 80);
+      ladderConfig.put(83, 97);
+      ladderConfig.put(90, 92);
 
-      snakeConfig.put(8, 4);
-      snakeConfig.put(18, 7);
-      snakeConfig.put(24, 16);
+      snakeConfig.put(38, 2);
+      snakeConfig.put(29, 11);
+      snakeConfig.put(78, 15);
+      snakeConfig.put(89, 86);
+      snakeConfig.put(95, 75);
+      snakeConfig.put(99, 41);
 
       moveBackConfig.put(10, 3);
       moveBackConfig.put(20, 2);
