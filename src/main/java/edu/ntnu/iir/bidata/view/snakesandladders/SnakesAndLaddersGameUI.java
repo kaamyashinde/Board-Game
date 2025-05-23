@@ -12,6 +12,7 @@ import edu.ntnu.iir.bidata.view.common.DiceView;
 import edu.ntnu.iir.bidata.view.common.JavaFXGameUI;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,6 +23,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -31,6 +33,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import lombok.Getter;
 
 /**
  * The SnakesAndLaddersGameUI class manages the user interface for a Snakes and Ladders game. This
@@ -52,6 +55,14 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
   private List<Player> playerNames;
   private boolean isLoadedGame = false;
   private String loadedGameName = null;
+  /**
+   * -- GETTER --
+   *  Retrieves the root BorderPane of the game UI. The root pane serves as the main container for
+   *  all UI components in the Snakes and Ladders game.
+   *
+   * @return the root BorderPane of the game UI
+   */
+  @Getter
   private BorderPane root;
   private GameMediator mediator;
   private SnakesAndLaddersController controller;
@@ -61,6 +72,12 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
   private ImageView boardView;
   private String boardImagePath;
   private String currentPlayer;
+
+  // New fields for message history
+  private VBox messageHistoryPane;
+  private LinkedList<String> messageHistory = new LinkedList<>();
+  private final int MAX_MESSAGES = 10;
+  private Label currentTurnLabel;
 
   /**
    * Constructs the SnakesAndLaddersGameUI, initializes the game UI components and connects the view
@@ -260,11 +277,20 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
     playerPanel.getStyleClass().add("snl-player-panel");
     playerPanel.setPrefWidth(250);
     playerPanel.setAlignment(Pos.TOP_LEFT);
-    statusLabel.setText("Game Started!");
+
+    // Create a separate label for current turn status
+    currentTurnLabel = new Label("Game Started!");
+    currentTurnLabel.getStyleClass().add("snl-game-status-label");
+    currentTurnLabel.setWrapText(true);
+    playerPanel.getChildren().add(currentTurnLabel);
+
+    // Keep the status label for dice roll information, but it won't be shown in the player panel
     statusLabel.getStyleClass().add("snl-game-status-label");
     statusLabel.setWrapText(true);
-    playerPanel.getChildren().add(statusLabel);
+
     playerPanel.getChildren().add(new Label("--------------------"));
+
+    // Add player information
     java.util.stream.IntStream.range(0, playerNames.size())
         .forEach(
             i -> {
@@ -284,6 +310,52 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
               playerBox.getChildren().addAll(nameBox, posLabel);
               playerPanel.getChildren().add(playerBox);
             });
+
+    // Add separator
+    playerPanel.getChildren().add(new Label("--------------------"));
+
+    // Add message history section
+    Label historyTitle = new Label("GAME HISTORY:");
+    historyTitle.getStyleClass().add("snl-player-name-label");
+    playerPanel.getChildren().add(historyTitle);
+
+    // Create a scrollable area for message history
+    messageHistoryPane = new VBox(5);
+    messageHistoryPane.setPadding(new Insets(5));
+
+    ScrollPane scrollPane = new ScrollPane(messageHistoryPane);
+    scrollPane.setFitToWidth(true);
+    scrollPane.setPrefHeight(200);
+    scrollPane.getStyleClass().add("message-history-scroll");
+
+    playerPanel.getChildren().add(scrollPane);
+
+    // Add initial message to history
+    addMessageToHistory("Game started!");
+  }
+
+  /**
+   * Adds a message to the history panel
+   *
+   * @param message The message to add
+   */
+  private void addMessageToHistory(String message) {
+    // Add to our linked list
+    messageHistory.addFirst(message);
+    // Trim if needed
+    while (messageHistory.size() > MAX_MESSAGES) {
+      messageHistory.removeLast();
+    }
+
+    // Update the UI
+    messageHistoryPane.getChildren().clear();
+    for (String msg : messageHistory) {
+      Label msgLabel = new Label(msg);
+      msgLabel.setWrapText(true);
+      msgLabel.setMaxWidth(230);
+      msgLabel.getStyleClass().add("history-message");
+      messageHistoryPane.getChildren().add(msgLabel);
+    }
   }
 
   /**
@@ -336,19 +408,29 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
       controller.rollDice();
       int[] rolls = controller.getLastDiceRolls();
       int sum = controller.getLastDiceSum();
+
+      String diceMessage = currentPlayer
+          + " rolled a "
+          + (rolls.length > 0 ? rolls[0] : 1)
+          + " and "
+          + (rolls.length > 1 ? rolls[1] : (rolls.length > 0 ? rolls[0] : 1))
+          + "! (Total: "
+          + sum
+          + ")";
+
       localDiceView.setValues(
           rolls.length > 0 ? rolls[0] : 1,
           rolls.length > 1 ? rolls[1] : (rolls.length > 0 ? rolls[0] : 1));
-      statusLabel.setText(
-          currentPlayer
-              + " rolled a "
-              + (rolls.length > 0 ? rolls[0] : 1)
-              + " and "
-              + (rolls.length > 1 ? rolls[1] : (rolls.length > 0 ? rolls[0] : 1))
-              + "! (Total: "
-              + sum
-              + ")");
-      PauseTransition pause = new PauseTransition(Duration.millis(800));
+
+      // Update status label with dice roll
+      statusLabel.setText(diceMessage);
+      currentTurnLabel.setText(diceMessage);
+
+      // Add dice roll to history
+      addMessageToHistory(diceMessage);
+
+      // Increased delay for dice roll message (from 800ms to 2000ms)
+      PauseTransition pause = new PauseTransition(Duration.millis(2000));
       pause.setOnFinished(
           event -> {
             SnakesAndLaddersController.MoveResult result =
@@ -358,29 +440,32 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
             updatePlayerPosition(currentPlayer);
 
             if (result.type.equals("snake")) {
-              LOGGER.info(
-                  currentPlayer
-                      + " hit a snake! Moving from "
-                      + result.start
-                      + " to "
-                      + result.end);
+              String snakeMessage = currentPlayer + " hit a snake! Moving from " + result.start + " to " + result.end;
+              LOGGER.info(snakeMessage);
               displaySnakeOrLadderMessage(currentPlayer, result.start, result.end, "snake");
+              // Add to history
+              addMessageToHistory(snakeMessage);
               // Update position again after snake
               updatePlayerPosition(currentPlayer);
             } else if (result.type.equals("ladder")) {
-              LOGGER.info(
-                  currentPlayer
-                      + " hit a ladder! Moving from "
-                      + result.start
-                      + " to "
-                      + result.end);
+              String ladderMessage = currentPlayer + " hit a ladder! Moving from " + result.start + " to " + result.end;
+              LOGGER.info(ladderMessage);
               displaySnakeOrLadderMessage(currentPlayer, result.start, result.end, "ladder");
+              // Add to history
+              addMessageToHistory(ladderMessage);
               // Update position again after ladder
               updatePlayerPosition(currentPlayer);
+            } else {
+              // Normal move
+              String moveMessage = currentPlayer + " moved from " + result.start + " to " + result.end;
+              addMessageToHistory(moveMessage);
             }
 
             if (result.end == 100) {
-              statusLabel.setText("🏆 " + currentPlayer + " WINS! 🏆");
+              String winMessage = "🏆 " + currentPlayer + " WINS! 🏆";
+              statusLabel.setText(winMessage);
+              currentTurnLabel.setText(winMessage);
+              addMessageToHistory(winMessage);
               rollDiceBtn.setDisable(true);
               return;
             }
@@ -391,8 +476,11 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
           });
       pause.play();
     } catch (GameException e) {
-      LOGGER.info("🏆 " + currentPlayer + " WINS! 🏆");
-      statusLabel.setText("🏆 " + currentPlayer + " WINS! 🏆");
+      String winMessage = "🏆 " + currentPlayer + " WINS! 🏆";
+      LOGGER.info(winMessage);
+      statusLabel.setText(winMessage);
+      currentTurnLabel.setText(winMessage);
+      addMessageToHistory(winMessage);
     }
   }
 
@@ -406,11 +494,12 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
    */
   public void displaySnakeOrLadderMessage(
       String playerName, int fromPosition, int toPosition, String type) {
-    statusLabel.setText(
-        playerName + " hit a " + type + "! Moving from " + fromPosition + " to " + toPosition);
+    String message = playerName + " hit a " + type + "! Moving from " + fromPosition + " to " + toPosition;
+    statusLabel.setText(message);
+    currentTurnLabel.setText(message);
 
     // Add a short delay before actually moving the token
-    PauseTransition pause = new PauseTransition(Duration.millis(1000));
+    PauseTransition pause = new PauseTransition(Duration.millis(1500));
     pause.setOnFinished(
         e -> {
           // Move the token to the new position
@@ -448,7 +537,10 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
   /** Updates the current player indicator in the UI. */
   public void updateCurrentPlayerIndicator(String currentPlayer) {
     LOGGER.info("Updating current player indicator: " + currentPlayer);
-    statusLabel.setText(currentPlayer + "'s Turn");
+    String message = currentPlayer + "'s Turn";
+    statusLabel.setText(message);
+    currentTurnLabel.setText(message);
+    addMessageToHistory(message);
   }
 
   /**
@@ -537,13 +629,4 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
     }
   }
 
-  /**
-   * Retrieves the root BorderPane of the game UI. The root pane serves as the main container for
-   * all UI components in the Snakes and Ladders game.
-   *
-   * @return the root BorderPane of the game UI
-   */
-  public BorderPane getRoot() {
-    return root;
-  }
 }
