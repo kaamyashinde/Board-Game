@@ -490,7 +490,7 @@ public class SnakesAndLaddersGameUI extends JavaFXGameUI {
     int offsetX = playerIndex * 4 - 1;
     int offsetY = playerIndex * 6 - 5;
     token.setTranslateX(boardImageOffsetX + coordinates[0] + offsetX - 7);
-    token.setTranslateY(boardImageOffsetY + coordinates[1] + offsetY - 68);
+    token.setTranslateY(boardImageOffsetY + coordinates[1] + offsetY - 88);
   }
 
   /**
