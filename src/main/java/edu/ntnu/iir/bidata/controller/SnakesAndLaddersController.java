@@ -124,6 +124,7 @@ public class SnakesAndLaddersController extends BaseGameController {
 
     // Use mediator to notify next player
     mediator.notify(this, "nextPlayer");
+    boardGame.notifyObservers(); // Notify observers after every move
   }
 
   /**
@@ -169,33 +170,30 @@ public class SnakesAndLaddersController extends BaseGameController {
         String type = "normal";
 
         // Ensure we don't go past the board size
-        int boardSize = boardGame.getBoard().getSizeOfBoard();
-        if (end >= boardSize) {
-          // Bounce-back logic: if overshoot, bounce back from the last tile
-          int overshoot = end - (boardSize - 1);
-          if (overshoot > 0) {
-            end = (boardSize - 1) - overshoot;
-          } else {
-            end = boardSize - 1;
-          }
+        int lastTile = boardGame.getBoard().getSizeOfBoard();
+        if (end == lastTile) {
+          return new MoveResult(start, end - 1, "win");
+        }
+        if (end > lastTile) {
+          int overshoot = end - lastTile;
+          end = lastTile - overshoot;
         }
 
-        int steps = end - start;
-        if (steps != 0) player.move(steps);
+        if (end != start) {
+          player.setCurrentTile(boardGame.getBoard().getTile(end));
+        }
 
         // Check for snakes
         if (tileConfig.isSnakeHead(end)) {
           int tail = tileConfig.getSnakeTail(end);
-          steps = tail - end;
-          player.move(steps);
+          player.setCurrentTile(boardGame.getBoard().getTile(tail));
           end = tail;
           type = "snake";
         }
         // Check for ladders only if it's a normal move
         else if (tileConfig.isLadderStart(end)) {
           int top = tileConfig.getLadderEnd(end);
-          steps = top - end;
-          player.move(steps);
+          player.setCurrentTile(boardGame.getBoard().getTile(top));
           end = top;
           type = "ladder";
         }
