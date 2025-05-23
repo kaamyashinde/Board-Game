@@ -60,6 +60,8 @@ class SnakesAndLaddersControllerTest {
     when(mockBoardGame.getCurrentDiceValues()).thenReturn(new int[]{4});
 
     when(mockBoard.getTile(0)).thenReturn(mockTile);
+    when(mockBoard.getSizeOfBoard()).thenReturn(101); // Adding board size (0-100)
+
     when(mockPlayer1.getName()).thenReturn("Player1");
     when(mockPlayer1.getCurrentPosition()).thenReturn(5);
     when(mockPlayer2.getName()).thenReturn("Player2");
@@ -116,12 +118,13 @@ class SnakesAndLaddersControllerTest {
     controller.setPlayerNames(playerNames);
     controller.startGame();
     when(mockBoardGame.getCurrentDiceValues()).thenReturn(new int[]{3});
-    when(mockPlayer1.getCurrentPosition()).thenReturn(5).thenReturn(8);
+    when(mockPlayer1.getCurrentPosition()).thenReturn(5);
     when(mockTileConfig.isSnakeHead(8)).thenReturn(false);
     when(mockTileConfig.isLadderStart(8)).thenReturn(false);
 
     controller.handlePlayerMove();
 
+    verify(mockPlayer1).move(3);
     verify(mockMediator).notify(controller, "nextPlayer");
   }
 
@@ -130,12 +133,13 @@ class SnakesAndLaddersControllerTest {
     controller.setPlayerNames(playerNames);
     controller.startGame();
     when(mockBoardGame.getCurrentDiceValues()).thenReturn(new int[]{3});
-    when(mockPlayer1.getCurrentPosition()).thenReturn(97).thenReturn(100);
+    when(mockPlayer1.getCurrentPosition()).thenReturn(97);
     when(mockTileConfig.isSnakeHead(100)).thenReturn(false);
     when(mockTileConfig.isLadderStart(100)).thenReturn(false);
 
     controller.handlePlayerMove();
 
+    verify(mockPlayer1).move(3);
     verify(mockMediator, never()).notify(controller, "nextPlayer");
   }
 
@@ -175,7 +179,7 @@ class SnakesAndLaddersControllerTest {
 
   @Test
   void testMovePlayer_NormalMove() {
-    when(mockPlayer1.getCurrentPosition()).thenReturn(10).thenReturn(15);
+    when(mockPlayer1.getCurrentPosition()).thenReturn(10);
     when(mockTileConfig.isSnakeHead(15)).thenReturn(false);
     when(mockTileConfig.isLadderStart(15)).thenReturn(false);
 
@@ -189,7 +193,7 @@ class SnakesAndLaddersControllerTest {
 
   @Test
   void testMovePlayer_HitSnake() {
-    when(mockPlayer1.getCurrentPosition()).thenReturn(10).thenReturn(25);
+    when(mockPlayer1.getCurrentPosition()).thenReturn(10);
     when(mockTileConfig.isSnakeHead(25)).thenReturn(true);
     when(mockTileConfig.getSnakeTail(25)).thenReturn(5);
 
@@ -198,13 +202,13 @@ class SnakesAndLaddersControllerTest {
     assertEquals(10, result.start);
     assertEquals(5, result.end);
     assertEquals("snake", result.type);
-    verify(mockPlayer1).move(15);
-    verify(mockPlayer1).move(-20);
+    verify(mockPlayer1).move(15); // Move to snake head
+    verify(mockPlayer1).move(-20); // Move down the snake
   }
 
   @Test
   void testMovePlayer_ClimbLadder() {
-    when(mockPlayer1.getCurrentPosition()).thenReturn(10).thenReturn(20);
+    when(mockPlayer1.getCurrentPosition()).thenReturn(10);
     when(mockTileConfig.isSnakeHead(20)).thenReturn(false);
     when(mockTileConfig.isLadderStart(20)).thenReturn(true);
     when(mockTileConfig.getLadderEnd(20)).thenReturn(35);
@@ -214,22 +218,36 @@ class SnakesAndLaddersControllerTest {
     assertEquals(10, result.start);
     assertEquals(35, result.end);
     assertEquals("ladder", result.type);
-    verify(mockPlayer1).move(10);
-    verify(mockPlayer1).move(15);
+    verify(mockPlayer1).move(10); // Move to ladder start
+    verify(mockPlayer1).move(15); // Climb the ladder
   }
 
   @Test
-  void testMovePlayer_ExceedBoard() {
-    when(mockPlayer1.getCurrentPosition()).thenReturn(95).thenReturn(100);
+  void testMovePlayer_ExactlyOnFinalTile() {
+    when(mockPlayer1.getCurrentPosition()).thenReturn(97);
+    when(mockBoard.getSizeOfBoard()).thenReturn(101); // 0-100
     when(mockTileConfig.isSnakeHead(100)).thenReturn(false);
     when(mockTileConfig.isLadderStart(100)).thenReturn(false);
 
-    SnakesAndLaddersController.MoveResult result = controller.movePlayer("Player1", 10);
+    SnakesAndLaddersController.MoveResult result = controller.movePlayer("Player1", 3);
 
-    assertEquals(95, result.start);
+    assertEquals(97, result.start);
     assertEquals(100, result.end);
     assertEquals("normal", result.type);
-    verify(mockPlayer1).move(5);
+    verify(mockPlayer1).move(3);
+  }
+
+  @Test
+  void testMovePlayer_OvershootFinalTile() {
+    when(mockPlayer1.getCurrentPosition()).thenReturn(97);
+    when(mockBoard.getSizeOfBoard()).thenReturn(101); // 0-100
+
+    SnakesAndLaddersController.MoveResult result = controller.movePlayer("Player1", 5);
+
+    assertEquals(97, result.start);
+    assertEquals(97, result.end); // Should stay in place when overshooting
+    assertEquals("normal", result.type);
+    verify(mockPlayer1, never()).move(anyInt()); // No movement should occur
   }
 
   @Test
@@ -354,7 +372,7 @@ class SnakesAndLaddersControllerTest {
 
   @Test
   void testMovePlayer_ComplexScenario() {
-    when(mockPlayer1.getCurrentPosition()).thenReturn(90).thenReturn(95);
+    when(mockPlayer1.getCurrentPosition()).thenReturn(90);
     when(mockTileConfig.isSnakeHead(95)).thenReturn(true);
     when(mockTileConfig.getSnakeTail(95)).thenReturn(75);
 
@@ -363,6 +381,8 @@ class SnakesAndLaddersControllerTest {
     assertEquals(90, result.start);
     assertEquals(75, result.end);
     assertEquals("snake", result.type);
+    verify(mockPlayer1).move(5); // Move to the snake head
+    verify(mockPlayer1).move(-20); // Move down the snake
   }
 
   @Test
@@ -379,7 +399,7 @@ class SnakesAndLaddersControllerTest {
     controller.setPlayerNames(playerNames);
     controller.startGame();
     when(mockBoardGame.getCurrentDiceValues()).thenReturn(new int[]{4});
-    when(mockPlayer1.getCurrentPosition()).thenReturn(10).thenReturn(14);
+    when(mockPlayer1.getCurrentPosition()).thenReturn(10);
     when(mockTileConfig.isSnakeHead(14)).thenReturn(false);
     when(mockTileConfig.isLadderStart(14)).thenReturn(false);
 

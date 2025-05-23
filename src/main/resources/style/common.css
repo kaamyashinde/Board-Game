@@ -108,3 +108,33 @@
   -fx-background-color: #f7e6c7;
   -fx-text-fill: #3b3b6d;
 }
+
+/* Ludo game styles */
+.ludo-game-label {
+  -fx-font-size: 18px;
+}
+
+.ludo-status-label {
+  -fx-font-size: 14px;
+  -fx-text-fill: white;
+  -fx-font-style: italic;
+}
+
+/* Popup dialog styles */
+.popup-dialog {
+  -fx-background-color: #f5fff5;
+  -fx-background-radius: 15;
+}
+
+.popup-message-label {
+  -fx-font-size: 14px;
+  -fx-font-weight: bold;
+}
+
+.popup-close-button {
+  -fx-background-color: #d3d3d3;
+  -fx-text-fill: black;
+  -fx-font-size: 14px;
+  -fx-background-radius: 15;
+  -fx-padding: 8 16;
+}
